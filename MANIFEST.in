@@ -1,0 +1,11 @@
+graft tests
+
+recursive-include test/test_data *
+
+recursive-exclude test/.pytest_cache *
+
+recursive-include C-Module/data/input *
+
+global-exclude *.py[cod]
+
+global-exclude *.log

@@ -1,0 +1,36 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: C-Module
+message: >-
+  # TODO tbc
+type: software
+authors:
+  - country: DE
+    city: Hamburg
+    name: TI-FSM
+    email: tomke.honkomp@thuenen.de
+    address: Leuschnerstraße 91
+    post-code: '21031'
+  - given-names: Tomke
+    family-names: Honkomp
+    email: tomke.honkomp@thuenen.de
+    affiliation: Thünen Institue of Forestry
+    orcid: 'https://orcid.org/0000-0002-6719-0190'
+identifiers:
+  - type: doi
+    value: ''
+    description: ''
+repository-code: ''  # TODO tbc
+abstract: |-
+  # TODO tbc
+keywords:
+  - research
+  - Forest sector model
+  - partial equilibrium model
+  - optimization
+  - wood markets
+license: AGPL-3.0-or-later
+version: 1.0.0
+date-released: '# TODO tbc'
