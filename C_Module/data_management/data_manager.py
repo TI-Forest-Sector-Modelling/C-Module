@@ -1,8 +1,10 @@
-from C_Module.parameters.paths import (PKL_RESULTS_INPUT, ADD_INFO_CARBON_PATH, ADD_INFO_COUNTRY, FAOSTAT_DATA)
+from C_Module.parameters.paths import (PKL_RESULTS_INPUT, ADD_INFO_CARBON_PATH, ADD_INFO_COUNTRY, FAOSTAT_DATA,
+                                       FRA_DATA)
 from C_Module.parameters.defines import VarNames, CountryConstants
 
 import pandas as pd
 from tqdm import tqdm
+from pathlib import Path
 
 class DataManager:
 
@@ -131,9 +133,10 @@ class DataManager:
         (Forestry_E_All_Data/Forestry_E_All_Data_NOFLAG.csv). See README.md for details.
         :param self: object of class C-Module
         """
-        self.faostat_data["data"] = DataManager.load_data(f"{FAOSTAT_DATA}.csv", FAOSTAT_DATA, "csv")
-        # if self.UserInput["read_in_pkl"]:
-        #    pass  # Todo add serialized faostat data
+        if Path(f"{FAOSTAT_DATA}.pkl").is_file():
+            self.faostat_data["data_aligned"] = DataManager.restore_from_pickle(f"{FAOSTAT_DATA}.pkl")
+        else:
+            self.faostat_data["data"] = DataManager.load_data(f"{FAOSTAT_DATA}.csv", FAOSTAT_DATA, "csv")
 
     @staticmethod
     def prep_faostat_data(self):
@@ -208,11 +211,14 @@ class DataManager:
 
     @staticmethod
     def load_fra_data(self):
-        pass
+        if Path(f"{FRA_DATA}.pkl").is_file():
+            self.fra_data["data_aligned"] = DataManager.restore_from_pickle(f"{FRA_DATA}.pkl")
+        else:
+            self.fra_data["data"] = DataManager.load_data(f"{FRA_DATA}.csv", FRA_DATA, "csv")
 
     @staticmethod
     def prep_fra_data(self):
-        pass
+        self.fra_data["data_aligned"] = pd.DataFrame()
 
     @staticmethod
     def align_carbon_data(self):
