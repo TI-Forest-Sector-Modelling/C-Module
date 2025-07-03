@@ -121,18 +121,25 @@ The package comes with a built-in CLI to compute the TiMBA for various inputs. W
 .
 `- data
   `-- input
-    `-- 01_Input_Files
-      |-- world.xlsx  # contains all input data to the model
-    `-- 02_Additional_Informations
-      |-- additional_information.xlsx 
-      |-- worldprice.xlsx
+    `-- additional_information
+      |--additional_information_carbon.pkl
       |--additional_information_carbon.xlsx
-    `-- 03_Serialization
-      |-- AddInfoContent.pkl  # contains additional information about the last input data which is processed by the model
-      |-- AddInfoCarbonContent.pkl  # contains additional carbon information about the last input data which is processed by the model
-      |-- WorldDataContent.pkl  # contains input information about the last input data which is processed by the model
-      |-- WorldPriceContent.pkl  # contains world price information about the last input data which is processed by the model
+    |-- 20250703_faostat_data.csv
+    |-- 20250703_fra_data.csv
+    |--default_Sc_forest.csv
+    |--default_Sc_results.csv
+    |--default_Sc_results.pkl
+    
 ```
+Following data from external sources ([FAOSTAT](https://www.fao.org/faostat/en/#data/FO) and [FRA](https://fra-data.fao.org/assessments/fra/2020)) are used:
+- The input data `20250703_faostat_data.csv` is a renamed copy of the file `Forestry_E_All_Data_NOFLAG.csv` provided by the [FAOSTAT bulk data
+download](https://bulks-faostat.fao.org/production/Forestry_E_All_Data.zip).
+- The input data `20250703_fra_data.csv` is a renamed copy of the file `FRA_Years_YYYY_MM_DD.csv` provided by the [FRA bulk data
+download](https://fra-data.fao.org/api/file/bulk-download?assessmentName=fra&cycleName=2020&countryIso=WO).
+
+The original FAOSTAT and FRA files are manually saved as an CSV UTF-8 file. The last copy of the FAOSTAT and FRA data was
+downloaded on the 2025-07-03 and contains data until the year 2023 for FAOSTAT and 2020 for FRA. FAOSTAT and FRA data will
+be updated regularly. However, when using the C-Module, check if new FAOSTAT and FRA data are available.
 
 The package will generate a results directory called `output` which is located inside the data folder. The final directory after one run will look something like this:
 ```bash
