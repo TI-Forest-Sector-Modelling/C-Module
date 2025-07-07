@@ -282,3 +282,19 @@ class DataManager:
         carbon_soil = pd.concat([self.add_carbon_data[carbon_soil_name]] * commodity_num).sort_values(
             by=[timba_country_code]).reset_index(drop=True)
         self.add_carbon_data[carbon_soil_name] = carbon_soil
+
+    @staticmethod
+    def set_up_carbon_data_dict(self):
+        carbon_forest_biomass_name = VarNames.carbon_forest_biomass.value
+        carbon_dwl_name = VarNames.carbon_dwl.value
+        carbon_soil_name = VarNames.carbon_soil.value
+        carbon_hwp_name = VarNames.carbon_hwp.value
+        carbon_substitution_name = VarNames.carbon_subsitution.value
+        carbon_total_name = VarNames.carbon_total.value
+
+        self.carbon_data[carbon_forest_biomass_name] = pd.DataFrame([0], columns=[carbon_forest_biomass_name])
+        self.carbon_data[carbon_dwl_name] = pd.DataFrame([0], columns=[carbon_dwl_name])
+        self.carbon_data[carbon_soil_name] = pd.DataFrame([0], columns=[carbon_soil_name])
+        self.carbon_data[carbon_hwp_name] = pd.DataFrame([0], columns=[carbon_hwp_name])
+        self.carbon_data[carbon_substitution_name] = pd.DataFrame([0], columns=[carbon_substitution_name])
+        self.carbon_data[carbon_total_name] = pd.DataFrame([0], columns=[carbon_total_name])
