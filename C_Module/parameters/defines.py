@@ -45,12 +45,21 @@ class VarNames(Enum):
 
     # Additional carbon data
     carbon_forest_biomass = "CarbonForestBiomass"
+    carbon_forest_biomass_chg = "CarbonChangeForestBiomass"
     carbon_hwp = "CarbonHWP"
     carbon_agb = "CarbonAboveGround"
     carbon_bgb = "CarbonBelowGround"
     carbon_dw = "CarbonDeadWood"
+    carbon_dwl = "CarbonDWL"
+    carbon_dwl_chg = "CarbonChangeDWL"
     carbon_litter = "CarbonLitter"
     carbon_soil = "CarbonSoil"
+    carbon_soil_chg = "CarbonChangeSoil"
+    carbon_subsitution = "CarbonSubstitution"
+    carbon_total = "CarbonTotal"
+    carbon_density_avg = "carbon_average"
+    carbon_density_avg_rand = "rand_carbon_average"
+
 
     # FAOSTAT data
     faostat_item_code = "Item Code"
