@@ -1,5 +1,6 @@
 import datetime as dt
 from C_Module.data_management.process_manager import ProcessManager
+from C_Module.logic.carbon_calc import CarbonCalculator
 from C_Module.logic.base_logger import get_logger
 
 
@@ -15,22 +16,8 @@ class C_Module(object):
         self.faostat_data = {}
         self.fra_data = {}
 
-    def calc_carbon_forest_biomass(self):
-        pass
-
-    def calc_carbon_forest_soil(self):
-        pass
-
-    def calc_carbon_forest_dwl(self):
-        pass
-
-    def calc_carbon_hwp(self):
-        pass
-
-    def calc_substitution_effect(self):
-        pass
-
     def run(self):
         ProcessManager.start_header(self)
         ProcessManager.run_readin_process(self)
+        CarbonCalculator.run_carbon_calc(self)
 
