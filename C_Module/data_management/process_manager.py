@@ -29,6 +29,7 @@ class ProcessManager:
         DataManager.load_additional_data_carbon(self)
         DataManager.retrieve_commodity_data(self)
         DataManager.align_carbon_data(self)
+        DataManager.set_up_carbon_data_dict(self)
 
     @staticmethod
     def readin_faostat_process(self):
