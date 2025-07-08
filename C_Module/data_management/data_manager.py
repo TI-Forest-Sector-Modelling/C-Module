@@ -251,6 +251,7 @@ class DataManager:
                                                     left_on=[carbon_region],
                                                     right_on=[carbon_region], how="left")
         commodity_num = self.add_data[commodity_dict_name][commodity_num]
+        country_num = len(country_data)
 
         carbon_forest_biomass = pd.concat([carbon_forest_biomass] * commodity_num).sort_values(
             by=[timba_country_code]).reset_index(drop=True)
@@ -258,7 +259,7 @@ class DataManager:
             carbon_forest_biomass[timba_country_code] != dummy_region]
         self.add_carbon_data[carbon_forest_biomass_name] = carbon_forest_biomass
 
-        carbon_hwp = pd.concat([self.add_carbon_data[carbon_hwp_name]] * commodity_num).reset_index(
+        carbon_hwp = pd.concat([self.add_carbon_data[carbon_hwp_name]] * country_num).reset_index(
             drop=True)
         self.add_carbon_data[carbon_hwp_name] = carbon_hwp
 
