@@ -8,7 +8,7 @@ class C_Module(object):
     def __init__(self, UserInput):
         self.UserInput = UserInput
         self.time_stamp = dt.datetime.now().strftime("%Y%m%dT%H-%M-%S")
-        self.logger = get_logger(None)
+        self.logger = get_logger("C-Module")
         self.timba_data = None
         self.add_data = {}
         self.carbon_data = {}
