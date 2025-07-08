@@ -6,6 +6,7 @@ import numpy as np
 class CarbonCalculator:
     @staticmethod
     def calc_carbon_forest_biomass(self):
+        self.logger.info(f"Calculating carbon stocks and fluxes for forest biomass (aboveground and belowground)")
         self.carbon_data[VarNames.carbon_forest_biomass.value] = CarbonCalculator.calc_carbon_forest(
             carbon_data=self.carbon_data[VarNames.carbon_forest_biomass.value],
             add_carbon_data=self.add_carbon_data,
@@ -14,6 +15,7 @@ class CarbonCalculator:
 
     @staticmethod
     def calc_carbon_forest_soil(self):
+        self.logger.info(f"Calculating carbon stocks and fluxes for forest soil")
         self.carbon_data[VarNames.carbon_soil.value] = CarbonCalculator.calc_carbon_forest(
             carbon_data=self.carbon_data[VarNames.carbon_soil.value],
             add_carbon_data=self.add_carbon_data,
@@ -22,6 +24,7 @@ class CarbonCalculator:
 
     @staticmethod
     def calc_carbon_forest_dwl(self):
+        self.logger.info(f"Calculating carbon stocks and fluxes for dead wood and litter")
         self.carbon_data[VarNames.carbon_dwl.value] = CarbonCalculator.calc_carbon_forest(
             carbon_data=self.carbon_data[VarNames.carbon_dwl.value],
             add_carbon_data=self.add_carbon_data,
@@ -376,6 +379,7 @@ class CarbonCalculator:
 
     @staticmethod
     def calc_substitution_effect(self):
+        self.logger.info(f"Calculating substitution effect")
         pass
 
     @staticmethod
