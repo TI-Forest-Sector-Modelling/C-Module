@@ -383,9 +383,15 @@ class CarbonCalculator:
         pass
 
     @staticmethod
+    def calc_total_carbon(self):
+        self.logger.info(f"Calculating total carbon stocks and fluxes")
+        pass
+
+    @staticmethod
     def run_carbon_calc(self):
         CarbonCalculator.calc_carbon_forest_biomass(self)
         CarbonCalculator.calc_carbon_forest_soil(self)
         CarbonCalculator.calc_carbon_forest_dwl(self)
         CarbonCalculator.calc_carbon_hwp(self)
         CarbonCalculator.calc_substitution_effect(self)
+        CarbonCalculator.calc_total_carbon(self)
