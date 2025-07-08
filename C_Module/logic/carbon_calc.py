@@ -380,7 +380,116 @@ class CarbonCalculator:
     @staticmethod
     def calc_substitution_effect(self):
         self.logger.info(f"Calculating substitution effect")
-        pass
+        self.carbon_data[VarNames.carbon_substitution.value] = CarbonCalculator.calc_constant_substitution_effect(
+            add_carbon_data=self.add_carbon_data[VarNames.carbon_hwp.value],
+            add_data=self.add_data,
+            timba_data=self.timba_data[VarNames.timba_data_all.value],
+            faostat_data=self.faostat_data[VarNames.data_aligned.value]
+        )
+
+    @staticmethod
+    def calc_constant_substitution_effect(add_carbon_data, timba_data):
+        """
+        Calculate potential substitution of fossil based products by wood based products differentiating between material
+        and energy uses. Calculations are based on constant displacement factors. Calculations based on equations xxx.
+        :param timba_data: Projection data from TiMBA
+        :param add_carbon_data: Additional carbon data
+        :return: substitution_hwp as Dataframe of substitution hwp of fosil based equivalence (given in tCO2)
+        """
+        period_num = len(timba_data[VarNames.period_var.value].unique())
+        displacement_factor = pd.concat([add_carbon_data[VarNames.displacement_factor.value]] * period_num
+                                        ).reset_index(drop=True)
+        cf_hwp = pd.concat([add_carbon_data[VarNames.carbon_factor.value]] * period_num).reset_index(drop=True)
+        hl_hwp = pd.concat([add_carbon_data[VarNames.half_life.value]] * period_num).reset_index(drop=True)
+
+        log_decay_rate = np.log(2) / hl_hwp
+        log_decay_rate[log_decay_rate == np.inf] = 0
+
+        data_aligned = timba_data[
+            timba_data[VarNames.domain_name.value] == VarNames.supply_var.value].copy().reset_index(drop=True)
+        data_aligned = data_aligned[[VarNames.region_code.value, VarNames.commodity_code.value,
+                                     VarNames.period_var.value]].copy()
+
+        cf_fuelwood = pd.concat([add_carbon_data[VarNames.commodity_code.value]] * period_num).reset_index(drop=True)
+        cf_fuelwood = pd.DataFrame(np.where(np.array(cf_fuelwood) == 80, 1, 0))[0]
+
+        supply_quantity = timba_data[
+            timba_data[VarNames.domain_name.value] == VarNames.supply_var.value
+        ][VarNames.quantity_col.value].reset_index(drop=True)
+        production_quantity = timba_data[
+            timba_data[VarNames.domain_name.value] == VarNames.production_var.value
+        ][VarNames.quantity_col.value].reset_index(drop=True)
+        export_quantity = timba_data[
+            timba_data[VarNames.domain_name.value] == VarNames.export_var.value
+        ][VarNames.quantity_col.value].reset_index(drop=True)
+        import_quantity = timba_data[
+            timba_data[VarNames.domain_name.value] == VarNames.import_var.value
+        ][VarNames.quantity_col.value].reset_index(drop=True)
+
+        apparent_consumption = ((supply_quantity + production_quantity + import_quantity - export_quantity) *
+                                CarbonConstants.CARBON_TSD_FACTOR.value)
+
+        # Material substitution
+        carbon_inflow = apparent_consumption * cf_hwp
+        carbon_inflow = carbon_inflow * ((1 - np.exp(-log_decay_rate)) / log_decay_rate)
+        material_substitution = carbon_inflow * displacement_factor * CarbonConstants.CO2_FACTOR.value  # conversion to tCO2
+        material_substitution = pd.concat([
+            data_aligned,
+            material_substitution.rename(VarNames.material_substitution.value)], axis=1)
+
+        # Energy substitution
+        energy_substitution = apparent_consumption * displacement_factor * cf_fuelwood * CarbonConstants.CO2_FACTOR.value  # conversion to tCO2
+        energy_substitution = pd.concat([
+            data_aligned,
+            energy_substitution.rename(VarNames.energy_substitution.value)], axis=1)
+
+        # Total substitution
+        total_substitution = (material_substitution[VarNames.material_substitution.value] +
+                              energy_substitution[VarNames.energy_substitution.value])
+        total_substitution = pd.concat([
+            data_aligned,
+            total_substitution.rename(VarNames.total_substitution.value)], axis=1)
+        mask_index = total_substitution[total_substitution[VarNames.total_substitution.value] <= 0].index
+        total_substitution.loc[mask_index, VarNames.total_substitution.value] = 0
+
+        substitution_data = pd.DataFrame()
+        for period in timba_data[VarNames.period_var.value].unique():
+            data_aligned_period = data_aligned[data_aligned[VarNames.period_var.value] == period].reset_index(drop=True)
+            if period == 0:
+                substitution_prev = pd.DataFrame(np.zeros(len(data_aligned_period)))[0]
+            else:
+                substitution_prev = substitution_data[substitution_data[VarNames.period_var.value] == period - 1
+                ].copy().reset_index(drop=True)
+                substitution_prev = pd.DataFrame(substitution_prev[VarNames.total_substitution.value]).rename(
+                    columns={VarNames.total_substitution.value: 0})[0]
+
+
+            total_substitution_period = total_substitution[
+                total_substitution[VarNames.period_var.value] == period
+            ][VarNames.total_substitution.value].reset_index(drop=True)
+
+
+            substitution_change = total_substitution_period - substitution_prev
+            material_substitution_period = material_substitution[
+                material_substitution[VarNames.period_var.value] == period
+            ][VarNames.material_substitution.value].reset_index(drop=True)
+
+            energy_substitution_period = energy_substitution[
+                energy_substitution[VarNames.period_var.value] == period
+            ][VarNames.energy_substitution.value].reset_index(drop=True)
+
+            substitution_hwp = pd.concat([
+                    data_aligned_period,
+                    pd.DataFrame(data=material_substitution_period),
+                    pd.DataFrame(data=energy_substitution_period),
+                    pd.DataFrame(data=total_substitution_period),
+                    pd.DataFrame(data=substitution_change).rename(
+                        columns={0: VarNames.total_substitution_chg.value})],
+                    axis=1)
+
+            substitution_data = pd.concat([substitution_data, substitution_hwp], axis=0).reset_index(drop=True)
+
+        return substitution_data
 
     @staticmethod
     def calc_total_carbon(self):
