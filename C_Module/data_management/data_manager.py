@@ -290,7 +290,7 @@ class DataManager:
         carbon_dwl_name = VarNames.carbon_dwl.value
         carbon_soil_name = VarNames.carbon_soil.value
         carbon_hwp_name = VarNames.carbon_hwp.value
-        carbon_substitution_name = VarNames.carbon_subsitution.value
+        carbon_substitution_name = VarNames.carbon_substitution.value
         carbon_total_name = VarNames.carbon_total.value
 
         self.carbon_data[carbon_forest_biomass_name] = pd.DataFrame([0], columns=[carbon_forest_biomass_name])
