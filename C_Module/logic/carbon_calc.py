@@ -382,9 +382,7 @@ class CarbonCalculator:
         self.logger.info(f"Calculating substitution effect")
         self.carbon_data[VarNames.carbon_substitution.value] = CarbonCalculator.calc_constant_substitution_effect(
             add_carbon_data=self.add_carbon_data[VarNames.carbon_hwp.value],
-            add_data=self.add_data,
-            timba_data=self.timba_data[VarNames.timba_data_all.value],
-            faostat_data=self.faostat_data[VarNames.data_aligned.value]
+            timba_data=self.timba_data[VarNames.timba_data_all.value]
         )
 
     @staticmethod
