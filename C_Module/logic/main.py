@@ -8,7 +8,7 @@ class C_Module(object):
     def __init__(self, UserInput):
         self.UserInput = UserInput
         self.time_stamp = dt.datetime.now().strftime("%Y%m%dT%H-%M-%S")
-        self.logger = get_logger("C-Module")
+        self.logger = get_logger(None)
         self.timba_data = None
         self.add_data = {}
         self.carbon_data = {}
@@ -20,4 +20,6 @@ class C_Module(object):
         ProcessManager.start_header(self)
         ProcessManager.run_readin_process(self)
         CarbonCalculator.run_carbon_calc(self)
+        ProcessManager.save_carbon_data(self)
+
 
