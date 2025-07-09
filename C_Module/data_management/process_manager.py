@@ -1,6 +1,9 @@
 from C_Module.data_management.data_manager import DataManager
-from C_Module.parameters.paths import (FAOSTAT_DATA, FRA_DATA)
+from C_Module.parameters.paths import (FAOSTAT_DATA, FRA_DATA, PKL_CARBON_OUTPUT, PKL_UPDATED_TIMBA_OUTPUT,
+                                       OUTPUT_FOLDER)
+from C_Module.parameters.defines import VarNames
 from pathlib import Path
+
 
 class ProcessManager:
     @staticmethod
@@ -47,6 +50,34 @@ class ProcessManager:
         if not Path(f"{FRA_DATA}.pkl").is_file():
             DataManager.prep_fra_data(self)
             DataManager.serialize_to_pickle(self.fra_data["data_aligned"], f"{FRA_DATA}.pkl")
+
+    @staticmethod
+    def save_carbon_data(self):
+        self.logger.info("Saving carbon stock and flux data")
+
+        if self.UserInput["save_data_as"] == "all":
+            self.timba_data[VarNames.timba_data_carbon.value] = self.carbon_data[VarNames.carbon_total.value]
+            DataManager.serialize_to_pickle(self.timba_data, f"{PKL_UPDATED_TIMBA_OUTPUT}{self.time_stamp}.pkl")
+            DataManager.serialize_to_pickle(self.carbon_data, f"{PKL_CARBON_OUTPUT}{self.time_stamp}.pkl")
+
+            for df_key in self.carbon_data.keys():
+                carbon_data = self.carbon_data[df_key]
+                carbon_data_path = OUTPUT_FOLDER / Path(f"{df_key}_D{self.time_stamp}")
+                carbon_data.to_csv(f"{carbon_data_path}.csv", index=False)
+
+        elif self.UserInput["save_data_as"] == "pkl":
+            self.timba_data[VarNames.timba_data_carbon.value] = self.carbon_data[VarNames.carbon_total.value]
+            DataManager.serialize_to_pickle(self.timba_data, f"{PKL_UPDATED_TIMBA_OUTPUT}{self.time_stamp}.pkl")
+            DataManager.serialize_to_pickle(self.carbon_data, f"{PKL_CARBON_OUTPUT}{self.time_stamp}.pkl")
+
+        elif self.UserInput["save_data_as"] == "csv":
+            for df_key in self.carbon_data.keys():
+                carbon_data = self.carbon_data[df_key]
+                carbon_data_path = OUTPUT_FOLDER / Path(f"{df_key}_D{self.time_stamp}")
+                carbon_data.to_csv(f"{carbon_data_path}.csv", index=False)
+
+        else:
+            self.logger.error(f"Unvalide user input {self.UserInput['save_data_as']}")
 
     @staticmethod
     def start_header(self):
