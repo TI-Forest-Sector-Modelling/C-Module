@@ -1,4 +1,6 @@
 from C_Module.data_management.data_manager import DataManager
+from C_Module.parameters.paths import (FAOSTAT_DATA, FRA_DATA)
+from pathlib import Path
 
 class ProcessManager:
     @staticmethod
@@ -27,19 +29,24 @@ class ProcessManager:
         DataManager.load_additional_data_carbon(self)
         DataManager.retrieve_commodity_data(self)
         DataManager.align_carbon_data(self)
+        DataManager.set_up_carbon_data_dict(self)
 
     @staticmethod
     def readin_faostat_process(self):
         self.logger.info("Reading in FAOSTAT data")
         DataManager.load_faostat_data(self)
-        DataManager.prep_faostat_data(self)
+        if not Path(f"{FAOSTAT_DATA}.pkl").is_file():
+            DataManager.prep_faostat_data(self)
+            DataManager.serialize_to_pickle(self.faostat_data["data_aligned"], f"{FAOSTAT_DATA}.pkl")
 
     @staticmethod
     def readin_fra_process(self):
         self.logger.info("Reading in FRA data")
         # TODO implement fra processing steps
         DataManager.load_fra_data(self)
-        DataManager.prep_fra_data(self)
+        if not Path(f"{FRA_DATA}.pkl").is_file():
+            DataManager.prep_fra_data(self)
+            DataManager.serialize_to_pickle(self.fra_data["data_aligned"], f"{FRA_DATA}.pkl")
 
     @staticmethod
     def start_header(self):

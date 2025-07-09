@@ -8,6 +8,7 @@ class CarbonConstants(Enum):
     CO2_FACTOR = round(44 / 12, 3)
     CARBON_MIO_FACTOR = 1000000
     CARBON_TSD_FACTOR = 1000
+    NON_ZERO_PARAMETER = 0.0000000001
 
 class CountryConstants(Enum):
     """
@@ -25,13 +26,20 @@ class VarNames(Enum):
     region_code = "RegionCode"
     commodity_code = "CommodityCode"
     commodity_name = "CommodityName"
+    domain_name = "domain"
+    quantity_col = "quantity"
     dummy_region = "zy"
-    year_name = "Year"
+    year_name = "year"
+    period_var = "Period"
     data_aligned = "data_aligned"
+    supply_var = "Supply"
+    import_var = "TransportationImport"
+    export_var = "TransportationExport"
+    production_var = "ManufactureCost"
 
     # Additonal data
     timba_country_name = "TiMBA Area"
-    timba_country_code = "TiMBA Area Code"
+    timba_country_code = "RegionCode"
     ISO3 = "ISO3 Code"
     fao_country_name = "Area Name"
     fao_country_code = "Area Code"
@@ -45,18 +53,43 @@ class VarNames(Enum):
 
     # Additional carbon data
     carbon_forest_biomass = "CarbonForestBiomass"
+    carbon_forest_biomass_chg = "CarbonChangeForestBiomass"
     carbon_hwp = "CarbonHWP"
+    carbon_hwp_chg = "CarbonChangeHWP"
+    carbon_hwp_inflow = "CarbonInflowHWP"
     carbon_agb = "CarbonAboveGround"
     carbon_bgb = "CarbonBelowGround"
     carbon_dw = "CarbonDeadWood"
+    carbon_dwl = "CarbonDWL"
+    carbon_dwl_chg = "CarbonChangeDWL"
     carbon_litter = "CarbonLitter"
     carbon_soil = "CarbonSoil"
+    carbon_soil_chg = "CarbonChangeSoil"
+    carbon_substitution = "CarbonSubstitution"
+    material_substitution = "MaterialSubstitution"
+    energy_substitution = "EnergySubstitution"
+    total_substitution = "TotalSubstitution"
+    total_substitution_chg = "TotalChangeSubstitution"
+    carbon_total = "CarbonTotal"
+    carbon_total_chg = "CarbonChangeTotal"
+    carbon_density_avg = "carbon_average"
+    carbon_density_avg_rand = "rand_carbon_average"
+    carbon_factor = "Carbon_factor"
+    half_life = "Half_life"
+    displacement_factor = "Displacement_factor"
 
     # FAOSTAT data
     faostat_item_code = "Item Code"
     faostat_item_name = "Item"
     faostat_element_name = "Element"
     faostat_element_code = "Element Code"
+    faostat_year = "Year"
+    faostat_production = "Production"
+    faostat_domestic_consumption = "Domestic consumption"
+    faostat_import = "Import quantity"
+    faostat_export = "Export quantity"
+
+
 
 
 

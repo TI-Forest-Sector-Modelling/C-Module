@@ -1,8 +1,10 @@
-from C_Module.parameters.paths import (PKL_RESULTS_INPUT, ADD_INFO_CARBON_PATH, ADD_INFO_COUNTRY, FAOSTAT_DATA)
+from C_Module.parameters.paths import (PKL_RESULTS_INPUT, ADD_INFO_CARBON_PATH, ADD_INFO_COUNTRY, FAOSTAT_DATA,
+                                       FRA_DATA)
 from C_Module.parameters.defines import VarNames, CountryConstants
 
 import pandas as pd
 from tqdm import tqdm
+from pathlib import Path
 
 class DataManager:
 
@@ -131,9 +133,10 @@ class DataManager:
         (Forestry_E_All_Data/Forestry_E_All_Data_NOFLAG.csv). See README.md for details.
         :param self: object of class C-Module
         """
-        self.faostat_data["data"] = DataManager.load_data(f"{FAOSTAT_DATA}.csv", FAOSTAT_DATA, "csv")
-        # if self.UserInput["read_in_pkl"]:
-        #    pass  # Todo add serialized faostat data
+        if Path(f"{FAOSTAT_DATA}.pkl").is_file():
+            self.faostat_data["data_aligned"] = DataManager.restore_from_pickle(f"{FAOSTAT_DATA}.pkl")
+        else:
+            self.faostat_data["data"] = DataManager.load_data(f"{FAOSTAT_DATA}.csv", FAOSTAT_DATA, "csv")
 
     @staticmethod
     def prep_faostat_data(self):
@@ -208,11 +211,14 @@ class DataManager:
 
     @staticmethod
     def load_fra_data(self):
-        pass
+        if Path(f"{FRA_DATA}.pkl").is_file():
+            self.fra_data["data_aligned"] = DataManager.restore_from_pickle(f"{FRA_DATA}.pkl")
+        else:
+            self.fra_data["data"] = DataManager.load_data(f"{FRA_DATA}.csv", FRA_DATA, "csv")
 
     @staticmethod
     def prep_fra_data(self):
-        pass
+        self.fra_data["data_aligned"] = pd.DataFrame()
 
     @staticmethod
     def align_carbon_data(self):
@@ -245,6 +251,7 @@ class DataManager:
                                                     left_on=[carbon_region],
                                                     right_on=[carbon_region], how="left")
         commodity_num = self.add_data[commodity_dict_name][commodity_num]
+        country_num = len(country_data)
 
         carbon_forest_biomass = pd.concat([carbon_forest_biomass] * commodity_num).sort_values(
             by=[timba_country_code]).reset_index(drop=True)
@@ -252,7 +259,7 @@ class DataManager:
             carbon_forest_biomass[timba_country_code] != dummy_region]
         self.add_carbon_data[carbon_forest_biomass_name] = carbon_forest_biomass
 
-        carbon_hwp = pd.concat([self.add_carbon_data[carbon_hwp_name]] * commodity_num).reset_index(
+        carbon_hwp = pd.concat([self.add_carbon_data[carbon_hwp_name]] * country_num).reset_index(
             drop=True)
         self.add_carbon_data[carbon_hwp_name] = carbon_hwp
 
@@ -276,3 +283,19 @@ class DataManager:
         carbon_soil = pd.concat([self.add_carbon_data[carbon_soil_name]] * commodity_num).sort_values(
             by=[timba_country_code]).reset_index(drop=True)
         self.add_carbon_data[carbon_soil_name] = carbon_soil
+
+    @staticmethod
+    def set_up_carbon_data_dict(self):
+        carbon_forest_biomass_name = VarNames.carbon_forest_biomass.value
+        carbon_dwl_name = VarNames.carbon_dwl.value
+        carbon_soil_name = VarNames.carbon_soil.value
+        carbon_hwp_name = VarNames.carbon_hwp.value
+        carbon_substitution_name = VarNames.carbon_substitution.value
+        carbon_total_name = VarNames.carbon_total.value
+
+        self.carbon_data[carbon_forest_biomass_name] = pd.DataFrame([0], columns=[carbon_forest_biomass_name])
+        self.carbon_data[carbon_dwl_name] = pd.DataFrame([0], columns=[carbon_dwl_name])
+        self.carbon_data[carbon_soil_name] = pd.DataFrame([0], columns=[carbon_soil_name])
+        self.carbon_data[carbon_hwp_name] = pd.DataFrame([0], columns=[carbon_hwp_name])
+        self.carbon_data[carbon_substitution_name] = pd.DataFrame([0], columns=[carbon_substitution_name])
+        self.carbon_data[carbon_total_name] = pd.DataFrame([0], columns=[carbon_total_name])
