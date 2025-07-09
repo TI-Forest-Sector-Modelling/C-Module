@@ -491,8 +491,128 @@ class CarbonCalculator:
 
     @staticmethod
     def calc_total_carbon(self):
+        """
+        Calculate sum of all carbon stocks. Carbon stocks are expressed in MtCO2 (= 1.000.000 tonnes of CO2).
+        Calculations based on equations xxx.
+        :param self: C-Module object containing all module data.
+        """
         self.logger.info(f"Calculating total carbon stocks and fluxes")
-        pass
+
+        timba_data = self.timba_data[VarNames.timba_data_all.value]
+        len_commodity = len(timba_data[VarNames.commodity_code.value].unique())
+        len_region = len(timba_data[VarNames.region_code.value].unique())
+        timba_period = timba_data[VarNames.period_var.value].unique()
+        len_period = len(timba_period)
+        period_df = pd.concat([pd.DataFrame(timba_data[VarNames.period_var.value].unique())] * len_region
+                              ).reset_index(drop=True).rename(columns={0: VarNames.period_var.value})
+        region_df = pd.concat([pd.DataFrame(timba_data[VarNames.region_code.value].unique())]
+                              ).reset_index(drop=True).rename(columns={0: VarNames.region_code.value})
+
+        carbon_hwp = self.carbon_data[VarNames.carbon_hwp.value].copy()
+        substitution = self.carbon_data[VarNames.carbon_substitution.value].copy()
+        carbon_biomass = self.carbon_data[VarNames.carbon_forest_biomass.value].copy()
+        carbon_soil = self.carbon_data[VarNames.carbon_soil.value].copy()
+        carbon_dwl = self.carbon_data[VarNames.carbon_dwl.value].copy()
+
+        carbonstock_hwp_total = pd.concat([(
+                                                   carbon_hwp.groupby([
+                                                       VarNames.region_code.value,
+                                                       VarNames.period_var.value])[VarNames.carbon_hwp.value].sum() /
+                                                   CarbonConstants.CARBON_MIO_FACTOR.value).reset_index(drop=True), period_df], axis=1)
+
+        substitution_hwp_total = pd.concat([(
+                                                    substitution.groupby([
+                                                        VarNames.region_code.value,
+                                                        VarNames.period_var.value])[VarNames.total_substitution.value].sum() /
+                                                    CarbonConstants.CARBON_MIO_FACTOR.value).reset_index(drop=True), period_df], axis=1)
+
+        carbonstock_biomass_zy = pd.DataFrame([0] * len_period)
+        carbonstock_biomass_total = pd.concat([
+            ((carbon_biomass.groupby([
+                VarNames.region_code.value,
+                VarNames.period_var.value])[VarNames.carbon_forest_biomass.value].sum()) / len_commodity /
+             CarbonConstants.CARBON_MIO_FACTOR.value
+             ).reset_index(drop=True), carbonstock_biomass_zy.rename(columns={0: VarNames.carbon_forest_biomass.value})
+        ], axis=0).reset_index(drop=True)[VarNames.carbon_forest_biomass.value]
+
+        carbonstock_biomass_total = pd.concat([carbonstock_biomass_total, period_df], axis=1)
+
+        carbonstock_soil_total = pd.concat([
+            ((carbon_soil.groupby([
+                VarNames.region_code.value,
+                VarNames.period_var.value])[VarNames.carbon_soil.value].sum()) / len_commodity /
+             CarbonConstants.CARBON_MIO_FACTOR.value
+             ).reset_index(drop=True), carbonstock_biomass_zy.rename(columns={0: VarNames.carbon_soil.value})
+        ], axis=0).reset_index(drop=True)[VarNames.carbon_soil.value]
+
+        carbonstock_soil_total = pd.concat([carbonstock_soil_total, period_df], axis=1)
+
+        carbonstock_dwl_total = pd.concat([
+            ((carbon_dwl.groupby([
+                VarNames.region_code.value,
+                VarNames.period_var.value])[VarNames.carbon_dwl.value].sum()) / len_commodity /
+             CarbonConstants.CARBON_MIO_FACTOR.value
+             ).reset_index(drop=True), carbonstock_biomass_zy.rename(columns={0: VarNames.carbon_dwl.value})], axis=0
+        ).reset_index(drop=True)[VarNames.carbon_dwl.value]
+
+        carbonstock_dwl_total = pd.concat([carbonstock_dwl_total, period_df], axis=1)
+
+        carbonstock_total = (carbonstock_biomass_total[VarNames.carbon_forest_biomass.value] +
+                             carbonstock_soil_total[VarNames.carbon_soil.value] +
+                             carbonstock_dwl_total[VarNames.carbon_dwl.value] +
+                             carbonstock_hwp_total[VarNames.carbon_hwp.value] +
+                             substitution_hwp_total[VarNames.total_substitution.value]
+                             ).rename(VarNames.carbon_total.value)
+
+        carbonstock_total = pd.concat([carbonstock_total, period_df], axis=1)
+
+        carbonstock_total_collector = pd.DataFrame()
+        for period in timba_period:
+            period_df = carbonstock_total[
+                carbonstock_total[VarNames.period_var.value] == period
+                ][VarNames.period_var.value].copy().reset_index(drop=True)
+            if period == 0:
+                carbonstock_total_prev = pd.DataFrame(np.zeros(len(period_df)), columns=[VarNames.carbon_total.value])
+                carbonstock_total_prev = carbonstock_total_prev[VarNames.carbon_total.value]
+            else:
+                carbonstock_total_prev = carbonstock_total_collector[
+                    carbonstock_total_collector[VarNames.period_var.value] == period - 1
+                    ][VarNames.carbon_total.value].copy().reset_index(drop=True)
+
+
+            carbonstock_total_period = carbonstock_total[
+                carbonstock_total[VarNames.period_var.value] == period
+                ][VarNames.carbon_total.value].copy().reset_index(drop=True)
+            carbonstock_total_change = carbonstock_total_period - carbonstock_total_prev
+
+            carbonstock_biomass_total_period = carbonstock_biomass_total[
+                carbonstock_biomass_total[VarNames.period_var.value] == period].copy().reset_index(drop=True)
+            carbonstock_soil_total_period = carbonstock_soil_total[
+                carbonstock_soil_total[VarNames.period_var.value] == period].copy().reset_index(drop=True)
+            carbonstock_dwl_total_period = carbonstock_dwl_total[
+                carbonstock_dwl_total[VarNames.period_var.value] == period].copy().reset_index(drop=True)
+            carbonstock_hwp_total_period = carbonstock_hwp_total[
+                carbonstock_hwp_total[VarNames.period_var.value] == period].copy().reset_index(drop=True)
+            substitution_hwp_total_period = substitution_hwp_total[
+                substitution_hwp_total[VarNames.period_var.value] == period].copy().reset_index(drop=True)
+
+            carbonstock_total_period = pd.concat([
+                region_df,
+                period_df,
+                pd.DataFrame(data=carbonstock_biomass_total_period[VarNames.carbon_forest_biomass.value]),
+                pd.DataFrame(data=carbonstock_soil_total_period[VarNames.carbon_soil.value]),
+                pd.DataFrame(data=carbonstock_dwl_total_period[VarNames.carbon_dwl.value]),
+                pd.DataFrame(data=carbonstock_hwp_total_period[VarNames.carbon_hwp.value]),
+                pd.DataFrame(data=substitution_hwp_total_period[VarNames.total_substitution.value]),
+                pd.DataFrame(data=carbonstock_total_period),
+                pd.DataFrame(data=carbonstock_total_change).rename(
+                    columns={VarNames.carbon_total.value: VarNames.carbon_total_chg.value})],
+                axis=1)
+
+            carbonstock_total_collector = pd.concat([carbonstock_total_collector, carbonstock_total_period],
+                                                    axis=0).reset_index(drop=True)
+
+        self.carbon_data[VarNames.carbon_total.value] = carbonstock_total_collector
 
     @staticmethod
     def run_carbon_calc(self):
