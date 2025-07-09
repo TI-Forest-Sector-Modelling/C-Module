@@ -6,6 +6,7 @@ start_year = 2020
 end_year = 2050
 
 read_in_pkl = True
+save_data_as = "csv"  # Options: "pkl", "csv", "all"
 
 # Forest carbon related parameters
 calc_c_forest_agb = True
@@ -24,6 +25,7 @@ user_input = {
     "start_year": start_year,
     "end_year": end_year,
     "read_in_pkl": read_in_pkl,
+    "save_data_as": save_data_as,
     "calc_c_forest_agb": calc_c_forest_agb,
     "calc_c_forest_bgb": calc_c_forest_bgb,
     "calc_c_forest_soil": calc_c_forest_soil,

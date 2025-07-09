@@ -23,6 +23,7 @@ class VarNames(Enum):
     # TiMBA data
     timba_data_forest = "Forest"
     timba_data_all = "data_periods"
+    timba_data_carbon = "Carbon"
     region_code = "RegionCode"
     commodity_code = "CommodityCode"
     commodity_name = "CommodityName"

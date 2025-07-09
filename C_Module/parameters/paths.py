@@ -22,10 +22,9 @@ ADD_INFO_COUNTRY = ADD_INFO_FOLDER / Path("country_data")
 
 # output
 OUTPUT_FOLDER = PACKAGEDIR / Path("data") / Path("output")
-CARBON_OUTPUT = OUTPUT_FOLDER / Path("carbon_results_D")
-CARBON_OUTPUT_AGG = OUTPUT_FOLDER / Path("carbon_results_agg_D")
 
-PKL_CARBON_OUTPUT = OUTPUT_FOLDER / Path("carbon_results_D")
+PKL_UPDATED_TIMBA_OUTPUT = OUTPUT_FOLDER / Path("updated_timba_output_D")
+PKL_CARBON_OUTPUT = OUTPUT_FOLDER / Path("c_module_output_D")
 PKL_CARBON_OUTPUT_AGG = OUTPUT_FOLDER / Path("carbon_results_agg_D")
 
 
