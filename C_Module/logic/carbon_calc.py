@@ -3,6 +3,7 @@ from C_Module.parameters.defines import (VarNames, CarbonConstants)
 import pandas as pd
 import numpy as np
 
+
 class CarbonCalculator:
     @staticmethod
     def calc_carbon_forest_biomass(self):
@@ -10,6 +11,7 @@ class CarbonCalculator:
         self.carbon_data[VarNames.carbon_forest_biomass.value] = CarbonCalculator.calc_carbon_forest(
             carbon_data=self.carbon_data[VarNames.carbon_forest_biomass.value],
             add_carbon_data=self.add_carbon_data,
+            add_data=self.add_data[VarNames.country_data.value],
             forest_data=self.timba_data[VarNames.timba_data_forest.value],
             monte_carlo=[VarNames.carbon_agb.value, VarNames.carbon_bgb.value])
 
@@ -19,6 +21,7 @@ class CarbonCalculator:
         self.carbon_data[VarNames.carbon_soil.value] = CarbonCalculator.calc_carbon_forest(
             carbon_data=self.carbon_data[VarNames.carbon_soil.value],
             add_carbon_data=self.add_carbon_data,
+            add_data=self.add_data[VarNames.country_data.value],
             forest_data=self.timba_data[VarNames.timba_data_forest.value],
             monte_carlo=[VarNames.carbon_agb.value, VarNames.carbon_bgb.value])
 
@@ -28,11 +31,12 @@ class CarbonCalculator:
         self.carbon_data[VarNames.carbon_dwl.value] = CarbonCalculator.calc_carbon_forest(
             carbon_data=self.carbon_data[VarNames.carbon_dwl.value],
             add_carbon_data=self.add_carbon_data,
+            add_data=self.add_data[VarNames.country_data.value],
             forest_data=self.timba_data[VarNames.timba_data_forest.value],
             monte_carlo=[VarNames.carbon_agb.value, VarNames.carbon_bgb.value])
 
     @staticmethod
-    def calc_carbon_forest(carbon_data, add_carbon_data, forest_data, monte_carlo):
+    def calc_carbon_forest(carbon_data, add_carbon_data, add_data, forest_data, monte_carlo):
         """
         Carbon stock calculation for forest biomass (aboveground and belowground), forest soil, and dead wood and litter.
         Calculations for carbon in forest biomass are based on forest stock and calculations for carbon in forest soil,
@@ -45,6 +49,7 @@ class CarbonCalculator:
         :param forest_data: Data from forest domain (forest area and stock)
         :param carbon_data: Data from selected carbon pool (CarbonAboveGround, CarbonBelowGround, CarbonSoil,
         CarbonLitter, CarbonDeadWood)
+        :param add_data: Additional data with country and commodity information
         :param add_carbon_data: DataContainer with carbon data
         :param monte_carlo: List storing names of carbon pools quantified with randomized emission factor
         :return: Updated dataframe of selected carbon pool
@@ -101,8 +106,11 @@ class CarbonCalculator:
 
         carbon_data = pd.DataFrame()
         for period in forest_data["Period"].unique():
-            period_vector = pd.DataFrame([period]).rename(columns={0: "Period"})
             forest_data_period = forest_data[forest_data["Period"] == period].copy().reset_index(drop=True)
+            forest_data_period = forest_data_period.merge(add_data[[VarNames.region_code.value, VarNames.ISO3.value]],
+                                                          left_on=VarNames.region_code.value,
+                                                          right_on=VarNames.region_code.value,
+                                                          how="left")
             if period == 0:
                 forest_variable_prev = pd.DataFrame(np.zeros(len(forest_data_period)))[0]
                 carbonstock_prev = pd.DataFrame(np.zeros(len(forest_data_period)))[0]
@@ -117,12 +125,11 @@ class CarbonCalculator:
                     emission_factor * (forest_variable_new - forest_variable_prev) * unit_conversion_param)
             carbonstock_new = carbonstock_change + carbonstock_prev
 
-
             carbonstock_forest = pd.concat([
-                forest_data_period[[VarNames.region_code.value, forest_data_col]],
+                forest_data_period[[VarNames.region_code.value, VarNames.ISO3.value, VarNames.period_var.value,
+                                    forest_data_col]],
                 pd.DataFrame(data=carbonstock_new, columns=[col_name]),
-                pd.DataFrame(data=carbonstock_change, columns=[col_name_change]),
-                pd.DataFrame(data=pd.concat([period_vector] * len(forest_data_period)).reset_index(drop=True))
+                pd.DataFrame(data=carbonstock_change, columns=[col_name_change])
             ], axis=1)
             carbon_data = pd.concat([carbon_data, carbonstock_forest.copy()], axis=0).reset_index(drop=True)
 
@@ -158,9 +165,10 @@ class CarbonCalculator:
         For all following periods, carbon stock in hwp in determined by carbon stock in previous periods, carbon inflows
         related to hwp apparent consumption in current period, and carbon outflow related to product decay.
         Calculations based on equations xxx.
-        :param timba_data: Complete data of World Data container
-        :param carbon_data: Dataframe from world data container with carbon data
-        :param add_carbon_data: Complete data of carbon Data container
+        :param add_carbon_data: Dict holding additional information related to carbon stock calculation
+        :param timba_data: Dict holding projections data from TiMBA
+        :param add_data: Dict holding addtional information related to commodities and regions
+        .param faostat_data: DataFrame holding historical production and trade data from the FAOSTAT
         """
         carbon_hwp = VarNames.carbon_hwp.value
         carbon_factor = VarNames.carbon_factor.value
@@ -193,6 +201,10 @@ class CarbonCalculator:
         data_aligned = timba_data[(timba_data[period_var] == 0) &
                                   (timba_data[domain_name] == VarNames.supply_var.value)].copy().reset_index(drop=True)
         data_aligned = data_aligned[[timba_region_code, timba_commodity_code]].copy()
+        data_aligned = data_aligned.merge(country_data[[timba_region_code, VarNames.ISO3.value]],
+                                          left_on=timba_region_code,
+                                          right_on=timba_region_code,
+                                          how='left')
 
         cf_hwp = add_carbon_data[carbon_factor]
         hl_hwp = add_carbon_data[half_life]
@@ -298,7 +310,7 @@ class CarbonCalculator:
                 carbonstockchange_hwp = historic_carbonstock_hwp - carbonstock_hwp_prev
 
                 carbonstock_hwp = pd.concat([
-                    data_aligned[[timba_region_code, timba_commodity_code]],
+                    data_aligned[[timba_region_code, VarNames.ISO3.value, timba_commodity_code]],
                     pd.DataFrame(data=[period] * len(data_aligned)).rename(columns={0: period_var}),
                     pd.DataFrame(data=historic_domestic_consumption).rename(columns={0: faostat_domestic_consumption}),
                     pd.DataFrame(data=carboninflow_hwp).rename(columns={0: carbon_hwp_inflow_col}),
@@ -359,7 +371,7 @@ class CarbonCalculator:
                 carboninflow = pd.DataFrame(data=np.zeros((len(data_aligned), 1)))
 
                 carbonstock_hwp = pd.concat([
-                    data_aligned[[timba_region_code, timba_commodity_code]],
+                    data_aligned[[timba_region_code, VarNames.ISO3.value, timba_commodity_code]],
                     pd.DataFrame(data=domestic_consumption).rename(
                         columns={VarNames.quantity_col.value: faostat_domestic_consumption}),
                     pd.DataFrame(data=carboninflow_prev).rename(columns={0: carbon_hwp_inflow_col}),
@@ -382,16 +394,18 @@ class CarbonCalculator:
         self.logger.info(f"Calculating substitution effect")
         self.carbon_data[VarNames.carbon_substitution.value] = CarbonCalculator.calc_constant_substitution_effect(
             add_carbon_data=self.add_carbon_data[VarNames.carbon_hwp.value],
-            timba_data=self.timba_data[VarNames.timba_data_all.value]
+            timba_data=self.timba_data[VarNames.timba_data_all.value],
+            add_data=self.add_data[VarNames.country_data.value]
         )
 
     @staticmethod
-    def calc_constant_substitution_effect(add_carbon_data, timba_data):
+    def calc_constant_substitution_effect(add_carbon_data, timba_data, add_data):
         """
         Calculate potential substitution of fossil based products by wood based products differentiating between material
         and energy uses. Calculations are based on constant displacement factors. Calculations based on equations xxx.
         :param timba_data: Projection data from TiMBA
         :param add_carbon_data: Additional carbon data
+        :param add_data: DataFrame holding additional information related to countries
         :return: substitution_hwp as Dataframe of substitution hwp of fosil based equivalence (given in tCO2)
         """
         period_num = len(timba_data[VarNames.period_var.value].unique())
@@ -407,6 +421,10 @@ class CarbonCalculator:
             timba_data[VarNames.domain_name.value] == VarNames.supply_var.value].copy().reset_index(drop=True)
         data_aligned = data_aligned[[VarNames.region_code.value, VarNames.commodity_code.value,
                                      VarNames.period_var.value]].copy()
+        data_aligned = data_aligned.merge(add_data[[VarNames.region_code.value, VarNames.ISO3.value]],
+                                          left_on=VarNames.region_code.value,
+                                          right_on=VarNames.region_code.value,
+                                          how='left')
 
         cf_fuelwood = pd.concat([add_carbon_data[VarNames.commodity_code.value]] * period_num).reset_index(drop=True)
         cf_fuelwood = pd.DataFrame(np.where(np.array(cf_fuelwood) == 80, 1, 0))[0]
@@ -503,10 +521,13 @@ class CarbonCalculator:
         len_region = len(timba_data[VarNames.region_code.value].unique())
         timba_period = timba_data[VarNames.period_var.value].unique()
         len_period = len(timba_period)
+        country_data = self.add_data[VarNames.country_data.value][[VarNames.region_code.value, VarNames.ISO3.value]]
         period_df = pd.concat([pd.DataFrame(timba_data[VarNames.period_var.value].unique())] * len_region
                               ).reset_index(drop=True).rename(columns={0: VarNames.period_var.value})
         region_df = pd.concat([pd.DataFrame(timba_data[VarNames.region_code.value].unique())]
                               ).reset_index(drop=True).rename(columns={0: VarNames.region_code.value})
+        region_df = region_df.merge(country_data, left_on=VarNames.region_code.value,
+                                    right_on=VarNames.region_code.value, how='left')
 
         carbon_hwp = self.carbon_data[VarNames.carbon_hwp.value].copy()
         substitution = self.carbon_data[VarNames.carbon_substitution.value].copy()
@@ -578,7 +599,6 @@ class CarbonCalculator:
                 carbonstock_total_prev = carbonstock_total_collector[
                     carbonstock_total_collector[VarNames.period_var.value] == period - 1
                     ][VarNames.carbon_total.value].copy().reset_index(drop=True)
-
 
             carbonstock_total_period = carbonstock_total[
                 carbonstock_total[VarNames.period_var.value] == period
