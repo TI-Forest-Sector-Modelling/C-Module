@@ -6,6 +6,7 @@ import pandas as pd
 from tqdm import tqdm
 from pathlib import Path
 
+
 class DataManager:
 
     @staticmethod
@@ -161,8 +162,8 @@ class DataManager:
         fao_df = self.faostat_data["data"].copy()
         fao_data_new = pd.DataFrame()
         for item in tqdm(fao_df[item_code_name].unique(), desc=f"Processing FAOSTAT data"):
-
-            if item in list(commodity_data[item_code_name]):
+            # Add item code of products to aggregate
+            if item in list(commodity_data[item_code_name]) + [1634, 1646, 1606]:
 
                 fao_data_element = pd.DataFrame()
                 for element in fao_df[element_name].unique():
@@ -192,10 +193,10 @@ class DataManager:
                         fao_data_tmp_year = fao_data_info_tmp.merge(
                             fao_data_tmp[[fao_country_code, year_col]],
                             left_on=fao_country_code, right_on=fao_country_code, how="left")
-                        fao_data_tmp_year = fao_data_tmp_year[[fao_country_code, iso3_code, item_name,item_code_name,
+                        fao_data_tmp_year = fao_data_tmp_year[[fao_country_code, iso3_code, item_name, item_code_name,
                                                                year_name, year_col]]
                         fao_data_tmp_year = fao_data_tmp_year.rename(columns={year_col: element})
-                        fao_data_tmp_year[element] = fao_data_tmp_year[element].fillna(0)
+                        # fao_data_tmp_year[element] = fao_data_tmp_year[element].fillna(0)
                         fao_data_year = pd.concat([fao_data_year, fao_data_tmp_year], axis=0).reset_index(drop=True)
 
                     if len(fao_data_element) == 0:
@@ -205,9 +206,81 @@ class DataManager:
                                                      axis=1).reset_index(drop=True)
 
                 fao_data_new = pd.concat([fao_data_new, fao_data_element], axis=0).reset_index(drop=True)
-
-
         self.faostat_data[data_aligned_name] = fao_data_new
+
+    @staticmethod
+    def aggregate_faostat_data(self):
+        self.logger.info(f"Aggregating FAOSTAT item data")
+        fao_country_code = VarNames.fao_country_code.value
+        iso3_code = VarNames.ISO3.value
+        year_name = VarNames.year_name.value
+        production_name = VarNames.faostat_production.value
+        import_name = VarNames.faostat_import.value
+        export_name = VarNames.faostat_export.value
+        import_value_name = VarNames.faostat_import_value.value
+        export_value_name = VarNames.faostat_export_value.value
+        data_aligned_name = VarNames.data_aligned.value
+
+        plywood_item_code = 1640
+        veneer_item_code = 1634
+        particleb_item_code_post_1995 = 1697
+        particleb_item_code_ante_1995 = 1646
+        osb_item_code = 1606
+
+        faostat_data = self.faostat_data[data_aligned_name].copy()
+        faostat_data_col = [fao_country_code, iso3_code, year_name]
+        col_to_aggregate = [production_name, import_name, import_value_name, export_name, export_value_name]
+
+        # Post-processing data aggregation
+
+        # Merge plywood and veneer data
+        self.logger.info(f"Aggregating FAOSTAT data for plywood and veneer sheets")
+        faostat_data = DataManager.faostat_data_aggregator(
+            faostat_data=faostat_data,
+            items_to_aggregate=[plywood_item_code, veneer_item_code],
+            faostat_data_col=faostat_data_col,
+            col_to_aggregate=col_to_aggregate,
+            aggregated_item_name="Plywood and LVL",  # TODO move to defines
+            aggregated_item_code=plywood_item_code
+        )
+
+        # Merge Particle board and OSB (1961-1995) and Particle board and Oriented Strand Board (OSB)
+        self.logger.info(f"Aggregating FAOSTAT data for particle board before and after 1995, and OSB")
+        faostat_data = DataManager.faostat_data_aggregator(
+            faostat_data=faostat_data,
+            items_to_aggregate=[particleb_item_code_post_1995, particleb_item_code_ante_1995, osb_item_code],
+            faostat_data_col=faostat_data_col,
+            col_to_aggregate=col_to_aggregate,
+            aggregated_item_name="Particle board",  # TODO move to defines
+            aggregated_item_code=particleb_item_code_post_1995
+        )
+
+        # Add new merging calls if needed
+
+        self.faostat_data[data_aligned_name] = faostat_data
+
+    @staticmethod
+    def faostat_data_aggregator(faostat_data, items_to_aggregate, faostat_data_col, col_to_aggregate,
+                                aggregated_item_name, aggregated_item_code):
+        country_code_name = VarNames.fao_country_code.value
+        item_code_name = VarNames.faostat_item_code.value
+        item_name = VarNames.faostat_item_name.value
+        faostat_data_merged = faostat_data[
+            [temp_item in items_to_aggregate for temp_item in faostat_data[item_code_name]]
+        ].copy().reset_index(drop=True)
+        faostat_data_merged = faostat_data_merged.groupby(faostat_data_col)[col_to_aggregate].sum().reset_index()
+        faostat_data_merged[item_name] = aggregated_item_name
+        faostat_data_merged[item_code_name] = aggregated_item_code
+
+        faostat_data = faostat_data[
+            [temp_item not in items_to_aggregate for temp_item in faostat_data[item_code_name]]
+        ].copy().reset_index(drop=True)
+        faostat_data = pd.concat([faostat_data, faostat_data_merged], axis=0).reset_index(drop=True)
+        faostat_data = faostat_data.sort_values(by=[country_code_name, item_code_name], ascending=[True, True]
+                                                ).reset_index(drop=True)
+
+        return faostat_data
+
 
     @staticmethod
     def load_fra_data(self):

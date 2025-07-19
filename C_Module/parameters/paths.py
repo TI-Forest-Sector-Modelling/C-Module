@@ -19,6 +19,7 @@ ADD_INFO_FOLDER = PACKAGEDIR / INPUT_FOLDER / Path("additional_information")
 ADD_INFO_CARBON_PATH = ADD_INFO_FOLDER / Path("carbon_additional_information")
 PKL_ADD_INFO_CARBON_PATH = ADD_INFO_FOLDER / Path("carbon_additional_information")
 ADD_INFO_COUNTRY = ADD_INFO_FOLDER / Path("country_data")
+PKL_ADD_INFO_START_YEAR = ADD_INFO_FOLDER / Path("hist_hwp_carbon_start_year")
 
 # output
 OUTPUT_FOLDER = PACKAGEDIR / Path("data") / Path("output")

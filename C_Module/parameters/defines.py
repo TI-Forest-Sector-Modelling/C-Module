@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class CarbonConstants(Enum):
     """
     Class to hold constants
@@ -10,11 +11,13 @@ class CarbonConstants(Enum):
     CARBON_TSD_FACTOR = 1000
     NON_ZERO_PARAMETER = 0.0000000001
 
+
 class CountryConstants(Enum):
     """
 
     """
     FAO_REGION_CODE = 5000
+
 
 class VarNames(Enum):
     """
@@ -33,6 +36,7 @@ class VarNames(Enum):
     year_name = "year"
     period_var = "Period"
     data_aligned = "data_aligned"
+    data = "data"
     supply_var = "Supply"
     import_var = "TransportationImport"
     export_var = "TransportationExport"
@@ -78,6 +82,11 @@ class VarNames(Enum):
     carbon_factor = "Carbon_factor"
     half_life = "Half_life"
     displacement_factor = "Displacement_factor"
+    share_domestic_feedstock = "share domestic feedstock"
+    hwp_category = "hwp_category"
+    start_year = "start year"
+    production_approach = "production"
+    stock_change_approach = "stock-change"
 
     # FAOSTAT data
     faostat_item_code = "Item Code"
@@ -87,8 +96,11 @@ class VarNames(Enum):
     faostat_year = "Year"
     faostat_production = "Production"
     faostat_domestic_consumption = "Domestic consumption"
+    faostat_production_domestic_feedstock = "Production domestic feedstock"
     faostat_import = "Import quantity"
     faostat_export = "Export quantity"
+    faostat_import_value = "Import value"
+    faostat_export_value = "Export value"
 
 
 
