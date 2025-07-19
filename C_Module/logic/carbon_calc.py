@@ -1,7 +1,11 @@
 from C_Module.parameters.defines import (VarNames, CarbonConstants)
+from C_Module.parameters.paths import (PKL_ADD_INFO_START_YEAR)
+from C_Module.data_management.data_manager import DataManager
 
 import pandas as pd
 import numpy as np
+from tqdm import tqdm
+from pathlib import Path
 
 
 class CarbonCalculator:
@@ -136,28 +140,34 @@ class CarbonCalculator:
         return carbon_data
 
     @staticmethod
-    def calc_carbon_hwp(self):
-        if self.UserInput["c_hwp_accounting_approach"] == "stock-change":
-            self.logger.info(
-                f"Calculating carbon stocks and fluxes for harvested wood products (stock-change approach)")
-            self.carbon_data[VarNames.carbon_hwp.value] = CarbonCalculator.calc_carbon_hwp_stock_change(
-                add_carbon_data=self.add_carbon_data[VarNames.carbon_hwp.value],
-                add_data=self.add_data,
-                timba_data=self.timba_data[VarNames.timba_data_all.value],
-                faostat_data=self.faostat_data[VarNames.data_aligned.value])
-        elif self.UserInput["c_hwp_accounting_approach"] == "production":
-            self.logger.info(
-                f"Calculating carbon stocks and fluxes for harvested wood products (production approach)")
-            self.carbon_data[VarNames.carbon_hwp.value] = CarbonCalculator.calc_carbon_hwp_production(
-                add_carbon_data=self.add_carbon_data[VarNames.carbon_hwp.value],
-                add_data=self.add_data,
-                timba_data=self.timba_data[VarNames.timba_data_all.value],
-                faostat_data=self.faostat_data[VarNames.data_aligned.value])
-        else:
-            self.logger.info(f"Chosen option {self.UserInput['c_hwp_accounting_approach']} is not available.")
-
-    @staticmethod
     def calc_carbon_hwp_stock_change(add_carbon_data, add_data, timba_data, faostat_data):
+    def calc_carbon_hwp(self):
+        self.logger.info(f"Calculating carbon stocks and fluxes for harvested wood products")
+        add_carbon_data = self.add_carbon_data[VarNames.carbon_hwp.value]
+        add_data = self.add_data
+        timba_data = self.timba_data[VarNames.timba_data_all.value]
+        faostat_data = self.faostat_data[VarNames.data_aligned.value]
+        period_var = VarNames.period_var.value
+
+        for period in timba_data[period_var].unique():
+            if period == 0:
+                carbon_data = CarbonCalculator.calc_historic_carbon_hwp(
+                    timba_data=timba_data,
+                    faostat_data=faostat_data,
+                    add_carbon_data=add_carbon_data,
+                    add_data=add_data,
+                    user_input=self.UserInput
+                )
+            else:
+                carbon_data = CarbonCalculator.calc_projection_carbon_hwp(
+                    timba_data=timba_data,
+                    carbon_data=carbon_data,
+                    add_carbon_data=add_carbon_data,
+                    add_data=add_data,
+                    user_input=self.UserInput,
+                    period=period
+                )
+        self.carbon_data[VarNames.carbon_hwp.value] = carbon_data
         """
         Carbon stock calculation for harvested wood products (hwp) based on IPCC-approach ("Stock-change" or "Production").
         For base period, FAOStat data is process and historical carbon pool of hwp is calculated based on processed data
