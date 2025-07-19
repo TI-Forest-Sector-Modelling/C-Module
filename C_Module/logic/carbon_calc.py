@@ -430,78 +430,204 @@ class CarbonCalculator:
             pd.DataFrame(data=carbonstockchange_hwp).rename(columns={0: carbon_hwp_chg_col}),
         ], axis=1)
 
-                carbon_data = pd.concat([carbon_data, carbonstock_hwp.copy()], axis=0).reset_index(drop=True)
         return historic_carbonstock_hwp
 
+    @staticmethod
+    def calc_projection_carbon_hwp(timba_data: pd.DataFrame, carbon_data: pd.DataFrame, add_data: pd.DataFrame,
+                                   add_carbon_data: pd.DataFrame, user_input: dict, period: int):
+        """
+        Calculates the future development of carbon stocks and fluxes related to semi-finished HWP based the production
+        or the stock-change approach depending on the user input (IPCC 2019). Future developments of HWP carbon stocks
+        are calculated based on TiMBA projections for the production, import, and export of semi-finished HWP.
+        :param timba_data: TiMBA projections data for the production, import, export of semi-finished HWP
+        :param carbon_data: Projections for carbon stocks in semi-finished HWP
+        :param add_data: Additional data related to the country and HWP structure in TiMBA
+        :param add_carbon_data: Additional data for carbon calculations
+        :param user_input: Input from user
+        :param period: Current period of the TiMBA projections
+        :return: Historical carbon stocks in semi-finished HWP for all countries represented in TiMBA
+        """
+        carbon_factor = VarNames.carbon_factor.value
+        half_life = VarNames.half_life.value
+        faostat_country_code = VarNames.fao_country_code.value
+        faostat_production = VarNames.faostat_production.value
+        faostat_import = VarNames.faostat_import.value
+        faostat_export = VarNames.faostat_export.value
+        faostat_domestic_consumption = VarNames.faostat_domestic_consumption.value
+        faostat_production_domestic_feedstock = VarNames.faostat_production_domestic_feedstock.value
+        sh_domestic_feed = VarNames.share_domestic_feedstock.value
+        iso3_code = VarNames.ISO3.value
+        hwp_category_var = VarNames.hwp_category.value
+        production_approach = VarNames.production_approach.value
+        stock_change_approach = VarNames.stock_change_approach.value
+
+        timba_region_code = VarNames.region_code.value
+        timba_commodity_code = VarNames.commodity_code.value
+        country_data = VarNames.country_data.value
+        commodity_data = VarNames.commodity_data.value
+        commodity = VarNames.commodity_dict.value
+        year_name = VarNames.year_name.value
+        period_var = VarNames.period_var.value
+        domain_name = VarNames.domain_name.value
+        supply_var = VarNames.supply_var.value
+        production_var = VarNames.production_var.value
+        import_var = VarNames.import_var.value
+        export_var = VarNames.export_var.value
+        quantity_var = VarNames.quantity_col.value
+
+        carbon_hwp_col = VarNames.carbon_hwp.value
+        carbon_hwp_chg_col = VarNames.carbon_hwp_chg.value
+        carbon_hwp_inflow_col = VarNames.carbon_hwp_inflow.value
+
+        country_data = add_data[country_data].copy()
+        commodity_data = add_data[commodity][commodity_data].copy()
+
+        data_aligned = timba_data[(timba_data[period_var] == period) &
+                                  (timba_data[domain_name] == VarNames.supply_var.value)].copy().reset_index(drop=True)
+        data_aligned = data_aligned[[timba_region_code, timba_commodity_code, period_var, year_name]].copy()
+        data_aligned = data_aligned.merge(country_data[[timba_region_code, iso3_code]],
+                                          left_on=timba_region_code,
+                                          right_on=timba_region_code,
+                                          how='left')
+
+        cf_hwp = add_carbon_data[carbon_factor]
+        hl_hwp = add_carbon_data[half_life]
+        log_decay_rate = np.log(2) / hl_hwp
+        log_decay_rate[log_decay_rate == np.inf] = 0
+
+        timba_supply_prev = timba_data[(timba_data[domain_name] == supply_var) &
+                                       (timba_data[period_var] == period - 1)].copy().reset_index(drop=True)
+        timba_prod_prev = timba_data[(timba_data[domain_name] == production_var) &
+                                     (timba_data[period_var] == period - 1)].copy().reset_index(drop=True)
+        timba_prod_prev = pd.concat([timba_supply_prev, timba_prod_prev], axis=0).reset_index(drop=True)
+        timba_prod_prev = timba_prod_prev.groupby([timba_region_code, timba_commodity_code, year_name])[
+            quantity_var].sum().reset_index()
+        timba_import_prev = timba_data[(timba_data[domain_name] == import_var) &
+                                       (timba_data[period_var] == period - 1)].copy().reset_index(drop=True)
+        timba_export_prev = timba_data[(timba_data[domain_name] == export_var) &
+                                       (timba_data[period_var] == period - 1)].copy().reset_index(drop=True)
+
+        timba_data_prev_info = timba_supply_prev[[timba_region_code, timba_commodity_code, year_name]].copy()
+        timba_data_prev = pd.concat([
+            timba_data_prev_info,
+            pd.DataFrame(timba_prod_prev[quantity_var]).rename(columns={quantity_var: faostat_production}),
+            pd.DataFrame(timba_import_prev[quantity_var]).rename(columns={quantity_var: faostat_import}),
+            pd.DataFrame(timba_export_prev[quantity_var]).rename(columns={quantity_var: faostat_export})], axis=1)
+
+        timba_data_prev = timba_data_prev.merge(country_data[[timba_region_code, faostat_country_code, iso3_code]],
+                                                left_on=timba_region_code,
+                                                right_on=timba_region_code,
+                                                how='left')
+
+        if user_input["c_hwp_accounting_approach"] == stock_change_approach:
+            target_var = faostat_domestic_consumption
+            # Domestic consumption of semi-finished HWP
+            timba_data_prev[faostat_domestic_consumption] = (timba_data_prev[faostat_production] +
+                                                             timba_data_prev[faostat_import] -
+                                                             timba_data_prev[faostat_export])
+
+            negativ_data_index = timba_data_prev[timba_data_prev[faostat_domestic_consumption] < 0].index
+            timba_data_prev.loc[negativ_data_index, faostat_domestic_consumption] = 0
+
+        elif user_input["c_hwp_accounting_approach"] == production_approach:
+            target_var = faostat_production_domestic_feedstock
+            # Share of domestic feedstock input:
+            if len(commodity_data) == 14:
+                ind_rndwood = timba_data_prev[
+                    timba_data_prev[timba_commodity_code] == 81].copy().reset_index(drop=True)  # Todo set as defines
+
+            elif (len(commodity_data) == 16) or (len(commodity_data) == 20):
+                ind_rndwood = timba_data_prev[
+                    (timba_data_prev[timba_commodity_code] == 78) |  # Todo set as defines
+                    (timba_data_prev[timba_commodity_code] == 81)
+                    ].copy().reset_index(drop=True)
+                ind_rndwood = ind_rndwood.groupby(
+                    [faostat_country_code, iso3_code, year_name])[
+                    [faostat_production, faostat_export, faostat_import]].sum().reset_index()
 
             else:
-                supply_quantity_prev = timba_data[
-                    (timba_data[VarNames.domain_name.value] == VarNames.supply_var.value) &
-                    (timba_data[period_var] == period - 1)][VarNames.quantity_col.value].copy().reset_index(drop=True)
+                print("Unvalide commodity structure, verify input data")
 
-                production_quantity_prev = timba_data[
-                    (timba_data[VarNames.domain_name.value] == VarNames.production_var.value) &
-                    (timba_data[period_var] == period - 1)][VarNames.quantity_col.value].copy().reset_index(drop=True)
+            share_domestic_feedstock_ind_rndw = CarbonCalculator.calc_domestic_feedstock(data=ind_rndwood)
 
-                import_quantity_prev = timba_data[
-                    (timba_data[VarNames.domain_name.value] == VarNames.import_var.value) &
-                    (timba_data[period_var] == period - 1)][VarNames.quantity_col.value].copy().reset_index(drop=True)
+            pulp = timba_data_prev[timba_data_prev[timba_commodity_code] == 89].copy().reset_index(
+                drop=True)  # Todo set as defines
+            share_domestic_feedstock_pulp = CarbonCalculator.calc_domestic_feedstock(data=pulp)
 
-                export_quantity_prev = timba_data[
-                    (timba_data[VarNames.domain_name.value] == VarNames.export_var.value) &
-                    (timba_data[period_var] == period - 1)][VarNames.quantity_col.value].copy().reset_index(drop=True)
+            recov_paper = timba_data_prev[timba_data_prev[timba_commodity_code] == 90].copy().reset_index(
+                drop=True)  # Todo set as defines
+            share_domestic_feedstock_recov_paper = CarbonCalculator.calc_domestic_feedstock(data=recov_paper)
 
-                domestic_consumption = (supply_quantity_prev + production_quantity_prev +
-                                        import_quantity_prev - export_quantity_prev)
+            timba_data_prev = pd.concat([timba_data_prev, add_carbon_data[hwp_category_var]], axis=1)
 
-                domestic_consumption[domestic_consumption < 0] = 0
+            timba_data_prev_lum = timba_data_prev[
+                [commodity in ["sawnwood", "wood-based panels"] for commodity in timba_data_prev[hwp_category_var]]
+            ].copy()
+            timba_data_prev_ppp = timba_data_prev[timba_data_prev[hwp_category_var] == "paper and paperboard"].copy()
 
-                carboninflow_prev = ((cf_hwp * domestic_consumption * CarbonConstants.CARBON_TSD_FACTOR.value)
-                                     * CarbonConstants.CO2_FACTOR.value)
+            timba_data_prev_other = timba_data_prev[timba_data_prev[hwp_category_var].isna()].copy()
+            timba_data_prev_other[sh_domestic_feed] = 0
 
-                carbonstock_hwp_prev = (
-                    carbon_data[carbon_data[period_var] == period - 1][carbon_hwp_col]).reset_index(drop=True)
+            share_domestic_harvest_lumber = share_domestic_feedstock_ind_rndw[
+                [faostat_country_code, iso3_code, sh_domestic_feed]]
 
-                carboninflow_prev[(carboninflow_prev <= CarbonConstants.NON_ZERO_PARAMETER.value) &
-                                  (carboninflow_prev >= - CarbonConstants.NON_ZERO_PARAMETER.value)] = 0
-                carbonstock_hwp_prev[(carboninflow_prev <= CarbonConstants.NON_ZERO_PARAMETER.value) &
-                                     (carboninflow_prev >= - CarbonConstants.NON_ZERO_PARAMETER.value)] = 0
+            timba_data_prev_lum = timba_data_prev_lum.merge(share_domestic_harvest_lumber,
+                                                            left_on=[iso3_code, faostat_country_code],
+                                                            right_on=[iso3_code, faostat_country_code],
+                                                            how="left")
 
-                carbonstock_hwp_new = (carbonstock_hwp_prev * np.exp(-log_decay_rate) +
-                                       carboninflow_prev * ((1 - np.exp(-log_decay_rate)) / log_decay_rate))
+            recov_paper_rate = 0.8  # from TiMBA input (change if TiMBA input is changed) TODO shift to defines
 
-                carbonstock_hwp_new = carbonstock_hwp_new.fillna(0)
-                carbonstockchange_hwp = carbonstock_hwp_new - carbonstock_hwp_prev
+            share_domestic_harvest_paper = (share_domestic_feedstock_ind_rndw[sh_domestic_feed] *
+                                            (1 - recov_paper_rate) *
+                                            share_domestic_feedstock_pulp[sh_domestic_feed]
+                                            ) + recov_paper_rate * share_domestic_feedstock_recov_paper[
+                                               sh_domestic_feed]
 
-                data_carbonstock_hwp_rest = (
-                    carbon_data[carbon_data[period_var] != period - 1]).reset_index(drop=True)
-                data_carbonstock_hwp_prev = (
-                    carbon_data[carbon_data[period_var] == period - 1]).reset_index(drop=True)
+            share_domestic_harvest_paper = pd.concat([
+                share_domestic_feedstock_ind_rndw[[faostat_country_code, iso3_code]],
+                share_domestic_harvest_paper], axis=1)
 
-                data_carbonstock_hwp_prev[carbon_hwp_inflow_col] = carboninflow_prev
-                carbonstock_hwp_prev = (pd.concat([data_carbonstock_hwp_rest, data_carbonstock_hwp_prev], axis=0)
-                                        ).sort_values(by=[period_var, timba_region_code], ascending=[True, True]
-                                                      ).reset_index(drop=True)
-                carboninflow = pd.DataFrame(data=np.zeros((len(data_aligned), 1)))
+            timba_data_prev_ppp = timba_data_prev_ppp.merge(share_domestic_harvest_paper,
+                                                            left_on=[iso3_code, faostat_country_code],
+                                                            right_on=[iso3_code, faostat_country_code],
+                                                            how="left")
+            timba_data_prev = pd.concat([
+                timba_data_prev_lum,
+                timba_data_prev_ppp,
+                timba_data_prev_other], axis=0
+            ).sort_values(by=[timba_region_code, timba_commodity_code]).reset_index(drop=True)
 
-                carbonstock_hwp = pd.concat([
-                    data_aligned[[timba_region_code, VarNames.ISO3.value, timba_commodity_code]],
-                    pd.DataFrame(data=domestic_consumption).rename(
-                        columns={VarNames.quantity_col.value: faostat_domestic_consumption}),
-                    pd.DataFrame(data=carboninflow_prev).rename(columns={0: carbon_hwp_inflow_col}),
-                    pd.DataFrame(data=carbonstock_hwp_new, columns=[carbon_hwp_col]),
-                    pd.DataFrame(data=carbonstockchange_hwp, columns=[carbon_hwp_chg_col]),
-                    pd.DataFrame(data=[period] * len(data_aligned)).rename(columns={0: period_var})],
-                    axis=1)
-                carbon_data = pd.concat([carbon_data, carbonstock_hwp.copy()], axis=0).reset_index(drop=True)
+            # Production of semi-finished HWP with domestic feedstock
+            timba_data_prev[faostat_production_domestic_feedstock] = (timba_data_prev[faostat_production] *
+                                                                      timba_data_prev[sh_domestic_feed])
+
+        carboninflow_prev = ((cf_hwp * timba_data_prev[target_var] * CarbonConstants.CARBON_TSD_FACTOR.value)
+                             * CarbonConstants.CO2_FACTOR.value)
+
+        carbonstock_hwp_prev = (
+            carbon_data[carbon_data[period_var] == period - 1][carbon_hwp_col]).reset_index(drop=True)
+
+        carboninflow_prev[(carboninflow_prev <= CarbonConstants.NON_ZERO_PARAMETER.value) &
+                          (carboninflow_prev >= - CarbonConstants.NON_ZERO_PARAMETER.value)] = 0
+        carbonstock_hwp_prev[(carbonstock_hwp_prev <= CarbonConstants.NON_ZERO_PARAMETER.value) &
+                             (carbonstock_hwp_prev >= - CarbonConstants.NON_ZERO_PARAMETER.value)] = 0
+
+        carbonstock_hwp_new = (carbonstock_hwp_prev * np.exp(-log_decay_rate) +
+                               carboninflow_prev * ((1 - np.exp(-log_decay_rate)) / log_decay_rate))
+
+        carbonstock_hwp_new = carbonstock_hwp_new.fillna(0)
+        carbonstockchange_hwp = carbonstock_hwp_new - carbonstock_hwp_prev
+
+        carbonstock_hwp = pd.concat([
+            data_aligned[[timba_region_code, iso3_code, timba_commodity_code, period_var, year_name]],
+            pd.DataFrame(data=timba_data_prev[target_var]),
+            pd.DataFrame(data=carboninflow_prev).rename(columns={0: carbon_hwp_inflow_col}),
+            pd.DataFrame(data=carbonstock_hwp_new, columns=[carbon_hwp_col]),
+            pd.DataFrame(data=carbonstockchange_hwp, columns=[carbon_hwp_chg_col])], axis=1)
+        carbon_data = pd.concat([carbon_data, carbonstock_hwp.copy()], axis=0).reset_index(drop=True)
 
         return carbon_data
-
-
-    @staticmethod
-    def calc_carbon_hwp_production(add_carbon_data, add_data, timba_data, faostat_data):
-        placeholder = pd.DataFrame()
-        return placeholder
 
     @staticmethod
     def calc_substitution_effect(self):
