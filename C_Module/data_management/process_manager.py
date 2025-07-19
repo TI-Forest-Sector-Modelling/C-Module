@@ -40,6 +40,7 @@ class ProcessManager:
         DataManager.load_faostat_data(self)
         if not Path(f"{FAOSTAT_DATA}.pkl").is_file():
             DataManager.prep_faostat_data(self)
+            DataManager.aggregate_faostat_data(self)
             DataManager.serialize_to_pickle(self.faostat_data["data_aligned"], f"{FAOSTAT_DATA}.pkl")
 
     @staticmethod
