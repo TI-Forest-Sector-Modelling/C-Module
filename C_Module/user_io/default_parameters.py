@@ -18,6 +18,8 @@ calc_c_forest_dwl = True
 calc_c_hwp = True
 c_hwp_accounting_approach = "stock-change"  # Options: "stock-change" or "production"
 historical_c_hwp = "average"  # Options: "average" or "historical"
+hist_hwp_start_year = "default"  # Options: "country-specific", "default"
+hist_hwp_start_year_default = 2020
 
 user_input = {
     "calc_c_ex_post": calc_c_ex_post,
@@ -32,5 +34,7 @@ user_input = {
     "calc_c_forest_dwl": calc_c_forest_dwl,
     "calc_c_hwp": calc_c_hwp,
     "c_hwp_accounting_approach": c_hwp_accounting_approach,
-    "historical_c_hwp": historical_c_hwp
+    "historical_c_hwp": historical_c_hwp,
+    "hist_hwp_start_year": hist_hwp_start_year,
+    "hist_hwp_start_year_default": hist_hwp_start_year_default
 }
