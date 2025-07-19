@@ -672,6 +672,88 @@ class CarbonCalculator:
         return share_domestic_feedstock
 
     @staticmethod
+    def determine_start_year(faostat_data: pd.DataFrame, add_carbon_data: pd.DataFrame, user_input: dict):
+        """
+        Determines dynamically the start year for the historic HWP carbon pool calculation based on the data
+        availability of FAOSTAT. The start year is determined for each country and product. The start year is determined
+        by checking if production, import, and export quantities are reported for 5 consecutive years (IPCC guideline).
+        To harmonized the start year for each country, the highest start year for all semi-finished products is taken.
+        :param faostat_data: Processed FAOSTAT data
+        :param add_carbon_data: Additional carbon data
+        :param user_input: Input from user
+        :return: DataFrame with start years
+        """
+        faostat_country_code = VarNames.fao_country_code.value
+        faostat_commodity_code = VarNames.faostat_item_code.value
+        year_var = VarNames.year_name.value
+        start_year_var = VarNames.start_year.value
+
+        faostat_production = VarNames.faostat_production.value
+        faostat_import = VarNames.faostat_import.value
+        faostat_export = VarNames.faostat_export.value
+        hwp_category = VarNames.hwp_category.value
+
+        country_data = pd.DataFrame(faostat_data[faostat_country_code].unique(), columns=[faostat_country_code])
+        commodity_data = pd.DataFrame(faostat_data[faostat_commodity_code].unique(), columns=[faostat_commodity_code])
+
+        start_year_data = country_data.join(commodity_data, how="cross")
+        start_year_data[start_year_var] = 0
+
+        if user_input["hist_hwp_start_year"] == "country-specific":
+            for country in tqdm(faostat_data[faostat_country_code].unique(), desc=f"Determining start year for hist HWP carbon pool"):
+                for commodity in faostat_data[faostat_commodity_code].unique():
+                    year_counter = 0
+                    for year in faostat_data[year_var].unique():
+                        temp_data = faostat_data[(faostat_data[faostat_country_code] == country) &
+                                                 (faostat_data[faostat_commodity_code] == commodity) &
+                                                 (faostat_data[year_var] == year)].reset_index(drop=True)
+                        # Criteria for year selection: data availability for production, import, and export for 5
+                        # consecutive years. Change selection criteria if too restrictive
+                        if ((pd.notna(temp_data[faostat_production].iloc[0])) &
+                                (pd.notna(temp_data[faostat_import].iloc[0])) &
+                                (pd.notna(temp_data[faostat_export].iloc[0]))):
+                            year_counter += 1
+                            data_index = start_year_data[(start_year_data[faostat_country_code] == country) &
+                                                         (start_year_data[faostat_commodity_code] == commodity)].index
+                            if start_year_data.iloc[data_index][start_year_var].iloc[0] == 0:  # save year if no entry
+                                start_year_data.loc[data_index, start_year_var] = year
+                            else:
+                                pass
+                            if year_counter == 5:  # change to new product if 5 consecutive years are fulfilled
+                                break
+                            else:
+                                pass
+
+                        else:
+                            data_index = start_year_data[(start_year_data[faostat_country_code] == country) &
+                                                         (start_year_data[faostat_commodity_code] == commodity)].index
+                            start_year_data.loc[data_index, start_year_var] = 0
+
+            # Select last year with complete data
+            semi_finished_commodity = add_carbon_data[
+                                          [faostat_commodity_code, hwp_category]].iloc[0:len(commodity_data)].copy()
+            semi_finished_commodity = semi_finished_commodity.dropna(axis=0)
+            semi_finished_commodity = list(semi_finished_commodity[faostat_commodity_code])
+
+            for country in start_year_data[faostat_country_code].unique():
+                temp_data = start_year_data[(start_year_data[faostat_country_code] == country)].copy()
+                temp_index = temp_data.index
+                temp_data = temp_data[
+                    [temp_item in semi_finished_commodity for temp_item in temp_data[faostat_commodity_code]]]
+                year_max = max(temp_data[start_year_var])
+                start_year_data.loc[temp_index, start_year_var] = year_max
+        elif user_input["hist_hwp_start_year"] == "default":
+            start_year_data[start_year_var] = user_input["hist_hwp_start_year_default"]
+
+        else:
+            print(f"Selected user setting for hist_hwp_start_year is not available")
+
+        if not Path(f"{PKL_ADD_INFO_START_YEAR}.pkl").is_file():
+            DataManager.serialize_to_pickle(start_year_data, f"{PKL_ADD_INFO_START_YEAR}.pkl")
+
+        return start_year_data
+
+    @staticmethod
     def calc_constant_substitution_effect(add_carbon_data, timba_data, add_data):
         """
         Calculate potential substitution of fossil based products by wood based products differentiating between material
