@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class CarbonConstants(Enum):
     """
     Class to hold constants
@@ -10,11 +11,13 @@ class CarbonConstants(Enum):
     CARBON_TSD_FACTOR = 1000
     NON_ZERO_PARAMETER = 0.0000000001
 
+
 class CountryConstants(Enum):
     """
 
     """
     FAO_REGION_CODE = 5000
+
 
 class VarNames(Enum):
     """
