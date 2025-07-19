@@ -639,6 +639,39 @@ class CarbonCalculator:
         )
 
     @staticmethod
+    def calc_domestic_feedstock(data: pd.DataFrame):
+        """
+        Calculates domestic feedstock for production accounting approach
+        :param data: FAOSTAT data for the selected commodity
+        :return: domestic feedstock shares
+        """
+        faostat_production = VarNames.faostat_production.value
+        faostat_import = VarNames.faostat_import.value
+        faostat_export = VarNames.faostat_export.value
+        faostat_country_code = VarNames.fao_country_code.value
+        iso3_code = VarNames.ISO3.value
+        year = VarNames.year_name.value
+        sh_domestic_feed = VarNames.share_domestic_feedstock.value
+
+        share_domestic_feedstock = (
+                (data[faostat_production] - data[faostat_export]) /
+                (data[faostat_production] + data[faostat_import] - data[faostat_export])
+        )
+        share_domestic_feedstock = pd.DataFrame(share_domestic_feedstock, columns=[sh_domestic_feed])
+        share_domestic_feedstock[sh_domestic_feed] = (
+            share_domestic_feedstock[sh_domestic_feed].fillna(0)
+        )
+        mask_index = share_domestic_feedstock[share_domestic_feedstock[sh_domestic_feed] < 0].index
+        share_domestic_feedstock.loc[mask_index, sh_domestic_feed] = 0
+
+        share_domestic_feedstock = pd.concat([
+            data[[faostat_country_code, iso3_code, year]],
+            share_domestic_feedstock], axis=1).sort_values(by=[faostat_country_code, year],
+                                                           ascending=[True, True]).reset_index(drop=True)
+
+        return share_domestic_feedstock
+
+    @staticmethod
     def calc_constant_substitution_effect(add_carbon_data, timba_data, add_data):
         """
         Calculate potential substitution of fossil based products by wood based products differentiating between material
