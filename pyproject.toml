@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "C-Module"
 version = "1.0.0"
 authors = [{name = "Tomke Honkomp", email = "tomke.honkomp@thuenen.de"}]
-description = "C-Module tracks global carbon stocks and flows across pools of the forestry sector"
+description = "The C-Module tracks global carbon stocks and flows across pools of the forestry sector"
 readme = "README.md"
 license = {file = "COPYING.txt"}
 keywords = ["c-module", "model", "carbon accounting", "thuenen institute", "economics of forests", "research"]
@@ -38,12 +38,12 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://placeholder.com"
-Documentation = "https://placeholder.org"
+Documentation = "https://placeholder.com"
 Repository = "https://github.com/TI-Forest-Sector-Modelling/C-Module"
 Issues = "https://github.com/TI-Forest-Sector-Modelling/C-Module/issues"
 
 [project.scripts]
-run_timba = "C-Module.cli.cli:cli"
+run_cmodule = "C-Module.cli.cli:cli"
 
 [tool.setuptools]
 include-package-data = true
