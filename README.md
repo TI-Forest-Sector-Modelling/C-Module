@@ -4,13 +4,14 @@
 <!-- TOC -->
 
 - [Cite C-Module](#cite-c-module)
-- [Install C-Module](#install-timba)
-  - [Double check installation and test suite](#doublecheck-installation-and-test-suite)
-- [Use C-Module](#use-timba)
+- [Install C-Module](#install-the-c-module)
+  - [Double check installation](#doublecheck-installation)
+  - [Test suite and coverage](#test-suite-and-coverage-report)
+- [Use the C-Module](#use-the-c-module)
   - [Module settings](#model-settings)
     - [Settings as parameters](#settings-as-parameters)
     - [Advanced settings](#advanced-settings)
-- [C-Module extended model description](#timba-extended-model-description)
+- [Extended module description](#extended-module-description)
 - [Roadmap and project status](#roadmap-and-project-status)
 - [Contributing to the project](#contributing-to-the-project)
 - [Authors](#authors)
@@ -23,9 +24,12 @@
 
 # C-Module
 
-The Carbon Module tracks global carbon stocks and flows across pools of the forestry sector. In the current version, the module 
+The Carbon Module tracks global carbon stocks and flows across pools in the forestry sector. In the current version, the module 
 quantifies carbon stocks and flows in forest biomass (above and belowground), in harvested wood products (HWP), in forest soils,
 in dead wood and litter for 180 countries. Substitution effects related to the use of HWP are quantified additionaly.
+The quantification of carbon in forest biomass, forest soils, and dead wood and litter is based on the publications of 
+Johnston et al. (2019) and Johnston and Radeloff (2019). Carbon in HWP is quantified based on the IPCC Tier1-approach (IPCC 2019).
+Additional mathematical information are provided in the [joined publication](#todo).
 
 ## Cite C-Module
 
@@ -34,7 +38,7 @@ or elsewhere, please cite the module as
 
 [Honkomp (2025) C-Module v1](CITATION.cff)
 
-## Install TiMBA
+## Install the C-Module
 
 The package is developed and tested with Python 3 (python 3.12.6) version on Windows.
 Before proceeding, please ensure that Python is installed on your system. It can be downloaded and installed 
@@ -61,9 +65,9 @@ Switch to the main branch of the C-Module.
    >git checkout main
    > 
 6. Create a virtual environment  
-It is recommended to set up a virtual environment for the C-Module to manage dependencies. The package is tested using Python >3.8.9 (3.8.10 and 3.9.7). With a newer Python version, we can not guarantee the full functionality of the package.
-   Select the correct Python interpreter.   
-   Show installed versions: 
+It is recommended to set up a virtual environment for the C-Module to manage dependencies. The package is tested using Python >3.9 (3.8.10 and 3.9.7). With a newer Python version, we can not guarantee the full functionality of the package.
+Select the correct Python interpreter.   
+Show installed versions: 
    >py -0  
    >
    - If you have installed multiple versions of Python, activate the correct version using the py-Launcher.
@@ -116,7 +120,15 @@ The coverage report of the TiMBA model can be accessed using:
 
 
 ## Use the C-Module
-The package comes with a built-in CLI to compute the TiMBA for various inputs. While the parametric input can be seen in cmd output calling `run_timba --help` from the terminal, an important part to mention is user input data that need to be imported from a selected folder. You shall not change the following structure within the data folder:
+The module comes with a built-in CLI to quantify global carbon stocks and flows of the forestry sector for various
+inputs. The module can be used in two ways: 
+- As a stand-alone module quantifying key figures related to carbon based on historical data for production, forest area,
+and forest stock changes. 
+- As an add-on module to the Timber market Model for policy-Based Analysis ([TiMBA](https://github.com/TI-Forest-Sector-Modelling/TiMBA))
+allowing to quantify key figures related to carbon based on forest products market, area, and stock projections.
+
+While the parametric input can be seen in cmd output calling `run_timba --help` from the terminal, an important part to 
+mention is user input data that need to be imported from a selected folder. You shall not change the following structure within the data folder:
 ```bash
 .
 `- data
@@ -163,30 +175,34 @@ Multiple settings are integrated in the C-Module to allow users to interact with
 Following chapter provides an brief overview of the model settings. A detailed description of the settings is provided in the documentation. 
 
 Basic module settings include:
-- ### Todo To be complemented
+
+[comment]: <to be complemented>
 
 The C-Module is delivered with a set of default settings, which were tested and validated. The default settings can be changed when excuting the package in the CMD or in `default_parameters.py` (changes in settings by the CLI will overwrite parameters in `default_parameters.py`).
   
 #### Settings as parameters
-The CLI allows to access basic model settings and their default values. 
+The CLI allows to access basic model settings and their default values.
 
-### Todo To be complemented
+[comment]: <to be complemented>
+
 
 #### Advanced settings
 In addition to the settings accessible via the CLI, users can control advanced settings through changes in `Defines.py` 
+[comment]: <to be complemented>
 
-### Todo To be complemented
-
-## Extended description of the C-Module
+## Extended module description
 To quantify and track carbon sequestration in the forest sector, TiMBA has been extended with a carbon module based on IPCC guidelines. TiMBA is enabled to quantify and price the climate mitigation potential of forests globally and on national level.
+
+[comment]: <to be complemented>
 
 ## Roadmap and project status
 
-The development of the C-Module is ongoing and we are already working on future releases.
-
-Several projects are currently extending different components of the C-Module:
+The development of the C-Module is ongoing and we are already working on future releases. 
+Several research projects are currently extending different components of the C-Module:
+- CarbonLeak
 - 
-Frequently check https://github.com/TI-FSM for new releases.
+Frequently check [the GitHub repository](https://github.com/TI-Forest-Sector-Modelling/C-Module) for new releases.
+[comment]: <to be complemented>
 
 ## Contributing to the project
 We welcome contributions, additions and suggestion to further develop or improve the code and the model. To check, discuss and include them into this project, we would like you to share your ideas with us so that we can agree on the requirements needed for accepting your contribution. 
@@ -204,15 +220,15 @@ The C-Module was developped by [Tomke Honkomp](https://www.thuenen.de/de/fachins
 
 ## Contribution statement
 
-| Author            | Conceptualization and theoretical framework | Methodology | Data Curation and Management | Formal Analysis | Programming | Writing and Documentation | Visualization | Review and Editing | Supervision |
-|:------------------|:-------------------------------------------:|:-----------:|:----------------------------:|:---------------:|:-----------:|:-------------------------:|:-------------:|:------------------:|:-----------:|
-| Tomke Honkomp     |                      X                      |      X      |              X               |        X        |      X      |             X             |       X       |         X          |             |
+| Author            | Conceptualization and theoretical framework | Methodology | Data Curation and Management | Formal Analysis | Programming | Writing and Documentation | Visualization | Review and Editing |
+|:------------------|:-------------------------------------------:|:-----------:|:----------------------------:|:---------------:|:-----------:|:-------------------------:|:-------------:|:------------------:|
+| Tomke Honkomp     |                      X                      |      X      |              X               |        X        |      X      |             X             |       X       |         X          |
 
 ## License and Copyright Note
 
 Licensed under the GNU AGPL, Version 3.0. 
 
-Copyright ©, 2025, Thuenen Institute, TI-FSM, tomke.honkomp@thuenen.de
+Copyright ©, 2025, Thuenen Institute, TI-FSM, Tomke Honkomp
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU Affero General Public License as
@@ -227,7 +243,6 @@ Copyright ©, 2025, Thuenen Institute, TI-FSM, tomke.honkomp@thuenen.de
  You should have received a copy of the GNU Affero General Public
  License along with this program.  If not, see
  <https://www.gnu.org/licenses/agpl-3.0.txt>.
-
 
 
 ## Acknowledgements
