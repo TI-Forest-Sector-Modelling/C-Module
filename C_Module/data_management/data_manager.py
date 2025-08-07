@@ -1,6 +1,6 @@
 from C_Module.parameters.paths import (PKL_RESULTS_INPUT, ADD_INFO_CARBON_PATH, ADD_INFO_COUNTRY, FAOSTAT_DATA,
                                        FRA_DATA)
-from C_Module.parameters.defines import VarNames, CountryConstants
+from C_Module.parameters.defines import (VarNames, ParamNames, CountryConstants)
 
 import pandas as pd
 from tqdm import tqdm
@@ -57,7 +57,7 @@ class DataManager:
 
     @staticmethod
     def load_timba_data(self):
-        if self.UserInput["read_in_pkl"]:
+        if self.UserInput[ParamNames.read_in_pkl.value]:
             self.timba_data = DataManager.restore_from_pickle(f"{PKL_RESULTS_INPUT}.pkl")
         else:
             # TODO implement possibility to read in xlsx data

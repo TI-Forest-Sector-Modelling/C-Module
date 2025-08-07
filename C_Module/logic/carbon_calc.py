@@ -1,4 +1,4 @@
-from C_Module.parameters.defines import (VarNames, CarbonConstants)
+from C_Module.parameters.defines import (VarNames, ParamNames, CarbonConstants)
 from C_Module.parameters.paths import (PKL_ADD_INFO_START_YEAR)
 from C_Module.data_management.data_manager import DataManager
 
@@ -241,7 +241,7 @@ class CarbonCalculator:
 
         # Check if current user settings correspond to serialized start year data
         if ((len(country_spec_start_year[start_year].unique()) > 1) &
-                (user_input["hist_hwp_start_year"] != "country-specific")):
+                (user_input[ParamNames.hist_hwp_start_year.value] != "country-specific")):
             country_spec_start_year = (CarbonCalculator.determine_start_year
                                        (user_input=user_input,
                                         faostat_data=faostat_data,
@@ -258,7 +258,7 @@ class CarbonCalculator:
                                                                 right_on=faostat_country_code,
                                                                 how='left')
 
-        if user_input["c_hwp_accounting_approach"] == production_approach:
+        if user_input[ParamNames.c_hwp_accounting_approach.value] == production_approach:
             # Calculating domestic feedstock shares for industrial roundwood, pulp, recovered paper
             if len(commodity_data) == 14:
                 ind_rndwood = faostat_data[faostat_data[faostat_item_code] == 1865].copy().reset_index(
@@ -282,10 +282,10 @@ class CarbonCalculator:
                 drop=True)  # Todo set as defines
             share_domestic_feedstock_recov_paper = CarbonCalculator.calc_domestic_feedstock(data=recov_paper)
 
-        if user_input["hist_hwp_start_year"] == "default":
+        if user_input[ParamNames.hist_hwp_start_year.value] == "default":
             # Adapt the number of years to the available years in FAOSTAT
             faostat_data_last_year = max(set(faostat_data[year_name]))
-            default_year = user_input["hist_hwp_start_year_default"]
+            default_year = user_input[ParamNames.hist_hwp_start_year_default.value]
             num_year = (faostat_data_last_year - default_year) + 1
         else:
             pass
@@ -309,14 +309,14 @@ class CarbonCalculator:
                                                           right_on=[year_name, faostat_country_code, faostat_item_code],
                                                           how="left")
 
-                if user_input["c_hwp_accounting_approach"] == stock_change_approach:
+                if user_input[ParamNames.c_hwp_accounting_approach.value] == stock_change_approach:
                     target_var = faostat_domestic_consumption
                     temp_faostat_data[faostat_domestic_consumption] = (
                             temp_faostat_data[faostat_production] +
                             temp_faostat_data[faostat_import] -
                             temp_faostat_data[faostat_export])
 
-                elif user_input["c_hwp_accounting_approach"] == production_approach:
+                elif user_input[ParamNames.c_hwp_accounting_approach.value] == production_approach:
                     target_var = faostat_production_domestic_feedstock
 
                     hwp_category = (
@@ -519,7 +519,7 @@ class CarbonCalculator:
                                                 right_on=timba_region_code,
                                                 how='left')
 
-        if user_input["c_hwp_accounting_approach"] == stock_change_approach:
+        if user_input[ParamNames.c_hwp_accounting_approach.value] == stock_change_approach:
             target_var = faostat_domestic_consumption
             # Domestic consumption of semi-finished HWP
             timba_data_prev[faostat_domestic_consumption] = (timba_data_prev[faostat_production] +
@@ -529,7 +529,7 @@ class CarbonCalculator:
             negativ_data_index = timba_data_prev[timba_data_prev[faostat_domestic_consumption] < 0].index
             timba_data_prev.loc[negativ_data_index, faostat_domestic_consumption] = 0
 
-        elif user_input["c_hwp_accounting_approach"] == production_approach:
+        elif user_input[ParamNames.c_hwp_accounting_approach.value] == production_approach:
             target_var = faostat_production_domestic_feedstock
             # Share of domestic feedstock input:
             if len(commodity_data) == 14:
@@ -699,7 +699,7 @@ class CarbonCalculator:
         start_year_data = country_data.join(commodity_data, how="cross")
         start_year_data[start_year_var] = 0
 
-        if user_input["hist_hwp_start_year"] == "country-specific":
+        if user_input[ParamNames.hist_hwp_start_year.value] == "country-specific":
             for country in tqdm(faostat_data[faostat_country_code].unique(), desc=f"Determining start year for hist HWP carbon pool"):
                 for commodity in faostat_data[faostat_commodity_code].unique():
                     year_counter = 0
@@ -742,8 +742,8 @@ class CarbonCalculator:
                     [temp_item in semi_finished_commodity for temp_item in temp_data[faostat_commodity_code]]]
                 year_max = max(temp_data[start_year_var])
                 start_year_data.loc[temp_index, start_year_var] = year_max
-        elif user_input["hist_hwp_start_year"] == "default":
-            start_year_data[start_year_var] = user_input["hist_hwp_start_year_default"]
+        elif user_input[ParamNames.hist_hwp_start_year.value] == "default":
+            start_year_data[start_year_var] = user_input[ParamNames.hist_hwp_start_year_default.value]
 
         else:
             print(f"Selected user setting for hist_hwp_start_year is not available")
