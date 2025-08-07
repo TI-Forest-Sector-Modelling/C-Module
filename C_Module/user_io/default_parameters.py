@@ -1,3 +1,5 @@
+from C_Module.parameters.defines import ParamNames
+
 # Overall parameters
 calc_c_ex_post = True
 calc_c_ex_ante = True
@@ -5,7 +7,7 @@ calc_c_ex_ante = True
 start_year = 2020
 end_year = 2050
 
-read_in_pkl = True
+read_in_pkl = True  # Caution False option is not implemented yet
 save_data_as = "csv"  # Options: "pkl", "csv", "all"
 
 # Forest carbon related parameters
@@ -22,19 +24,19 @@ hist_hwp_start_year = "default"  # Options: "country-specific", "default"
 hist_hwp_start_year_default = 2020
 
 user_input = {
-    "calc_c_ex_post": calc_c_ex_post,
-    "calc_c_ex_ante": calc_c_ex_ante,
-    "start_year": start_year,
-    "end_year": end_year,
-    "read_in_pkl": read_in_pkl,
-    "save_data_as": save_data_as,
-    "calc_c_forest_agb": calc_c_forest_agb,
-    "calc_c_forest_bgb": calc_c_forest_bgb,
-    "calc_c_forest_soil": calc_c_forest_soil,
-    "calc_c_forest_dwl": calc_c_forest_dwl,
-    "calc_c_hwp": calc_c_hwp,
-    "c_hwp_accounting_approach": c_hwp_accounting_approach,
-    "historical_c_hwp": historical_c_hwp,
-    "hist_hwp_start_year": hist_hwp_start_year,
-    "hist_hwp_start_year_default": hist_hwp_start_year_default
+    ParamNames.calc_c_ex_post.value: calc_c_ex_post,
+    ParamNames.calc_c_ex_ante.value: calc_c_ex_ante,
+    ParamNames.start_year.value: start_year,
+    ParamNames.end_year.value: end_year,
+    ParamNames.read_in_pkl.value: read_in_pkl,
+    ParamNames.save_data_as.value: save_data_as,
+    ParamNames.calc_c_forest_agb.value: calc_c_forest_agb,
+    ParamNames.calc_c_forest_bgb.value: calc_c_forest_bgb,
+    ParamNames.calc_c_forest_soil.value: calc_c_forest_soil,
+    ParamNames.calc_c_forest_dwl.value: calc_c_forest_dwl,
+    ParamNames.calc_c_hwp.value: calc_c_hwp,
+    ParamNames.c_hwp_accounting_approach.value: c_hwp_accounting_approach,
+    ParamNames.historical_c_hwp.value: historical_c_hwp,
+    ParamNames.hist_hwp_start_year.value: hist_hwp_start_year,
+    ParamNames.hist_hwp_start_year_default.value: hist_hwp_start_year_default
 }
