@@ -1,0 +1,51 @@
+name: Python CI with SonarCloud
+on:
+  push:
+    branches: [ "16-add-github-actions" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  sonar:
+    name: Run SonarCloud Analysis
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ "3.9" ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Install dependencies necessary for the package
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
+          pip install coverage
+
+      # Generate a coverage report
+      - name: Run tests with coverage
+        run: |
+          coverage run -m unittest discover
+          coverage report
+          coverage xml -o coverage.xml
+
+      # Execute project scan and upload the coverage report to SonarCloud
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@v2
+        with:
+          args: >
+            -Dsonar.organization=ti-forest-sector-modelling
+            -Dsonar.projectKey=TI-Forest-Sector-Modelling_C-Module
+            -Dsonar.projectName=C-Module
+            -Dsonar.projectVersion=1.0.0
+            -Dsonar.python.coverage.reportPaths=coverage.xml
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
