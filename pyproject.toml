@@ -43,7 +43,7 @@ Repository = "https://github.com/TI-Forest-Sector-Modelling/C-Module"
 Issues = "https://github.com/TI-Forest-Sector-Modelling/C-Module/issues"
 
 [project.scripts]
-run_cmodule = "C-Module.cli.cli:cli"
+run_cmodule = "C_Module.cli.cli:cli"
 
 [tool.setuptools]
 include-package-data = true
