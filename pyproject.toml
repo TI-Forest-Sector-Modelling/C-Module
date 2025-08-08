@@ -17,7 +17,7 @@ dependencies = [
     "openpyxl==3.1.2",
     "dataclasses==0.6",
     "DateTime==5.5",
-    "numpy==1.24.4",
+    "numpy==1.26.4",
     "pandas==1.5.3",
     "pathlib==1.0.1",
     "typing==3.7.4.3",
