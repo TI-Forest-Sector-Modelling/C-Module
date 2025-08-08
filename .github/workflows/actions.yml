@@ -34,7 +34,7 @@ jobs:
     # Run test suite and generate coverage report in XML format
     - name: Run test suite with coverage
       run: |
-        pytest --cov=C-Module --cov-report xml:coverage.xml
+        pytest --cov=C_Module --cov-report xml:coverage.xml
 
     # Upload the coverage XML report as an artifact
     - name: Upload coverage XML artifact
