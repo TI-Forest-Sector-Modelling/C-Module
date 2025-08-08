@@ -1,7 +1,7 @@
 name: Python CI with SonarCloud
 on:
   push:
-    branches: [ "16-add-github-actions" ]
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
