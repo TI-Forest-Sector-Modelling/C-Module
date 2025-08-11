@@ -1,7 +1,7 @@
 import unittest
 
-from c_module.logic.main import C_Module
-from c_module.user_io.default_parameters import user_input
+from tmp_folder.logic.main import C_Module
+from tmp_folder.user_io.default_parameters import user_input
 
 
 class TestCModuleClass(unittest.TestCase):
