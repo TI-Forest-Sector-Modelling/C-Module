@@ -1,0 +1,182 @@
+﻿TiMBA Area;RegionCode;ISO3 Code;Area Code;ContinentNew;Carbon Region
+Algeria;a0;DZA;4;Africa;Northern Africa
+Angola;a1;AGO;7;Africa;Western and Central Africa
+Benin;a2;BEN;53;Africa;Western and Central Africa
+Botswana;a3;BWA;20;Africa;Western and Central Africa
+Burkina Faso;a4;BFA;233;Africa;Western and Central Africa
+Burundi;a5;BDI;29;Africa;Western and Central Africa
+Cameroon;a6;CMR;32;Africa;Western and Central Africa
+Cape Verde;a7;CPV;35;Africa;Western and Central Africa
+Central African Republic;a8;CAF;37;Africa;Western and Central Africa
+Chad;a9;TCD;39;Africa;Western and Central Africa
+Congo Republic of;b0;COG;46;Africa;Western and Central Africa
+Côte d'Ivoire;b1;CIV;107;Africa;Western and Central Africa
+Djibouti;b2;DJI;72;Africa;Eastern and Southern Africa
+Egypt;b3;EGY;59;Africa;Northern Africa
+Equatorial Guinea;b4;GNQ;61;Africa;Western and Central Africa
+Ethiopia;b5;ETH;238;Africa;Eastern and Southern Africa
+Gabon;b6;GAB;74;Africa;Western and Central Africa
+Gambia;b7;GMB;75;Africa;Western and Central Africa
+Ghana;b8;GHA;81;Africa;Western and Central Africa
+Guinea;b9;GIN;90;Africa;Western and Central Africa
+Guinea-Bissau;c0;GNB;175;Africa;Western and Central Africa
+Kenya;c1;KEN;114;Africa;Eastern and Southern Africa
+Lesotho;c2;LSO;122;Africa;Eastern and Southern Africa
+Liberia;c3;LBR;123;Africa;Western and Central Africa
+Libyan Arab Jamahiriya;c4;LBY;124;Africa;Northern Africa
+Madagascar;c5;MDG;129;Africa;Eastern and Southern Africa
+Malawi;c6;MWI;130;Africa;Eastern and Southern Africa
+Mali;c7;MLI;133;Africa;Western and Central Africa
+Mauritania;c8;MRT;136;Africa;Western and Central Africa
+Mauritius;c9;MUS;137;Africa;Eastern and Southern Africa
+Morocco;d0;MAR;143;Africa;Northern Africa
+Mozambique;d1;MOZ;144;Africa;Eastern and Southern Africa
+Niger;d2;NER;158;Africa;Western and Central Africa
+Nigeria;d3;NGA;159;Africa;Western and Central Africa
+Réunion;d4;REU;182;Africa;Eastern and Southern Africa
+Rwanda;d5;RWA;184;Africa;Eastern and Southern Africa
+Sao Tome and Principe;d6;STP;193;Africa;Western and Central Africa
+Senegal;d7;SEN;195;Africa;Western and Central Africa
+Sierra Leone;d8;SLE;197;Africa;Western and Central Africa
+Somalia;d9;SOM;201;Africa;Eastern and Southern Africa
+South Africa;e0;ZAF;202;Africa;Eastern and Southern Africa
+Sudan;e1;SDN;276;Africa;Eastern and Southern Africa
+Swaziland;e2;SWZ;209;Africa;Eastern and Southern Africa
+Tanzania United Rep of;e3;TZA;215;Africa;Eastern and Southern Africa
+Togo;e4;TGO;217;Africa;Western and Central Africa
+Tunisia;e5;TUN;222;Africa;Northern Africa
+Uganda;e6;UGA;226;Africa;Eastern and Southern Africa
+Congo Dem Republic of;e7;COD;250;Africa;Western and Central Africa
+Zambia;e8;ZMB;251;Africa;Eastern and Southern Africa
+Zimbabwe;e9;ZWE;181;Africa;Eastern and Southern Africa
+Bahamas;f0;BHS;12;North America;Caribbean
+Barbados;f1;BRB;14;North America;Caribbean
+Belize;f2;BLZ;23;North America;Caribbean
+Canada;f3;CAN;33;North America;North America
+Saint Lucia;f4;LCA;189;North America;Caribbean
+Costa Rica;f5;CRI;48;North America;Central America
+Cuba;f6;CUB;49;North America;Caribbean
+Dominica;f7;DMA;55;North America;Caribbean
+Dominican Republic;f8;DOM;56;North America;Caribbean
+El Salvador;f9;SLV;60;North America;Central America
+Guatemala;g0;GTM;89;North America;Central America
+Haiti;g1;HTI;93;North America;Caribbean
+Honduras;g2;HND;95;North America;Central America
+Jamaica;g3;JAM;109;North America;Caribbean
+Martinique;g4;MTQ;135;North America;Caribbean
+Mexico;g5;MEX;138;North America;Central America
+Netherlands Antilles;g6;ANT;151;North America;Caribbean
+Nicaragua;g7;NIC;157;North America;Central America
+Panama;g8;PAN;166;North America;Central America
+Saint Vincent/Grenadines;g9;VCT;191;North America;Caribbean
+Trinidad and Tobago;h0;TTO;220;North America;Caribbean
+United States of America;h1;USA;231;North America;North America
+Argentina;h2;ARG;9;South America;South America
+Bolivia;h3;BOL;19;South America;South America
+Brazil;h4;BRA;21;South America;South America
+Chile;h5;CHL;40;South America;South America
+Colombia;h6;COL;44;South America;South America
+Ecuador;h7;ECU;58;South America;South America
+French Guiana;h8;GUF;69;South America;South America
+Guyana;h9;GUY;91;South America;South America
+Paraguay;i0;PRY;169;South America;South America
+Peru;i1;PER;170;South America;South America
+Suriname;i2;SUR;207;South America;South America
+Uruguay;i3;URY;234;South America;South America
+Venezuela Boliv Rep of;i4;VEN;236;South America;South America
+Afghanistan;i5;AFG;2;Asia;South and Southeast Asia
+Bahrain;i6;BHR;13;Asia;Western and Central Asia
+Bangladesh;i7;BGD;16;Asia;South and Southeast Asia
+Bhutan;i8;BTN;18;Asia;South and Southeast Asia
+Brunei Darussalam;i9;BRN;26;Asia;South and Southeast Asia
+Cambodia;j0;KHM;115;Asia;South and Southeast Asia
+China;j1;CHN;351;Asia;East Asia
+Cyprus;j2;CYP;50;Asia;Western and Central Asia
+Maldives;j3;MDV;134;Asia;South and Southeast Asia
+India;j4;IND;100;Asia;South and Southeast Asia
+Indonesia;j5;IDN;101;Asia;South and Southeast Asia
+Iran Islamic Rep of;j6;IRN;102;Asia;Western and Central Asia
+Iraq;j7;IRQ;103;Asia;Western and Central Asia
+Israel;j8;ISR;105;Asia;Western and Central Asia
+Japan;j9;JPN;110;Asia;East Asia
+Jordan;k0;JOR;112;Asia;Western and Central Asia
+Korea Dem People's Rep;k1;PRK;116;Asia;East Asia
+Korea Republic of;k2;KOR;117;Asia;East Asia
+Kuwait;k3;KWT;118;Asia;Western and Central Asia
+Laos;k4;LAO;120;Asia;South and Southeast Asia
+Lebanon;k5;LBN;121;Asia;Western and Central Asia
+Timor-Leste;k6;TLS;176;Asia;South and Southeast Asia
+Malaysia;k7;MYS;131;Asia;South and Southeast Asia
+Mongolia;k8;MNG;141;Asia;East Asia
+Myanmar;k9;MMR;28;Asia;South and Southeast Asia
+Nepal;l0;NPL;149;Asia;South and Southeast Asia
+Oman;l1;OMN;221;Asia;Western and Central Asia
+Pakistan;l2;PAK;165;Asia;South and Southeast Asia
+Philippines;l3;PHL;171;Asia;South and Southeast Asia
+Qatar;l4;QAT;179;Asia;Western and Central Asia
+Saudi Arabia;l5;SAU;194;Asia;Western and Central Asia
+Singapore;l6;SGP;200;Asia;South and Southeast Asia
+Sri Lanka;l7;LKA;38;Asia;South and Southeast Asia
+Syrian Arab Republic;l8;SYR;212;Asia;Western and Central Asia
+Thailand;l9;THA;216;Asia;South and Southeast Asia
+Turkey;m0;TUR;223;Asia;Western and Central Asia
+United Arab Emirates;m1;ARE;225;Asia;Western and Central Asia
+Viet Nam;m2;VNM;237;Asia;South and Southeast Asia
+Yemen;m3;YEM;249;Asia;Western and Central Asia
+Australia;m4;AUS;10;Oceania;Oceania
+Cook Islands;m5;COK;47;Oceania;Oceania
+Fiji Islands;m6;FJI;66;Oceania;Oceania
+French Polynesia;m7;PYF;70;Oceania;Oceania
+New Caledonia;m8;NCL;153;Oceania;Oceania
+New Zealand;m9;NZL;156;Oceania;Oceania
+Papua New Guinea;n0;PNG;168;Oceania;Oceania
+Samoa;n1;WSM;244;Oceania;Oceania
+Solomon Islands;n2;SLB;25;Oceania;Oceania
+Tonga;n3;TON;219;Oceania;Oceania
+Vanuatu;n4;VUT;155;Oceania;Oceania
+Albania;n5;ALB;3;Europe;Europe
+Austria;n6;AUT;11;Europe;Europe
+Belgium;n7;BEL;255;Europe;Europe
+Bosnia and Herzegovina;n8;BIH;80;Europe;Europe
+Bulgaria;n9;BGR;27;Europe;Europe
+Croatia;o0;HRV;98;Europe;Europe
+Czech Republic;o1;CZE;167;Europe;Europe
+Denmark;o2;DNK;54;Europe;Europe
+Finland;o3;FIN;67;Europe;Europe
+France;o4;FRA;68;Europe;Europe
+Germany;o5;DEU;79;Europe;Europe
+Greece;o6;GRC;84;Europe;Europe
+Hungary;o7;HUN;97;Europe;Europe
+Luxembourg;o8;LUX;256;Europe;Europe
+Ireland;o9;IRL;104;Europe;Europe
+Italy;p0;ITA;106;Europe;Europe
+MacedoniaThe Fmr Yug Rp;p1;MKD;154;Europe;Europe
+Montenegro;p2;MNE;273;Europe;Europe
+Netherlands;p3;NLD;150;Europe;Europe
+Norway;p4;NOR;162;Europe;Europe
+Poland;p5;POL;173;Europe;Europe
+Portugal;p6;PRT;174;Europe;Europe
+Romania;p7;ROU;183;Europe;Europe
+Slovakia;p8;SVK;199;Europe;Europe
+Slovenia;p9;SVN;198;Europe;Europe
+Spain;q0;ESP;203;Europe;Europe
+Sweden;q1;SWE;210;Europe;Europe
+Switzerland;q2;CHE;211;Europe;Europe
+United Kingdom;q3;GBR;229;Europe;Europe
+Serbia;q4;SRB;272;Europe;Europe
+Armenia;q5;ARM;1;Asia;Western and Central Asia
+Azerbaijan Republic of;q6;AZE;52;Asia;Western and Central Asia
+Belarus;q7;BLR;57;Europe;Europe
+Estonia;q8;EST;63;Europe;Europe
+Georgia;q9;GEO;73;Asia;Western and Central Asia
+Kazakhstan;r0;KAZ;108;Asia;Western and Central Asia
+Kyrgyzstan;r1;KGZ;113;Asia;Western and Central Asia
+Latvia;r2;LVA;119;Europe;Europe
+Lithuania;r3;LTU;126;Europe;Europe
+Moldova Republic of;r4;MDA;146;Europe;Europe
+Russian Federation;r5;RUS;185;Asia;Russian Federation
+Tajikistan;r6;TJK;208;Asia;Western and Central Asia
+Turkmenistan;r7;TKM;213;Asia;Western and Central Asia
+Ukraine;r8;UKR;230;Europe;Europe
+Uzbekistan;r9;UZB;235;Asia;Western and Central Asia
+Rest of World;zy;WRL;0;World;World
