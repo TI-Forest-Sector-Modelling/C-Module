@@ -61,6 +61,6 @@ show_missing = true
 
 [tool.coverage.run]
 branch = true
-include = ["C-Module/*"]
+include = ["c_module/*"]
 command_line = "-m unittest discover -s test"
 
