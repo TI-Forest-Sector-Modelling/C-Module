@@ -1,10 +1,10 @@
 graft tests
 
+recursive-include c_module/data/input *
+
 recursive-include test/test_data *
 
 recursive-exclude test/.pytest_cache *
-
-recursive-include C-Module/data/input *
 
 global-exclude *.py[cod]
 
