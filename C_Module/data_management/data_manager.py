@@ -1,6 +1,6 @@
-from C_Module.parameters.paths import (PKL_RESULTS_INPUT, ADD_INFO_CARBON_PATH, ADD_INFO_COUNTRY, FAOSTAT_DATA,
+from c_module.parameters.paths import (PKL_RESULTS_INPUT, ADD_INFO_CARBON_PATH, ADD_INFO_COUNTRY, FAOSTAT_DATA,
                                        FRA_DATA)
-from C_Module.parameters.defines import (VarNames, ParamNames, CountryConstants)
+from c_module.parameters.defines import (VarNames, ParamNames, CountryConstants)
 
 import pandas as pd
 from tqdm import tqdm

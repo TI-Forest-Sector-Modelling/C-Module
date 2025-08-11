@@ -1,5 +1,5 @@
-from C_Module.logic.main import C_Module
-from C_Module.user_io.default_parameters import user_input
+from c_module.logic.main import C_Module
+from c_module.user_io.default_parameters import user_input
 
 
 if __name__ == "__main__":

@@ -2,9 +2,9 @@ from pathlib import Path
 import click
 import os
 import datetime as dt
-from C_Module.logic.main import C_Module
-from C_Module.user_io.default_parameters import user_input
-from C_Module.parameters.defines import ParamNames
+from c_module.logic.main import C_Module
+from c_module.user_io.default_parameters import user_input
+from c_module.parameters.defines import ParamNames
 
 
 @click.command()

@@ -1,7 +1,7 @@
-from C_Module.data_management.data_manager import DataManager
-from C_Module.parameters.paths import (FAOSTAT_DATA, FRA_DATA, PKL_CARBON_OUTPUT, PKL_UPDATED_TIMBA_OUTPUT,
+from c_module.data_management.data_manager import DataManager
+from c_module.parameters.paths import (FAOSTAT_DATA, FRA_DATA, PKL_CARBON_OUTPUT, PKL_UPDATED_TIMBA_OUTPUT,
                                        OUTPUT_FOLDER)
-from C_Module.parameters.defines import (VarNames, ParamNames)
+from c_module.parameters.defines import (VarNames, ParamNames)
 from pathlib import Path
 
 

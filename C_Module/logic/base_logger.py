@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 import datetime as dt
 import logging
-from C_Module.parameters.paths import LOGGING_OUTPUT_FOLDER
+from c_module.parameters.paths import LOGGING_OUTPUT_FOLDER
 
 
 def get_logger(user_path: Union[str, Path, None]):

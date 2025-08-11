@@ -1,6 +1,6 @@
-from C_Module.parameters.defines import (VarNames, ParamNames, CarbonConstants)
-from C_Module.parameters.paths import (PKL_ADD_INFO_START_YEAR)
-from C_Module.data_management.data_manager import DataManager
+from c_module.parameters.defines import (VarNames, ParamNames, CarbonConstants)
+from c_module.parameters.paths import (PKL_ADD_INFO_START_YEAR)
+from c_module.data_management.data_manager import DataManager
 
 import pandas as pd
 import numpy as np

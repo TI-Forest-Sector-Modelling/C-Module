@@ -1,4 +1,4 @@
-from C_Module.parameters.defines import ParamNames
+from c_module.parameters.defines import ParamNames
 
 # Overall parameters
 calc_c_ex_post = True

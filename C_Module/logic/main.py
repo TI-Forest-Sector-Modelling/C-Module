@@ -1,7 +1,7 @@
 import datetime as dt
-from C_Module.data_management.process_manager import ProcessManager
-from C_Module.logic.carbon_calc import CarbonCalculator
-from C_Module.logic.base_logger import get_logger
+from c_module.data_management.process_manager import ProcessManager
+from c_module.logic.carbon_calc import CarbonCalculator
+from c_module.logic.base_logger import get_logger
 
 
 class C_Module(object):
