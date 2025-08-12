@@ -23,8 +23,7 @@ class ParamNames(Enum):
     """
     Class to hold names of parameters set by users
     """
-    calc_c_ex_post = "calc_c_ex_post"
-    calc_c_ex_ante = "calc_c_ex_ante"
+    add_on_activated = "add_on_activated"
     start_year = "start_year"
     end_year = "end_year"
     read_in_pkl = "read_in_pkl"
