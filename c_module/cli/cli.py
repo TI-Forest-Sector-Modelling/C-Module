@@ -41,12 +41,11 @@ from c_module.parameters.defines import ParamNames
 @click.option('-S', '--save_data_as', 'save_data_as', default=user_input[ParamNames.save_data_as.value],
               show_default=True, required=False, type=str,
               help="Flag to select the format of output files (csv or pkl).")
-def cli(start_year, end_year, calc_c_ex_post, calc_c_ex_ante, calc_c_forest_agb, calc_c_forest_bgb, calc_c_forest_soil,
+def cli(add_on_activated, start_year, end_year, calc_c_forest_agb, calc_c_forest_bgb, calc_c_forest_soil,
         calc_c_forest_dwl, calc_c_hwp, c_hwp_accounting_approach, read_in_pkl, save_data_as):
 
     user_input_cli = {
-        ParamNames.calc_c_ex_post.value: calc_c_ex_post,
-        ParamNames.calc_c_ex_ante.value: calc_c_ex_ante,
+        ParamNames.add_on_activated.value: add_on_activated,
         ParamNames.start_year.value: start_year,
         ParamNames.end_year.value: end_year,
         ParamNames.read_in_pkl.value: read_in_pkl,
