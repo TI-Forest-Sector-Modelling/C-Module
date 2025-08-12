@@ -75,10 +75,12 @@ class ProcessManager:
         print(f"               Time: {self.time_stamp}")
         print(f"")
         print(f"            Module settings:")
-        print(f"            Carbon ex-post calculation: {self.UserInput[ParamNames.calc_c_ex_post.value]}")
-        print(f"            Carbon ex-ante calculation: {self.UserInput[ParamNames.calc_c_ex_ante.value]}")
-        print(f"            Start year: {self.UserInput[ParamNames.start_year.value]}")
-        print(f"            End year: {self.UserInput[ParamNames.end_year.value]}")
+        if self.add_on_activated:
+            print(f"            Used as TiMBA add-on: {self.UserInput[ParamNames.add_on_activated.value]}")
+        else:
+            print(f"            Used as standalone module: {self.UserInput[ParamNames.add_on_activated.value]}")
+            print(f"            Start year: {self.UserInput[ParamNames.start_year.value]}")
+            print(f"            End year: {self.UserInput[ParamNames.end_year.value]}")
         print(f"            ---------------------------------")
         print(f"")
         print(f"            Forest carbon related parameters: ")
