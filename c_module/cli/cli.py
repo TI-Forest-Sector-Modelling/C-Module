@@ -8,19 +8,15 @@ from c_module.parameters.defines import ParamNames
 
 
 @click.command()
+@click.option('-ADD_ON', '--add_on_activated', "add_on_activated",
+              default=user_input[ParamNames.add_on_activated.value], show_default=True, required=True, type=bool,
+              help="Flag to use the carbon module as a standalone module or as a TiMBA add-on.")
 @click.option('-SY', '--start_year', 'start_year', default=user_input[ParamNames.start_year.value],
               show_default=True, required=True, type=int,
               help="Start year of carbon calculations.")
 @click.option('-EY', '--end_year', 'end_year', default=user_input[ParamNames.end_year.value],
               show_default=True, required=True, type=int,
               help="End year of carbon calculations.")
-@click.option('-EXP', '--calc_c_ex_post', "calc_c_ex_post",
-              default=user_input[ParamNames.calc_c_ex_post.value], show_default=True, required=True, type=bool,
-              help="Flag to calculate historical carbon stocks and stock changes.")
-@click.option('-EXA', '--calc_c_ex_ante', "calc_c_ex_ante",
-              default=user_input[ParamNames.calc_c_ex_ante.value], show_default=True, required=True, type=bool,
-              help="Flag to calculate carbon stocks and stock changes based on projections for forest products market,"
-                   " forest area, and stocks.")
 @click.option('-CF_AGB', '--calc_c_forest_agb', "calc_c_forest_agb",
               default=user_input[ParamNames.calc_c_forest_agb.value], show_default=True, required=True, type=bool,
               help="Flag to activate carbon calculation for aboveground forest biomass.")
@@ -45,12 +41,11 @@ from c_module.parameters.defines import ParamNames
 @click.option('-S', '--save_data_as', 'save_data_as', default=user_input[ParamNames.save_data_as.value],
               show_default=True, required=False, type=str,
               help="Flag to select the format of output files (csv or pkl).")
-def cli(start_year, end_year, calc_c_ex_post, calc_c_ex_ante, calc_c_forest_agb, calc_c_forest_bgb, calc_c_forest_soil,
+def cli(add_on_activated, start_year, end_year, calc_c_forest_agb, calc_c_forest_bgb, calc_c_forest_soil,
         calc_c_forest_dwl, calc_c_hwp, c_hwp_accounting_approach, read_in_pkl, save_data_as):
 
     user_input_cli = {
-        ParamNames.calc_c_ex_post.value: calc_c_ex_post,
-        ParamNames.calc_c_ex_ante.value: calc_c_ex_ante,
+        ParamNames.add_on_activated.value: add_on_activated,
         ParamNames.start_year.value: start_year,
         ParamNames.end_year.value: end_year,
         ParamNames.read_in_pkl.value: read_in_pkl,

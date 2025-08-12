@@ -2,13 +2,15 @@ import datetime as dt
 from c_module.data_management.process_manager import ProcessManager
 from c_module.logic.carbon_calc import CarbonCalculator
 from c_module.logic.base_logger import get_logger
+from c_module.parameters.defines import ParamNames
 
 
 class C_Module(object):
     def __init__(self, UserInput):
         self.UserInput = UserInput
+        self.add_on_activated = UserInput[ParamNames.add_on_activated.value]
         self.time_stamp = dt.datetime.now().strftime("%Y%m%dT%H-%M-%S")
-        self.logger = get_logger(None)
+        self.logger = get_logger(None, add_on_activated=self.add_on_activated)
         self.timba_data = None
         self.add_data = {}
         self.carbon_data = {}

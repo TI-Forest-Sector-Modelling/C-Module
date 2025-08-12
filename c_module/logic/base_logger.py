@@ -6,9 +6,12 @@ import logging
 from c_module.parameters.paths import LOGGING_OUTPUT_FOLDER
 
 
-def get_logger(user_path: Union[str, Path, None]):
+def get_logger(user_path: Union[str, Path, None], add_on_activated: bool):
     current_dt = dt.datetime.now().strftime("%Y%m%d")
-    filename = rf"{current_dt}_C_Module.log"
+    if add_on_activated:
+        filename = f"{current_dt}_TiMBA.log"
+    else:
+        filename = rf"{current_dt}_C_Module.log"
 
     if user_path is None:
         filepath = os.path.join(LOGGING_OUTPUT_FOLDER, filename)
@@ -17,7 +20,10 @@ def get_logger(user_path: Union[str, Path, None]):
     if not os.path.exists(filepath):
         os.makedirs(Path(filepath).parent, exist_ok=True)
 
-    Logger = logging.getLogger("C-Module")
+    if add_on_activated:
+        Logger = logging.getLogger("TiMBA")
+    else:
+        Logger = logging.getLogger("C-Module")
     if not Logger.hasHandlers():
         Logger.setLevel(logging.DEBUG)
         formatter = logging.Formatter(
