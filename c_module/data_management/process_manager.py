@@ -16,19 +16,19 @@ class ProcessManager:
 
     @staticmethod
     def readin_add_data_process(self):
-        self.logger.info("Reading in additional data")
+        self.logger.info("C-Module - Reading in additional data")
         DataManager.load_additional_data(self)
 
 
     @staticmethod
     def readin_timba_process(self):
-        self.logger.info("Reading in input data")
+        self.logger.info("C-Module - Reading in input data")
         DataManager.load_timba_data(self)
         DataManager.retrieve_commodity_num(self)
 
     @staticmethod
     def readin_carbon_process(self):
-        self.logger.info("Reading in carbon data")
+        self.logger.info("C-Module - Reading in carbon data")
         DataManager.load_additional_data_carbon(self)
         DataManager.retrieve_commodity_data(self)
         DataManager.align_carbon_data(self)
@@ -36,7 +36,7 @@ class ProcessManager:
 
     @staticmethod
     def readin_faostat_process(self):
-        self.logger.info("Reading in FAOSTAT data")
+        self.logger.info("C-Module - Reading in FAOSTAT data")
         DataManager.load_faostat_data(self)
         if not Path(f"{FAOSTAT_DATA}.pkl").is_file():
             DataManager.prep_faostat_data(self)
@@ -45,7 +45,7 @@ class ProcessManager:
 
     @staticmethod
     def readin_fra_process(self):
-        self.logger.info("Reading in FRA data")
+        self.logger.info("C-Module - Reading in FRA data")
         # TODO implement fra processing steps
         DataManager.load_fra_data(self)
         if not Path(f"{FRA_DATA}.pkl").is_file():

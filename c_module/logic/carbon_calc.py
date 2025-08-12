@@ -11,7 +11,8 @@ from pathlib import Path
 class CarbonCalculator:
     @staticmethod
     def calc_carbon_forest_biomass(self):
-        self.logger.info(f"Calculating carbon stocks and fluxes for forest biomass (aboveground and belowground)")
+        self.logger.info(
+            f"C-Module - Calculating carbon stocks and fluxes for forest biomass (aboveground and belowground)")
         self.carbon_data[VarNames.carbon_forest_biomass.value] = CarbonCalculator.calc_carbon_forest(
             carbon_data=self.carbon_data[VarNames.carbon_forest_biomass.value],
             add_carbon_data=self.add_carbon_data,
@@ -21,7 +22,7 @@ class CarbonCalculator:
 
     @staticmethod
     def calc_carbon_forest_soil(self):
-        self.logger.info(f"Calculating carbon stocks and fluxes for forest soil")
+        self.logger.info(f"C-Module - Calculating carbon stocks and fluxes for forest soil")
         self.carbon_data[VarNames.carbon_soil.value] = CarbonCalculator.calc_carbon_forest(
             carbon_data=self.carbon_data[VarNames.carbon_soil.value],
             add_carbon_data=self.add_carbon_data,
@@ -31,7 +32,7 @@ class CarbonCalculator:
 
     @staticmethod
     def calc_carbon_forest_dwl(self):
-        self.logger.info(f"Calculating carbon stocks and fluxes for dead wood and litter")
+        self.logger.info(f"C-Module - Calculating carbon stocks and fluxes for dead wood and litter")
         self.carbon_data[VarNames.carbon_dwl.value] = CarbonCalculator.calc_carbon_forest(
             carbon_data=self.carbon_data[VarNames.carbon_dwl.value],
             add_carbon_data=self.add_carbon_data,
@@ -141,7 +142,7 @@ class CarbonCalculator:
 
     @staticmethod
     def calc_carbon_hwp(self):
-        self.logger.info(f"Calculating carbon stocks and fluxes for harvested wood products")
+        self.logger.info(f"C-Module - Calculating carbon stocks and fluxes for harvested wood products")
         add_carbon_data = self.add_carbon_data[VarNames.carbon_hwp.value]
         add_data = self.add_data
         timba_data = self.timba_data[VarNames.timba_data_all.value]
@@ -631,7 +632,7 @@ class CarbonCalculator:
 
     @staticmethod
     def calc_substitution_effect(self):
-        self.logger.info(f"Calculating substitution effect")
+        self.logger.info(f"C-Module - Calculating substitution effect")
         self.carbon_data[VarNames.carbon_substitution.value] = CarbonCalculator.calc_constant_substitution_effect(
             add_carbon_data=self.add_carbon_data[VarNames.carbon_hwp.value],
             timba_data=self.timba_data[VarNames.timba_data_all.value],
@@ -869,7 +870,7 @@ class CarbonCalculator:
         Calculations based on equations xxx.
         :param self: C-Module object containing all module data.
         """
-        self.logger.info(f"Calculating total carbon stocks and fluxes")
+        self.logger.info(f"C-Module - Calculating total carbon stocks and fluxes")
 
         timba_data = self.timba_data[VarNames.timba_data_all.value]
         len_commodity = len(timba_data[VarNames.commodity_code.value].unique())
