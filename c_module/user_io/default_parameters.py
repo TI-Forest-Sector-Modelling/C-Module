@@ -1,7 +1,7 @@
 from c_module.parameters.defines import ParamNames
 
 # Overall parameters
-add_on_activated = True
+add_on_activated = False
 
 # Activate the option of controling start and end year of the calculations if the module is used as standalone
 start_year = 2020  # Not activated
