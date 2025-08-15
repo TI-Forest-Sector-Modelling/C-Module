@@ -14,7 +14,7 @@ identifiers:
   - type: doi
     value: ''
     description: ''
-repository-code: ''
+repository-code: 'https://github.com/TI-Forest-Sector-Modelling/C-Module'
 abstract: |-
   The Carbon Module (C-Module) tracks global carbon stocks and stock changes across pools in the forestry sector, based on
   either forest sector projections or historical forest sector statistics. In its current version, the module quantifies
