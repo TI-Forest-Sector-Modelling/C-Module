@@ -1,7 +1,6 @@
 import datetime as dt
 import re
 import os
-import __main__
 from pathlib import Path
 from c_module.user_io.default_parameters import user_input
 from c_module.parameters.defines import ParamNames
@@ -47,7 +46,8 @@ def cmodule_is_standalone():
     Check if cmodule is standalone or not.
     :return: Bool if cmodule is standalone or not.
     """
-    return getattr(__main__, "__package__", None) is None
+    import __main__
+    return __main__.__package__ is None
 
 
 PACKAGEDIR = Path(__file__).parent.parent.absolute()
