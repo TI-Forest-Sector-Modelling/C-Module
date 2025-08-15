@@ -55,8 +55,6 @@ def cmodule_is_standalone():
     if not main_file.exists():
         return False
 
-    entry_names = {"main.py", "__main__.py"}
-    is_entry_point = main_file.name in entry_names
     if package_root in main_file.parents:
         return True
 
