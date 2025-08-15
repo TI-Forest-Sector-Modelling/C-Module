@@ -42,8 +42,8 @@ def get_latest_file(folder_path, pattern, use_timestamp):
 
 
 PACKAGEDIR = Path(__file__).parent.parent.absolute()
-TIMBADIR = Path(__file__).parent.parent.parent.parent.absolute()
-TIMBADIR = TIMBADIR / Path("TiMBA") / Path("TiMBA") / Path("data") / Path("output")
+TIMBADIR = Path(__file__).parent.parent.parent.parent.parent.parent.absolute()
+TIMBADIR = TIMBADIR / Path("TiMBA") / Path("data") / Path("output")
 INPUT_FOLDER = PACKAGEDIR / Path("data") / Path("input")
 
 if user_input[ParamNames.add_on_activated.value]:
