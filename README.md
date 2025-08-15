@@ -1,10 +1,15 @@
 ![C-Module_Logo](C-Module_Logo_transparent_v1.png)
 
 ------
+[![CI - Test](https://github.com/TI-Forest-Sector-Modelling/C-Module/actions/workflows/actions.yml/badge.svg)](https://github.com/TI-Forest-Sector-Modelling/C-Module/actions/workflows/actions.yml)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=TI-Forest-Sector-Modelling_TiMBA&metric=coverage)](https://sonarcloud.io/summary/new_code?id=TI-Forest-Sector-Modelling_TiMBA)
+![GitHub Release](https://img.shields.io/github/v/release/TI-Forest-Sector-Modelling/C-Module)
+[![License](https://img.shields.io/github/license/TI-Forest-Sector-Modelling/C-Module)](https://github.com/TI-Forest-Sector-Modelling/C-Module/blob/main/COPYING)
+------
 <!-- TOC -->
 
-- [Cite C-Module](#cite-c-module)
-- [Install C-Module](#install-the-c-module)
+- [Cite the C-Module](#cite-the-c-module)
+- [Install the C-Module](#install-the-c-module)
   - [Double check installation](#doublecheck-installation)
   - [Test suite and coverage](#test-suite-and-coverage-report)
 - [Use the C-Module](#use-the-c-module)
@@ -36,7 +41,7 @@ details are provided in [Honkomp (in prep)](#todo).
 The C-Module can be used in two modes: either as an add-on to the Timber market Model for policy-Based Analysis ([TiMBA](#https://github.com/TI-Forest-Sector-Modelling/TiMBA))
 or as a standalone module (see [Use the C-Module](#use-the-c-module)).
 
-## Cite C-Module
+## Cite the C-Module
 
 We are happy that you use the C-Module for your research. When publishing your work in articles, working paper, presentations
 or elsewhere, please cite the module as: 
