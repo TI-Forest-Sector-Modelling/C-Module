@@ -1,6 +1,7 @@
 import datetime as dt
 import re
 import os
+import __main__
 from pathlib import Path
 from c_module.user_io.default_parameters import user_input
 from c_module.parameters.defines import ParamNames
@@ -41,12 +42,20 @@ def get_latest_file(folder_path, pattern, use_timestamp):
         return latest_file
 
 
+def cmodule_is_standalone():
+    """
+    Check if cmodule is standalone or not.
+    :return: Bool if cmodule is standalone or not.
+    """
+    return getattr(__main__, "__package__", None) is None
+
+
 PACKAGEDIR = Path(__file__).parent.parent.absolute()
 TIMBADIR = Path(__file__).parent.parent.parent.parent.parent.parent.absolute()
 TIMBADIR = TIMBADIR / Path("TiMBA") / Path("data") / Path("output")
 INPUT_FOLDER = PACKAGEDIR / Path("data") / Path("input")
 
-if user_input[ParamNames.add_on_activated.value]:
+if user_input[ParamNames.add_on_activated.value] or cmodule_is_standalone():
     # input paths for add-on c-module
     AO_RESULTS_INPUT_PATTERN = r"results_D(\d{8}T\d{2}-\d{2}-\d{2})_.*"
     AO_FOREST_INPUT_PATTERN = r"forest_D(\d{8}T\d{2}-\d{2}-\d{2})_.*"
