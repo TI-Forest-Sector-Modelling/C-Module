@@ -48,15 +48,17 @@ def cmodule_is_standalone():
     :return: Bool if cmodule is standalone or not.
     """
     import __main__
+    import sys
 
-    main_file = Path(getattr(__main__, '__file__', '')).resolve()
-    package_root = Path(__file__).resolve().parents[1]  # parent of the package folder
+    if getattr(__main__, "__file__", None):
+        main_file = Path(__main__.__file__).resolve()
+        package_root = Path(__file__).resolve().parents[1]
 
-    if not main_file.exists():
-        return False
+        if package_root in main_file.parents:
+            return True
 
-    if package_root in main_file.parents:
-        return True
+        if "pytest" in sys.modules and Path.cwd().resolve() == package_root.parent:
+            return True
 
     return False
 
