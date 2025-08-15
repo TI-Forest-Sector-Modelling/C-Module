@@ -3,16 +3,8 @@
 
 cff-version: 1.2.0
 title: C-Module
-message: >-
-  # TODO tbc
 type: software
 authors:
-  - country: DE
-    city: Hamburg
-    name: TI-FSM
-    email: tomke.honkomp@thuenen.de
-    address: Leuschnerstraße 91
-    post-code: '21031'
   - given-names: Tomke
     family-names: Honkomp
     email: tomke.honkomp@thuenen.de
@@ -22,15 +14,18 @@ identifiers:
   - type: doi
     value: ''
     description: ''
-repository-code: ''  # TODO tbc
+repository-code: ''
 abstract: |-
-  # TODO tbc
+  The Carbon Module (C-Module) tracks global carbon stocks and stock changes across pools in the forestry sector, based on
+  either forest sector projections or historical forest sector statistics. In its current version, the module quantifies
+  carbon stocks and stock changes in forest biomass (above- and below-ground), harvested wood products (HWP), forest soils,
+  dead wood, and litter for 180 countries.
 keywords:
   - research
+  - carbon accounting
   - Forest sector model
-  - partial equilibrium model
-  - optimization
+  - Forest sector
   - wood markets
 license: AGPL-3.0-or-later
 version: 1.0.0
-date-released: '# TODO tbc'
+date-released: '15.08.2025'

@@ -8,7 +8,7 @@
   - [Double check installation](#doublecheck-installation)
   - [Test suite and coverage](#test-suite-and-coverage-report)
 - [Use the C-Module](#use-the-c-module)
-  - [Module settings](#model-settings)
+  - [Module settings](#module-settings)
     - [Settings as parameters](#settings-as-parameters)
     - [Advanced settings](#advanced-settings)
 - [Extended module description](#extended-module-description)
@@ -24,23 +24,33 @@
 
 # C-Module
 
-The Carbon Module tracks global carbon stocks and flows across pools in the forestry sector. In the current version, the module 
-quantifies carbon stocks and flows in forest biomass (above and belowground), in harvested wood products (HWP), in forest soils,
-in dead wood and litter for 180 countries. Substitution effects related to the use of HWP are quantified additionaly.
-The quantification of carbon in forest biomass, forest soils, and dead wood and litter is based on the publications of 
-Johnston et al. (2019) and Johnston and Radeloff (2019). Carbon in HWP is quantified based on the IPCC Tier1-approach (IPCC 2019).
-Additional mathematical information are provided in the [joined publication](#todo).
+The Carbon Module (C-Module) monitors global carbon stocks and their changes across the forestry sector’s key carbon pools,
+drawing on either forest sector projections or historical statistics. In its current version, the module quantifies carbon
+stocks and stock changes in forest biomass (above- and below-ground), harvested wood products (HWP), forest soils, dead wood,
+and litter for 180 countries.
+Substitution effects associated with the use of harvested wood products (HWP) are also quantified. The estimation of carbon
+in forest biomass, forest soils, and dead wood and litter follows the methodologies described in Johnston et al. (2019) and
+Johnston & Radeloff (2019). Carbon in HWP is quantified using the IPCC Tier 1 approach (IPCC 2019). Additional mathematical
+details are provided in [Honkomp (in prep)](#todo).
+
+The C-Module can be used in two modes: either as an add-on to the Timber market Model for policy-Based Analysis ([TiMBA](#https://github.com/TI-Forest-Sector-Modelling/TiMBA))
+or as a standalone module (see [Use the C-Module](#use-the-c-module)).
 
 ## Cite C-Module
 
 We are happy that you use the C-Module for your research. When publishing your work in articles, working paper, presentations
-or elsewhere, please cite the module as 
+or elsewhere, please cite the module as: 
 
 [Honkomp (2025) C-Module v1](CITATION.cff)
 
 ## Install the C-Module
 
-The package is developed and tested with Python 3 (python 3.12.6) version on Windows.
+The package is developed and tested with Python 3 (Python 3.12.6) version on Windows. Further, the module's functionality
+is tested using GitHub Actions for Python 3.9, 3.10, 3.11 with the latest Windows, Ubuntu, and macOS operating systems. 
+Using the C-Module with other Python versions or OS might alter the functionality and the results of the module.   
+If the C-Module is used as an add-on module of TiMBA, the C-Module will be installed automatically via the requirements of TiMBA.
+
+The following steps apply if the C-Module is used as a standalone module.
 Before proceeding, please ensure that Python is installed on your system. It can be downloaded and installed 
 from [Python.org](https://www.python.org/downloads/release/python-389/).
 
@@ -65,7 +75,8 @@ Switch to the main branch of the C-Module.
    >git checkout main
    > 
 6. Create a virtual environment  
-It is recommended to set up a virtual environment for the C-Module to manage dependencies. The package is tested using Python >3.9 (3.8.10 and 3.9.7). With a newer Python version, we can not guarantee the full functionality of the package.
+It is recommended to set up a virtual environment for the C-Module to manage dependencies. The package is tested using Python 3.12.6.
+With a newer Python version, we can not guarantee the full functionality of the package.
 Select the correct Python interpreter.   
 Show installed versions: 
    >py -0  
@@ -96,38 +107,39 @@ you might need to update the pip version you use with:
 Doublecheck if installation was successful by running following command from terminal:  
    >run_cmodule --help
 
-The help provides you information about the basic model settings which changed to adapt model runs to your needs (see section [Model settings](#model-settings) for further details).
+The help provides you information about the basic model settings which changed to adapt model runs to your needs (see [Module settings](#module-settings) for further details).
 
-Test if the C-Module is running by executing the model only for the first period:
+Test if the C-Module is running by executing the module only for a selection of carbon pools:
 
-  >run_cmodule -MP=1
+  >run_cmodule -CF_AGB=True -CF_BGB=True -CF_S=False -CF_DWL=False -C_HWP=True
+
+By running the provided example, the C-Module will calculate carbon stocks and stock changes in forest aboveground biomass (-CF_AGB),
+in forest belowground biomass (-CF_BGB), and in HWP (-C_HWP). Carbon stocks and stock changes in forest soil (-CF_S) and dead wood and
+litter (-CF_DWL) will not be calculated.
 
 ### Test suite and coverage report
-The C-Module comes with a test suite to ensure its functionality.
-Run the test suite to check the functionality of the package and validate the produced results with those provided by the TI-FSM:
+The C-Module comes with a test suite to ensure its functionality and allow for a continous and safe development.
+Run the test suite to check the functionality of the package:
 
   > coverage run
 
 or 
  > $python -m unittest discover -s test
 
-
-To reduce the test suite running time, only the first period will be computed and compared. The test suite results will not be saved.
-The computed results and provided validation results are compared with a relative tolerance of 5%.  
-
-The coverage report of the TiMBA model can be accessed using:
+The coverage report of the C-Module can be accessed using:
  > coverage report
 
 
 ## Use the C-Module
-The module comes with a built-in CLI to quantify global carbon stocks and flows of the forestry sector for various
+The module comes with a built-in CLI to quantify global carbon stocks and stock changes of the forestry sector for various
 inputs. The module can be used in two ways: 
-- As a stand-alone module quantifying key figures related to carbon based on historical data for production, forest area,
-and forest stock changes. 
-- As an add-on module to the Timber market Model for policy-Based Analysis ([TiMBA](https://github.com/TI-Forest-Sector-Modelling/TiMBA))
-allowing to quantify key figures related to carbon based on forest products market, area, and stock projections.
+- As a standalone module quantifying key figures related to carbon based on historical data for production and trade, as
+well as forest area and stock data. 
 
-While the parametric input can be seen in cmd output calling `run_timba --help` from the terminal, an important part to 
+- As an add-on module to [TiMBA](https://github.com/TI-Forest-Sector-Modelling/TiMBA) allowing to quantify key figures
+related to carbon based on forest products market, area, and stock projections.
+
+While the parametric input can be seen in cmd output calling `run_cmodule --help` from the terminal, an important part to 
 mention is user input data that need to be imported from a selected folder. You shall not change the following structure within the data folder:
 ```bash
 .
@@ -149,9 +161,10 @@ download](https://bulks-faostat.fao.org/production/Forestry_E_All_Data.zip).
 - The input data `20250703_fra_data.csv` is a renamed copy of the file `FRA_Years_YYYY_MM_DD.csv` provided by the [FRA bulk data
 download](https://fra-data.fao.org/api/file/bulk-download?assessmentName=fra&cycleName=2020&countryIso=WO).
 
-The original FAOSTAT and FRA files are manually saved as an CSV UTF-8 file. The last copy of the FAOSTAT and FRA data was
-downloaded on the 2025-07-03 and contains data until the year 2023 for FAOSTAT and 2020 for FRA. FAOSTAT and FRA data will
-be updated regularly. However, when using the C-Module, check if new FAOSTAT and FRA data are available.
+The original FAOSTAT and FRA files are manually saved as CSV UTF-8 files. The most recent copy of the FAOSTAT and FRA datasets
+was downloaded on 2025-07-03 and contains data up to 2023 for FAOSTAT and up to 2020 for FRA. For production and trade, the module
+includes data from 1961 onwards. For forest area and stock, data are available from 1990 onwards. FAOSTAT and FRA data will be
+updated regularly; however, users of the C-Module should verify whether more recent FAOSTAT or FRA data are available before use.
 
 The package will generate a results directory called `output` which is located inside the data folder. The final directory after one run will look something like this:
 ```bash
@@ -159,58 +172,102 @@ The package will generate a results directory called `output` which is located i
 `- data
   `-- output
       |-- ....log  # contains the logged process of the simulation
-      |-- DataContainer_....pkl  # contains all output information as pkl file
-      |-- results....csv  # contains main results as csv file
-      |-- worldprices....csv  # contains world price results as csv file
-      |-- forest....csv  # contains forest area and stock results as csv file
-      |-- manufacture....csv #contain results for manufacturing as csv 
-      |-- results_aggregated....csv #contain aggregated results on continent level as csv file
+      |-- c_module_output_D<YYYYMMDD>Y<HH-MM-SS>_<scenario_name>.pkl  # contains all carbon outputs in a dict as pkl file
+      |-- CarbonDWL_D<YYYYMMDD>Y<HH-MM-SS>_<scenario_name>.csv  # contains carbon outputs for deadwood and litter as csv file
+      |-- CarbonForestBiomass_D<YYYYMMDD>Y<HH-MM-SS>_<scenario_name>.csv  # contains carbon outputs for forest biomass as csv file
+      |-- CarbonWHP_D<YYYYMMDD>Y<HH-MM-SS>_<scenario_name>.csv  # contains carbon outputs for HWP as csv file
+      |-- CarbonSoil_D<YYYYMMDD>Y<HH-MM-SS>_<scenario_name>.csv # contains carbon outputs for forest soils as csv file 
+      |-- CarbonSubstitution_D<YYYYMMDD>Y<HH-MM-SS>_<scenario_name>.csv # contains carbon outputs for substitution as csv file
+      |-- CarbonTotal_D<YYYYMMDD>Y<HH-MM-SS>_<scenario_name>.csv  # contains carbon outputs for all carbon pools as csv file
 
 ```
 **Important Output Information**  
 No output file will ever be overwritten by the application itself. New results-files will be generated in the format `results_D<yyyymmdd>T<hh-mm-ss>.csv` and will be saved to the output folder as well. The logfile itself won't be overwritten as well but also no new file created on additional runs. Log information simply gets appended to the existing logfile. Removing the logfile ahead of executing the model won't result in errors.
 
-### Model settings
+### Module settings
 Multiple settings are integrated in the C-Module to allow users to interact with the model and adapt the modelling parameters to their research interests.
-Following chapter provides an brief overview of the model settings. A detailed description of the settings is provided in the documentation. 
+The following chapter provides a brief overview of the model settings.
 
 Basic module settings include:
 
-[comment]: <to be complemented>
+|            Setting            |                                                            Description                                                            |                                                                                                Options                                                                                                 |  Default setting  |
+|:-----------------------------:|:---------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-----------------:|
+|      `add_on_activated`       |                                  Flag to activate if the C-Module is used as an add-on to TiMBA                                   |                                                                                                  Bool                                                                                                  |       True        |
+|         `start_year`          |        Year from which calculations of the C-Module are started. The value should be aligned with the provided input data         |                                                                                                  int                                                                                                   |       2020        |
+|          `end_year`           |        Year until which calculations of the C-Module are running. The value should be aligned with the provided input data        |                                                                                                  int                                                                                                   |       2050        |
+|         `read_in_pkl`         |                                  Flag to control which input files are used for projection data                                   |                                                                                                  Bool                                                                                                  |       True        |
+|      `calc_c_forest_agb`      |                               Flag to control if carbon in aboveground forest biomass is quantified                               |                                                                                                  Bool                                                                                                  |       True        |
+|      `calc_c_forest_bgb`      |                               Flag to control if carbon in belowground forest biomass is quantified                               |                                                                                                  Bool                                                                                                  |       True        |
+|     `calc_c_forest_soil`      |                                      Flag to control if carbon in forest soil is quantified                                       |                                                                                                  Bool                                                                                                  |       True        |
+|       `calc_forest_dwl`       |                                  Flag to control if carbon in deadwood and litter is quantified                                   |                                                                                                  Bool                                                                                                  |       True        |
+|         `calc_c_hwp`          |                                          Flag to control if carbon in HWP is quantified                                           |                                                                                                  Bool                                                                                                  |       True        |
+|  `c_hwp_accounting_approach`  |                           Setting to control the accounting approach to quantify carbon in the HWP pool                           |                                                                                     "stock-change" or "production"                                                                                     |  "stock-change"   |
+|      `historical_c_hwp`       |                          Setting to control the approach to quantify carbon in the historical HWP pool.                           |                                               "average": uses an 5-year average based on a selected year<br/> or<br/> "historical": uses historical data                                               |     "average"     |
+|     `hist_hwp_start_year`     |                           Setting to control the year from which the historical HWP pool is calculated                            | "default": uses a uniform default reference year for all countries and products<br/> or<br/> "country-specific": uses country-specific reference year based on the data availability for each country  |     "default"     |
+| `hist_hwp_start_year_default` | Setting to control the reference year for the historical HWP pool. <br/>Used in combination with `hist_hwp_start_year`="default"  |                                                                                                  int                                                                                                   | 2020 (start year) |
 
-The C-Module is delivered with a set of default settings, which were tested and validated. The default settings can be changed when excuting the package in the CMD or in `default_parameters.py` (changes in settings by the CLI will overwrite parameters in `default_parameters.py`).
+
+If the C-Module is used as an add-on to TiMBA, the start and end year parameters are automatically adjusted to match TiMBA's start and end years.
+The C-Module is delivered with a set of default settings, which were tested and validated. The default settings can be changed when executing the
+package in the CMD or in `default_parameters.py` (changes in settings by the CLI will overwrite parameters in `default_parameters.py`).
+Gaps in historical FAOSTAT and FRA data exist. The C-Module relies on gap-filling procedures to curate the original data:
+- For FRA data, the C-Module fills data gaps assuming that countries in the same regions have similar biogeographical characteristics.
+Regional averages are used in case data is missing for the country.
+- For FAOSTAT data, no data gap-filling procedure is implemented. However, if `historical_c_hwp`="average" is only applied
+for years with data. If `hist_hwp_start_year`="country-specific", the C-Module searches automatically for the 5 years for which data is available for each country.
   
 #### Settings as parameters
-The CLI allows to access basic model settings and their default values.
-
-[comment]: <to be complemented>
-
+The CLI allows to access basic model settings and their default values. Run following code to get details:
+ >run_cmodule --help
 
 #### Advanced settings
-In addition to the settings accessible via the CLI, users can control advanced settings through changes in `Defines.py` 
-[comment]: <to be complemented>
+In addition to the settings accessible via the CLI, users can control advanced settings through changes in `default_parameter.py`.
+Further, users can enhance additional input data related to carbon factors with country-specific data to conduct analyses 
+focused on specific countries.
 
 ## Extended module description
-To quantify and track carbon sequestration in the forest sector, TiMBA has been extended with a carbon module based on IPCC guidelines. TiMBA is enabled to quantify and price the climate mitigation potential of forests globally and on national level.
+Forest ecosystems and related forest products constitute important natural carbon sinks. Owing to their cost-effectiveness,
+flexibility, and availability, these sinks may play a vital role in achieving climate neutrality. To inform policy-making,
+numerical estimates and projections of these sinks are essential for benchmarking current trends against established targets
+and for exploring their potential when setting new ones. The C-Module quantifies and tracks carbon stocks in the forest sector
+of 180 countries using the latest IPCC guidelines and established scientific methods.
+For carbon in forest biomass (above- and below-ground), the C-Module uses forest stock data multiplied by nationally averaged
+carbon densities derived from FRA [tC m⁻³]. For carbon in forest deadwood, litter, and soils, the C-Module uses forest area 
+data multiplied by nationally averaged carbon densities from FRA [tC ha⁻¹] (Johnston et al., 2019; Johnston and Radeloff, 2019).
+Changes in these carbon pools are calculated between individual years or across multi-year periods (as applied in TiMBA).
 
-[comment]: <to be complemented>
+For quantifying carbon in harvested wood products (HWP), the C-Module offers several accounting approaches (e.g., stock-change
+and production), which primarily differ in how trade is integrated. The stock-change approach is based on domestic consumption,
+accounting for both exports and imports, whereas the production approach considers only carbon in HWP manufactured from nationally
+harvested wood, excluding imports of raw wood (Rüter et al., 2019). The C-Module applies default Tier 1 parameters for HWP
+half-lives and carbon content (Pingoud et al., 2006; Rüter et al., 2019).
+
+In addition, substitution effects from the use of HWP are calculated using constant default substitution factors from 
+Sathre and O'Connor (2010) and Hurmekoski et al. (2021). Due to the lack of country-specific data, these substitution
+factors are applied uniformly across all countries.
+
+All C-Module results are expressed in MtCO₂ per year (1 Mt = 1 million tonnes).
 
 ## Roadmap and project status
 
-The development of the C-Module is ongoing and we are already working on future releases. 
-Several research projects are currently extending different components of the C-Module:
-- CarbonLeak
-- 
+The development of the C-Module is ongoing and we are already working on future releases.
+It is planned to extend the module using alternative datasets for carbon densities, especially remote sensing datasets.
+Several research projects have extended and are extending different components of the C-Module:
+- [BioSDG](https://www.thuenen.de/en/institutes/forestry/projects-1/the-bioeconomy-and-the-sustainable-development-goals-of-the-united-nations-biosdg)
+- [CarbonLeak](https://www.thuenen.de/en/cross-institutional-projects/carbon-leak)
+
 Frequently check [the GitHub repository](https://github.com/TI-Forest-Sector-Modelling/C-Module) for new releases.
-[comment]: <to be complemented>
 
 ## Contributing to the project
-We welcome contributions, additions and suggestion to further develop or improve the code and the model. To check, discuss and include them into this project, we would like you to share your ideas with us so that we can agree on the requirements needed for accepting your contribution. 
+We welcome contributions, additions and suggestion to further develop or improve the code and the model. To check, discuss
+and include them into this project, we would like you to share your ideas with us so that we can agree on the requirements
+needed for accepting your contribution. 
 You can contact us directly via GitHub by creating issues, or by writing an Email to:
 
 tomke.honkomp@thuenen.de
 
-A detailed open access documentation will follow and be linked here soon. So far, this README serves as a comprehensive introduction and guidance on how to get started. 
+A detailed open access documentation will follow and be linked here soon. So far, this README serves as a comprehensive
+introduction and guidance on how to get started. 
 
 
 
@@ -228,7 +285,7 @@ The C-Module was developped by [Tomke Honkomp](https://www.thuenen.de/de/fachins
 
 Licensed under the GNU AGPL, Version 3.0. 
 
-Copyright ©, 2025, Thuenen Institute, TI-FSM, Tomke Honkomp
+Copyright ©, 2025, Thuenen Institute, Tomke Honkomp
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU Affero General Public License as
@@ -250,9 +307,16 @@ Copyright ©, 2025, Thuenen Institute, TI-FSM, Tomke Honkomp
 This work is the result of great efforts over two research projects [BioSDG](https://www.thuenen.de/en/institutes/forestry/projects-1/the-bioeconomy-and-the-sustainable-development-goals-of-the-united-nations-biosdg) and [CarbonLeak](https://www.thuenen.de/en/cross-institutional-projects/carbon-leak) at the Thünen Institute of Forestry.
 In the last years, many people made important contributions to this work. Without their support, reflection, and constructive criticism, this undertaking would not have been as successful as it turns out to be now.
 My gratitude goes to all of them. In particular, I would like to thank: 
--	The forest sector modelling team of the Thünen Institute of Forestry
+-	The forest sector modelling team of the Thünen Institute of Forestry (Franziska Schier, Christian Morland, and Julia Tandetzki)
 -	Holger Weimar and Matthias Dieter for the trustful and cooperative working environment, rational support and critical discussion and the opportunity to keep on going
 -	The Thünen Institute of Forestry and its Head Matthias Dieter for providing financial resources over the years 
 - [makeareadme.com](https://www.makeareadme.com/) for providing the template this README is leaned on.
 
 ## References
+
+- Johnston, C.; Buongiorno, J.; Nepal, P.; Prestemon, J. (2019): From Source to Sink: Past Changes and Model Projections of Carbon Sequestration in the Global Forest Sector. In: J Forest Econ 34 (1-2), P. 47–72. DOI: 10.1561/112.00000442.
+- Johnston, Craig M. T.; Radeloff, Volker C. (2019): Global mitigation potential of carbon stored in harvested wood products. In: Proceedings of the National Academy of Sciences of the United States of America 116 (29), P. 14526–14531. DOI: 10.1073/pnas.1904231116.
+- Pingoud, K.; Skog, K. E.; Martino, D. L.; Tonosaki, M.; Xiaoquan, Z. (2006): Chapter 12: Harvested Wood Products. In: IPCC (Hg.): 2006 IPCC Guidelines for National Greenhouse Gas Inventories. Under the collaboration of H. S. Eggleston, L. Buendia, K. Miwa, T. Ngara und K. Tanabe. Japan: IGES.
+- Rüter, S.; Matthews, R. W.; Lundblad, M.; Sato, A.; Hassan, R. A. (2019): Chapter 12: Harvested Wood Products. In: IPCC (Hg.): Refinement of the 2006 IPCC Guidelines for National Greenhouse Gas Inventories. Under the collaboration of E. Calvo Buendia, K. Tanabe, A. Kranjc, J. Baasansuren, M. Fukuda, S. Ngarize et al. Switzerland.
+- Sathre, Roger; O’Connor, Jennifer (2010): Meta-analysis of greenhouse gas displacement factors of wood product substitution. In: Environmental Science & Policy 13 (2), P. 104–114. DOI: 10.1016/j.envsci.2009.12.005.
+- Hurmekoski, Elias; Smyth, Carolyn E.; Stern, Tobias; Verkerk, Pieter Johannes; Asada, Raphael (2021): Substitution impacts of wood use at the market level: a systematic review. In: Environ. Res. Lett. 16 (12), P. 123004. DOI: 10.1088/1748-9326/ac386f.
