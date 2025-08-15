@@ -41,12 +41,36 @@ def get_latest_file(folder_path, pattern, use_timestamp):
         return latest_file
 
 
+def cmodule_is_standalone():
+    """
+    Check if cmodule is standalone or not, covering if the code is run as the main program, covering CLI, script, IDE,
+     and entry point runs.
+    :return: Bool if cmodule is standalone or not.
+    """
+    import __main__
+    import sys
+
+    main_file = Path(getattr(__main__, '__file__', '')).resolve()
+
+    package_root = Path(__file__).resolve().parent
+
+    if not main_file.exists():
+        return False
+
+    entry_names = {"main.py", "__main__.py"}
+    is_entry_point = main_file.name in entry_names
+
+    return package_root in main_file.parents and (is_entry_point or sys.argv[0] == str(main_file))
+
+    return main_file.startswith(project_root) and sys.argv[0] == main_file
+
+
 PACKAGEDIR = Path(__file__).parent.parent.absolute()
 TIMBADIR = Path(__file__).parent.parent.parent.parent.parent.parent.absolute()
 TIMBADIR = TIMBADIR / Path("TiMBA") / Path("data") / Path("output")
 INPUT_FOLDER = PACKAGEDIR / Path("data") / Path("input")
 
-if user_input[ParamNames.add_on_activated.value]:
+if user_input[ParamNames.add_on_activated.value] or cmodule_is_standalone():
     # input paths for add-on c-module
     AO_RESULTS_INPUT_PATTERN = r"results_D(\d{8}T\d{2}-\d{2}-\d{2})_.*"
     AO_FOREST_INPUT_PATTERN = r"forest_D(\d{8}T\d{2}-\d{2}-\d{2})_.*"
