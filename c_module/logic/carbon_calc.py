@@ -905,7 +905,7 @@ class CarbonCalculator:
 
         carbonstock_biomass_zy = pd.DataFrame([0] * len_period)
         carbonstock_biomass_total = pd.concat([
-            ((carbon_biomass.groupby([
+            pd.DataFrame((carbon_biomass.groupby([
                 VarNames.region_code.value,
                 VarNames.period_var.value])[VarNames.carbon_forest_biomass.value].sum()) / len_commodity /
              CarbonConstants.CARBON_MIO_FACTOR.value
@@ -915,7 +915,7 @@ class CarbonCalculator:
         carbonstock_biomass_total = pd.concat([carbonstock_biomass_total, period_df], axis=1)
 
         carbonstock_soil_total = pd.concat([
-            ((carbon_soil.groupby([
+            pd.DataFrame((carbon_soil.groupby([
                 VarNames.region_code.value,
                 VarNames.period_var.value])[VarNames.carbon_soil.value].sum()) / len_commodity /
              CarbonConstants.CARBON_MIO_FACTOR.value
@@ -925,7 +925,7 @@ class CarbonCalculator:
         carbonstock_soil_total = pd.concat([carbonstock_soil_total, period_df], axis=1)
 
         carbonstock_dwl_total = pd.concat([
-            ((carbon_dwl.groupby([
+            pd.DataFrame((carbon_dwl.groupby([
                 VarNames.region_code.value,
                 VarNames.period_var.value])[VarNames.carbon_dwl.value].sum()) / len_commodity /
              CarbonConstants.CARBON_MIO_FACTOR.value
