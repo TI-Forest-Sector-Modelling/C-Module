@@ -138,6 +138,9 @@ class CarbonCalculator:
             ], axis=1)
             carbon_data = pd.concat([carbon_data, carbonstock_forest.copy()], axis=0).reset_index(drop=True)
 
+        carbon_data = carbon_data.drop_duplicates().reset_index(drop=True)
+        carbon_data[col_name] = carbon_data[col_name] / CarbonConstants.CARBON_MIO_FACTOR.value
+        carbon_data[col_name_change] = carbon_data[col_name_change] / CarbonConstants.CARBON_MIO_FACTOR.value
         return carbon_data
 
     @staticmethod
@@ -167,6 +170,11 @@ class CarbonCalculator:
                     user_input=self.UserInput,
                     period=period
                 )
+        carbon_data[VarNames.carbon_hwp.value] = (carbon_data[VarNames.carbon_hwp.value] /
+                                                  CarbonConstants.CARBON_MIO_FACTOR.value)
+        carbon_data[VarNames.carbon_hwp_chg.value] = (carbon_data[VarNames.carbon_hwp_chg.value] /
+                                                      CarbonConstants.CARBON_MIO_FACTOR.value)
+
         self.carbon_data[VarNames.carbon_hwp.value] = carbon_data
 
     @staticmethod
@@ -861,6 +869,15 @@ class CarbonCalculator:
 
             substitution_data = pd.concat([substitution_data, substitution_hwp], axis=0).reset_index(drop=True)
 
+        substitution_data[VarNames.material_substitution.value] = (
+                substitution_data[VarNames.material_substitution.value] / CarbonConstants.CARBON_MIO_FACTOR.value)
+        substitution_data[VarNames.energy_substitution.value] = (
+                substitution_data[VarNames.energy_substitution.value] / CarbonConstants.CARBON_MIO_FACTOR.value)
+        substitution_data[VarNames.total_substitution.value] = (
+                substitution_data[VarNames.total_substitution.value] / CarbonConstants.CARBON_MIO_FACTOR.value)
+        substitution_data[VarNames.total_substitution_chg.value] = (
+                substitution_data[VarNames.total_substitution_chg.value] / CarbonConstants.CARBON_MIO_FACTOR.value)
+
         return substitution_data
 
     @staticmethod
@@ -891,25 +908,23 @@ class CarbonCalculator:
         carbon_soil = self.carbon_data[VarNames.carbon_soil.value].copy()
         carbon_dwl = self.carbon_data[VarNames.carbon_dwl.value].copy()
 
-        carbonstock_hwp_total = pd.concat([(
-                                                   carbon_hwp.groupby([
-                                                       VarNames.region_code.value,
-                                                       VarNames.period_var.value])[VarNames.carbon_hwp.value].sum() /
-                                                   CarbonConstants.CARBON_MIO_FACTOR.value).reset_index(drop=True), period_df], axis=1)
+        carbonstock_hwp_total = pd.concat([(carbon_hwp.groupby([
+            VarNames.region_code.value,
+            VarNames.period_var.value])[VarNames.carbon_hwp.value].sum()
+                                            ).reset_index(drop=True), period_df], axis=1)
 
-        substitution_hwp_total = pd.concat([(
-                                                    substitution.groupby([
-                                                        VarNames.region_code.value,
-                                                        VarNames.period_var.value])[VarNames.total_substitution.value].sum() /
-                                                    CarbonConstants.CARBON_MIO_FACTOR.value).reset_index(drop=True), period_df], axis=1)
+        substitution_hwp_total = pd.concat([(substitution.groupby([
+            VarNames.region_code.value,
+            VarNames.period_var.value])[VarNames.total_substitution.value].sum()
+                                             ).reset_index(drop=True), period_df], axis=1)
 
         carbonstock_biomass_zy = pd.DataFrame([0] * len_period)
         carbonstock_biomass_total = pd.concat([
             pd.DataFrame((carbon_biomass.groupby([
                 VarNames.region_code.value,
-                VarNames.period_var.value])[VarNames.carbon_forest_biomass.value].sum()) / len_commodity /
-             CarbonConstants.CARBON_MIO_FACTOR.value
-             ).reset_index(drop=True), carbonstock_biomass_zy.rename(columns={0: VarNames.carbon_forest_biomass.value})
+                VarNames.period_var.value])[VarNames.carbon_forest_biomass.value].sum())
+                         ).reset_index(drop=True),
+            carbonstock_biomass_zy.rename(columns={0: VarNames.carbon_forest_biomass.value})
         ], axis=0).reset_index(drop=True)[VarNames.carbon_forest_biomass.value]
 
         carbonstock_biomass_total = pd.concat([carbonstock_biomass_total, period_df], axis=1)
@@ -917,8 +932,7 @@ class CarbonCalculator:
         carbonstock_soil_total = pd.concat([
             pd.DataFrame((carbon_soil.groupby([
                 VarNames.region_code.value,
-                VarNames.period_var.value])[VarNames.carbon_soil.value].sum()) / len_commodity /
-             CarbonConstants.CARBON_MIO_FACTOR.value
+                VarNames.period_var.value])[VarNames.carbon_soil.value].sum())
              ).reset_index(drop=True), carbonstock_biomass_zy.rename(columns={0: VarNames.carbon_soil.value})
         ], axis=0).reset_index(drop=True)[VarNames.carbon_soil.value]
 
@@ -927,8 +941,7 @@ class CarbonCalculator:
         carbonstock_dwl_total = pd.concat([
             pd.DataFrame((carbon_dwl.groupby([
                 VarNames.region_code.value,
-                VarNames.period_var.value])[VarNames.carbon_dwl.value].sum()) / len_commodity /
-             CarbonConstants.CARBON_MIO_FACTOR.value
+                VarNames.period_var.value])[VarNames.carbon_dwl.value].sum())
              ).reset_index(drop=True), carbonstock_biomass_zy.rename(columns={0: VarNames.carbon_dwl.value})], axis=0
         ).reset_index(drop=True)[VarNames.carbon_dwl.value]
 
