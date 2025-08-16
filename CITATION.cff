@@ -19,7 +19,8 @@ abstract: |-
   The Carbon Module (C-Module) tracks global carbon stocks and stock changes across pools in the forestry sector, based on
   either forest sector projections or historical forest sector statistics. In its current version, the module quantifies
   carbon stocks and stock changes in forest biomass (above- and below-ground), harvested wood products (HWP), forest soils,
-  dead wood, and litter for 180 countries.
+  dead wood, and litter for 180 countries. The Carbon Module was developed as an add-on to the Timber markets Model for policy-Based
+  Analysis (TiMBA).
 keywords:
   - research
   - carbon accounting
