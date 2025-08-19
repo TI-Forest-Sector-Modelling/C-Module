@@ -1,4 +1,4 @@
-![C-Module_Logo](C-Module_Logo_transparent_v1.png)
+![C-Module_Logo](https://github.com/TI-Forest-Sector-Modelling/C-Module/blob/main/C-Module_Logo_transparent_v1.png?raw=true)
 
 ------
 [![CI - Test](https://github.com/TI-Forest-Sector-Modelling/C-Module/actions/workflows/actions.yml/badge.svg)](https://github.com/TI-Forest-Sector-Modelling/C-Module/actions/workflows/actions.yml)
