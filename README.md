@@ -2,7 +2,7 @@
 
 ------
 [![CI - Test](https://github.com/TI-Forest-Sector-Modelling/C-Module/actions/workflows/actions.yml/badge.svg)](https://github.com/TI-Forest-Sector-Modelling/C-Module/actions/workflows/actions.yml)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=TI-Forest-Sector-Modelling_TiMBA&metric=coverage)](https://sonarcloud.io/summary/new_code?id=TI-Forest-Sector-Modelling_TiMBA)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=TI-Forest-Sector-Modelling_C-Module&metric=coverage)](https://sonarcloud.io/summary/new_code?id=TI-Forest-Sector-Modelling_C-Module)
 ![GitHub Release](https://img.shields.io/github/v/release/TI-Forest-Sector-Modelling/C-Module)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16884230.svg)](https://doi.org/10.5281/zenodo.16884230)
 [![License](https://img.shields.io/github/license/TI-Forest-Sector-Modelling/C-Module)](https://github.com/TI-Forest-Sector-Modelling/C-Module/blob/main/COPYING)
