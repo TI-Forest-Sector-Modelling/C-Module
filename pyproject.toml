@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "C-Module"
-version = "1.0.0"
+version = "1.0.1"
 authors = [{name = "Tomke Honkomp", email = "tomke.honkomp@thuenen.de"}]
 description = "The C-Module tracks global carbon stocks and flows across pools of the forestry sector"
 readme = "README.md"
