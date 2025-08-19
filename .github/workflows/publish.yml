@@ -49,5 +49,11 @@ jobs:
           name: dist
           path: dist/
 
+      - name: Debug GitHub context
+        run: |
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "Workflow: $GITHUB_WORKFLOW"
+          echo "Actor: $GITHUB_ACTOR"
+
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
