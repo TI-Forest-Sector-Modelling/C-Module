@@ -8,7 +8,8 @@ version = "1.0.3"
 authors = [{name = "Tomke Honkomp", email = "tomke.honkomp@thuenen.de"}]
 description = "The C-Module tracks global carbon stocks and flows across pools of the forestry sector"
 readme = "README.md"
-license = { text = "AGPL-3.0-or-later" }
+license = "AGPL-3.0-or-later"
+license-files = ["COPYING.txt"]
 keywords = ["c-module", "model", "carbon accounting", "thuenen institute", "economics of forests", "research"]
 
 requires-python = ">=3.9"
@@ -52,10 +53,10 @@ include-package-data = true
 zip-safe = true
 
 [tool.setuptools.packages]
-find = {namespaces = false}
+find = {}
 
 [tool.setuptools.package-data]
-"*" = ["README.md"]
+"c_module" = ["data/input/*"]
 
 [tool.coverage.report]
 fail_under = 50
