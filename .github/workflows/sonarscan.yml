@@ -45,7 +45,7 @@ jobs:
             -Dsonar.organization=ti-forest-sector-modelling
             -Dsonar.projectKey=TI-Forest-Sector-Modelling_C-Module
             -Dsonar.projectName=C-Module
-            -Dsonar.projectVersion=1.0.1
+            -Dsonar.projectVersion=1.0.3
             -Dsonar.python.coverage.reportPaths=coverage.xml
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
