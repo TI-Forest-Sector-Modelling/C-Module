@@ -3,7 +3,7 @@ requires = ["setuptools>=75.0.0", "wheel>=0.38", "build"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "C-Module"
+name = "Carbon-Module"
 version = "1.0.3"
 authors = [{name = "Tomke Honkomp", email = "tomke.honkomp@thuenen.de"}]
 description = "The C-Module tracks global carbon stocks and flows across pools of the forestry sector"
