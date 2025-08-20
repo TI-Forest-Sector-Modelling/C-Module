@@ -16,15 +16,13 @@ requires-python = ">=3.9"
 dependencies = [
     "click==8.1.7",
     "coverage==7.6.3",
-    "dataclasses==0.6",
     "DateTime==5.5",
     "numpy==1.26.4",
     "openpyxl==3.1.5",
     "pandas==1.5.3",
     "pathlib==1.0.1",
     "tqdm==4.67.1",
-    "tomli==2.0.2",
-    "typing==3.7.4.3"
+    "tomli==2.0.2"
 ]
 
 classifiers = [
@@ -34,7 +32,6 @@ classifiers = [
     "Operating System :: Microsoft :: Windows :: Windows 10",
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: POSIX :: Linux",
-    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering"
 ]
@@ -53,10 +50,10 @@ include-package-data = true
 zip-safe = true
 
 [tool.setuptools.packages]
-find = {}
+find = { include = ["c_module*"] }
 
 [tool.setuptools.package-data]
-"c_module" = ["data/input/*"]
+"c_module" = ["data/input/**/*"]
 
 [tool.coverage.report]
 fail_under = 50
