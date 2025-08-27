@@ -17,10 +17,14 @@ dependencies = [
     "click==8.1.7",
     "coverage==7.6.3",
     "DateTime==5.5",
+    "dash==3.0.0",
+    "dash-bootstrap-components==2.0.0",
     "numpy==1.26.4",
     "openpyxl==3.1.5",
     "pandas==1.5.3",
     "pathlib==1.0.1",
+    "plotly==6.0.1",
+    "seaborn==0.13.2",
     "tqdm==4.67.1",
     "tomli==2.0.2"
 ]
