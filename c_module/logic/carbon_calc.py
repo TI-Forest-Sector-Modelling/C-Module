@@ -175,6 +175,17 @@ class CarbonCalculator:
         carbon_data[VarNames.carbon_hwp_chg.value] = (carbon_data[VarNames.carbon_hwp_chg.value] /
                                                       CarbonConstants.CARBON_MIO_FACTOR.value)
 
+        hwp_category = self.add_carbon_data[VarNames.carbon_hwp.value][[VarNames.commodity_code.value,
+                                                                        VarNames.hwp_category.value]].drop_duplicates()
+
+        carbon_data = carbon_data.merge(hwp_category, left_on=VarNames.commodity_code.value,
+                                        right_on=VarNames.commodity_code.value, how="left")
+        carbon_data = carbon_data.dropna(axis=0).reset_index(drop=True)
+        carbon_data = carbon_data.groupby(
+            [VarNames.region_code.value, VarNames.hwp_category.value, VarNames.ISO3.value,
+             VarNames.period_var.value, VarNames.year_name.value]
+        )[[VarNames.carbon_hwp.value, VarNames.carbon_hwp_chg.value]].sum().reset_index()
+
         self.carbon_data[VarNames.carbon_hwp.value] = carbon_data
 
     @staticmethod
