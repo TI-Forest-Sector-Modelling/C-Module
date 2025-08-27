@@ -64,7 +64,7 @@ class CarbonCalculator:
 
         if VarNames.carbon_forest_biomass.value in carbon_data.columns:
             unit_conversion_param = CarbonConstants.CARBON_MIO_FACTOR.value
-            forest_data_col = "ForStock"
+            forest_data_col = VarNames.forest_stock_var.value
 
             if VarNames.carbon_agb.value in monte_carlo:
                 carbon_above_ground_col = c_dens_avg_rnd
@@ -81,7 +81,7 @@ class CarbonCalculator:
             col_name, col_name_change = VarNames.carbon_forest_biomass.value, VarNames.carbon_forest_biomass_chg.value
         else:
             unit_conversion_param = CarbonConstants.CARBON_TSD_FACTOR.value
-            forest_data_col = "ForArea"
+            forest_data_col = VarNames.forest_area_var.value
             if VarNames.carbon_soil.value in carbon_data.columns:
 
                 if VarNames.carbon_soil.value in monte_carlo:
@@ -110,8 +110,8 @@ class CarbonCalculator:
                 col_name, col_name_change = VarNames.carbon_dwl.value, VarNames.carbon_dwl_chg.value
 
         carbon_data = pd.DataFrame()
-        for period in forest_data["Period"].unique():
-            forest_data_period = forest_data[forest_data["Period"] == period].copy().reset_index(drop=True)
+        for period in forest_data[VarNames.period_var.value].unique():
+            forest_data_period = forest_data[forest_data[VarNames.period_var.value] == period].copy().reset_index(drop=True)
             forest_data_period = forest_data_period.merge(add_data[[VarNames.region_code.value, VarNames.ISO3.value]],
                                                           left_on=VarNames.region_code.value,
                                                           right_on=VarNames.region_code.value,
@@ -121,9 +121,9 @@ class CarbonCalculator:
                 carbonstock_prev = pd.DataFrame(np.zeros(len(forest_data_period)))[0]
             else:
                 forest_variable_prev = (
-                    forest_data[forest_data["Period"] == period - 1][forest_data_col]).copy().reset_index(drop=True)
+                    forest_data[forest_data[VarNames.period_var.value] == period - 1][forest_data_col]).copy().reset_index(drop=True)
                 carbonstock_prev = (
-                    carbon_data[carbon_data["Period"] == period - 1][col_name]).copy().reset_index(drop=True)
+                    carbon_data[carbon_data[VarNames.period_var.value] == period - 1][col_name]).copy().reset_index(drop=True)
 
             forest_variable_new = forest_data_period[forest_data_col].copy().reset_index(drop=True)
             carbonstock_change = (
