@@ -372,3 +372,54 @@ class DataManager:
         self.carbon_data[carbon_hwp_name] = pd.DataFrame([0], columns=[carbon_hwp_name])
         self.carbon_data[carbon_substitution_name] = pd.DataFrame([0], columns=[carbon_substitution_name])
         self.carbon_data[carbon_total_name] = pd.DataFrame([0], columns=[carbon_total_name])
+
+    @staticmethod
+    def flattening_data(data):
+        """
+        Flattens dictionary data into 2D dataframe.
+        :param data: dictionary data
+        :return: flattened dataframe
+        """
+        flat_data = pd.DataFrame()
+        change_var_list = [VarNames.carbon_forest_biomass_chg.value, VarNames.carbon_dwl_chg.value,
+                           VarNames.carbon_soil_chg.value, VarNames.carbon_hwp_chg.value,
+                           VarNames.total_substitution_chg.value, VarNames.carbon_total_chg.value]
+        for key, key_change in zip(data.keys(), change_var_list):
+            data_tmp = data[key].copy()
+            if key == VarNames.carbon_hwp.value:
+                data_tmp[VarNames.output_variable.value] = key + "_" + data_tmp[VarNames.hwp_category.value]
+            else:
+                data_tmp[VarNames.output_variable.value] = key
+
+            if key == VarNames.carbon_substitution.value:
+                key = VarNames.total_substitution.value
+
+            data_tmp = data_tmp.rename(columns={key: VarNames.carbon_stock.value,
+                                                key_change: VarNames.carbon_stock_chg.value})
+
+            data_tmp = data_tmp[[VarNames.region_code.value, VarNames.ISO3.value, VarNames.period_var.value,
+                                 VarNames.output_variable.value, VarNames.carbon_stock.value,
+                                 VarNames.carbon_stock_chg.value]]
+            flat_data = pd.concat([flat_data, data_tmp], axis=0).reset_index(drop=True)
+
+        return flat_data
+
+    @staticmethod
+    def add_additional_info(self, data):
+        """
+        Adds additional information related to regional aggregation and projection years
+        :param self: C-Module object
+        :param data: Data to which the additional information will be added
+        :return: Data enhanced by additional information
+        """
+        geo_data = self.add_data[VarNames.country_data.value]
+        geo_data = geo_data[[VarNames.ISO3.value, VarNames.continent.value, VarNames.carbon_region.value]]
+        year_data = self.timba_data[VarNames.timba_data_all.value]
+        year_data = year_data[[VarNames.period_var.value,
+                               VarNames.year_name.value]].drop_duplicates().reset_index(drop=True)
+
+        data = data.merge(geo_data, left_on=VarNames.ISO3.value, right_on=VarNames.ISO3.value, how='left')
+        data = data.merge(year_data, left_on=VarNames.period_var.value, right_on=VarNames.period_var.value, how='left')
+
+        return data
+
