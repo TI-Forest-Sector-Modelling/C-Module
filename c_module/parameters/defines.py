@@ -47,6 +47,7 @@ class VarNames(Enum):
     timba_data_forest = "Forest"
     timba_data_all = "data_periods"
     timba_data_carbon = "Carbon"
+    timba_data_carbon_flat = "Carbon_flat"
     region_code = "RegionCode"
     commodity_code = "CommodityCode"
     commodity_name = "CommodityName"
@@ -61,6 +62,8 @@ class VarNames(Enum):
     import_var = "TransportationImport"
     export_var = "TransportationExport"
     production_var = "ManufactureCost"
+    forest_stock_var = "ForStock"
+    forest_area_var = "ForArea"
 
     # Additonal data
     timba_country_name = "TiMBA Area"
@@ -107,6 +110,9 @@ class VarNames(Enum):
     start_year = "start year"
     production_approach = "production"
     stock_change_approach = "stock-change"
+    output_variable = "Variable"
+    carbon_stock = "carbon stock"
+    carbon_stock_chg = "carbon stock change"
 
     # FAOSTAT data
     faostat_item_code = "Item Code"
