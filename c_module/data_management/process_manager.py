@@ -55,7 +55,10 @@ class ProcessManager:
     @staticmethod
     def save_carbon_data(self):
         self.logger.info("C-Module - Saving carbon stock and flux data")
+        carbon_data_ext = DataManager.flattening_data(data=self.carbon_data)
+        carbon_data_ext = DataManager.add_additional_info(self, data=carbon_data_ext)
         self.timba_data[VarNames.timba_data_carbon.value] = self.carbon_data[VarNames.carbon_total.value]
+        self.timba_data[VarNames.timba_data_carbon_flat.value] = carbon_data_ext
         if self.UserInput[ParamNames.add_on_activated.value]:
             DataManager.serialize_to_pickle(self.timba_data, f"{PKL_UPDATED_TIMBA_OUTPUT}.pkl")
         else:
