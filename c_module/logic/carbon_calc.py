@@ -130,6 +130,11 @@ class CarbonCalculator:
                     emission_factor * (forest_variable_new - forest_variable_prev) * unit_conversion_param)
             carbonstock_new = carbonstock_change + carbonstock_prev
 
+            if period == 0:
+                carbonstock_change = pd.DataFrame(np.zeros(len(carbonstock_change)))[0]
+            else:
+                pass
+
             carbonstock_forest = pd.concat([
                 forest_data_period[[VarNames.region_code.value, VarNames.ISO3.value, VarNames.period_var.value,
                                     forest_data_col]],
@@ -437,9 +442,8 @@ class CarbonCalculator:
                                     ) / log_decay_rate
 
         carboninflow_hwp = pd.DataFrame(data=np.zeros((len(data_aligned), 1)))[0]
-        carbonstock_hwp_prev = pd.DataFrame(data=np.zeros((len(data_aligned), 1)))[0]
         carbonstock_hwp = historic_carbonstock_hwp + carboninflow_hwp
-        carbonstockchange_hwp = historic_carbonstock_hwp - carbonstock_hwp_prev
+        carbonstockchange_hwp = pd.DataFrame(data=np.zeros((len(data_aligned), 1)))[0]
 
         historic_carbonstock_hwp = pd.concat([
             data_info.rename(columns={start_year: year_name}),
@@ -854,13 +858,16 @@ class CarbonCalculator:
                 substitution_prev = pd.DataFrame(substitution_prev[VarNames.total_substitution.value]).rename(
                     columns={VarNames.total_substitution.value: 0})[0]
 
-
             total_substitution_period = total_substitution[
                 total_substitution[VarNames.period_var.value] == period
             ][VarNames.total_substitution.value].reset_index(drop=True)
 
-
             substitution_change = total_substitution_period - substitution_prev
+            if period == 0:
+                substitution_change = pd.DataFrame(np.zeros(len(data_aligned_period)))[0]
+            else:
+                pass
+
             material_substitution_period = material_substitution[
                 material_substitution[VarNames.period_var.value] == period
             ][VarNames.material_substitution.value].reset_index(drop=True)
