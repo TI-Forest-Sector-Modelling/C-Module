@@ -7,8 +7,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import dash
-from dash.testing.application_runners import import_app, ThreadedRunner
+from dash.testing.application_runners import ThreadedRunner
 
 
 from c_module.logic.visualisation import Carbon_DashboardPlotter
