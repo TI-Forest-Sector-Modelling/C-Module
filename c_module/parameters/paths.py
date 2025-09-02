@@ -78,6 +78,9 @@ def cmodule_is_standalone():
         if "pytest" in sys.modules and Path.cwd().resolve() == package_root.parent:
             return True
 
+        if any("unittest" in mod for mod in sys.modules):
+            return True
+
     return False
 
 
