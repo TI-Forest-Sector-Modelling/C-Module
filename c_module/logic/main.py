@@ -24,5 +24,6 @@ class C_Module(object):
         ProcessManager.run_readin_process(self)
         CarbonCalculator.run_carbon_calc(self)
         ProcessManager.save_carbon_data(self)
+        ProcessManager.call_carbon_dashboard(self)
 
 

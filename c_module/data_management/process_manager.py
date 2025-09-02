@@ -2,6 +2,7 @@ from c_module.data_management.data_manager import DataManager
 from c_module.parameters.paths import (FAOSTAT_DATA, FRA_DATA)
 from c_module.parameters.defines import (VarNames, ParamNames)
 from pathlib import Path
+from c_module.logic.visualisation import Carbon_DashboardPlotter
 
 
 class ProcessManager:
@@ -57,10 +58,11 @@ class ProcessManager:
         DataManager.save_data(self)
         DataManager.merge_sc_data(self)
 
-        for df_key in self.carbon_data.keys():
-            carbon_data = self.carbon_data[df_key]
-            carbon_data_path = OUTPUT_FOLDER / Path(f"{df_key}_D{self.time_stamp}_{SC_NAME}")
-            carbon_data.to_csv(f"{carbon_data_path}.csv", index=False)
+    @staticmethod
+    def call_carbon_dashboard(self):
+        timba_data = self.timba_data[VarNames.all_scenarios.value].copy()
+        timba_data = timba_data[timba_data[VarNames.year_name.value] % 5 == 0].reset_index(drop=True)
+        Carbon_DashboardPlotter(data=timba_data).run()
 
     @staticmethod
     def start_header(self):
