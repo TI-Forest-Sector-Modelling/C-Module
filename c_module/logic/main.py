@@ -24,7 +24,7 @@ class C_Module(object):
         ProcessManager.run_readin_process(self)
         CarbonCalculator.run_carbon_calc(self)
         ProcessManager.save_carbon_data(self)
-        if self.UserInput[ParamNames.show_dashboard.value]:
+        if self.UserInput[ParamNames.show_carbon_dashboard.value]:
             ProcessManager.call_carbon_dashboard(self)
 
 

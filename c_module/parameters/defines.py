@@ -37,7 +37,7 @@ class ParamNames(Enum):
     historical_c_hwp = "historical_c_hwp"
     hist_hwp_start_year = "hist_hwp_start_year"
     hist_hwp_start_year_default = "hist_hwp_start_year_default"
-    show_dashboard = "show_dashboard"
+    show_carbon_dashboard = "show_carbon_dashboard"
 
 
 class VarNames(Enum):

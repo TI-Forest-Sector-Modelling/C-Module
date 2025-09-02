@@ -23,7 +23,7 @@ hist_hwp_start_year = "default"  # Options: "country-specific", "default"
 hist_hwp_start_year_default = 2020
 
 # Visualization parameters
-show_dashboard = True
+show_carbon_dashboard = True
 
 user_input = {
     ParamNames.add_on_activated.value: add_on_activated,
@@ -39,5 +39,5 @@ user_input = {
     ParamNames.historical_c_hwp.value: historical_c_hwp,
     ParamNames.hist_hwp_start_year.value: hist_hwp_start_year,
     ParamNames.hist_hwp_start_year_default.value: hist_hwp_start_year_default,
-    ParamNames.show_dashboard.value: show_dashboard
+    ParamNames.show_carbon_dashboard.value: show_carbon_dashboard
 }
