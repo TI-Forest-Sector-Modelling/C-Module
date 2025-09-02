@@ -68,3 +68,10 @@ branch = true
 include = ["c_module/*"]
 command_line = "-m unittest discover -s test"
 
+[project.optional-dependencies]
+dev = [
+    "dash[testing]",
+    "coverage",
+    "webdriver-manager"
+]
+
