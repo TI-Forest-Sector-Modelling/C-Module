@@ -96,16 +96,15 @@ if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone():
 
 else:
     # input paths for standalone c-module
-    RESULTS_INPUT = PACKAGEDIR / INPUT_FOLDER / Path("default_Sc_results")
-    FOREST_INPUT = PACKAGEDIR / INPUT_FOLDER / Path("default_Sc_forest")
-    PKL_RESULTS_INPUT = PACKAGEDIR / INPUT_FOLDER / Path("default_Sc_results")
+    RESULTS_INPUT = INPUT_FOLDER / Path("default_Sc_results")
+    FOREST_INPUT = INPUT_FOLDER / Path("default_Sc_forest")
+    PKL_RESULTS_INPUT = list(INPUT_FOLDER.glob("default_Sc_results_*.pkl"))
 
     # output paths for standalone c-module
     OUTPUT_FOLDER = PACKAGEDIR / Path("data") / Path("output")
-    PKL_UPDATED_TIMBA_OUTPUT = OUTPUT_FOLDER / Path("updated_timba_output_D")
+    PKL_UPDATED_TIMBA_OUTPUT = OUTPUT_FOLDER / Path("updated_timba_output")
     PKL_CARBON_OUTPUT = OUTPUT_FOLDER / Path("c_module_output_D")
     PKL_CARBON_OUTPUT_AGG = OUTPUT_FOLDER / Path("carbon_results_agg_D")
-    SC_NAME = "default_Sc"
 
 
 # Official statistics from the Food and Agriculture Organization

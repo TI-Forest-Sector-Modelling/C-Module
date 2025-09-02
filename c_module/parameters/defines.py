@@ -113,6 +113,8 @@ class VarNames(Enum):
     output_variable = "Variable"
     carbon_stock = "carbon stock"
     carbon_stock_chg = "carbon stock change"
+    all_scenarios = "all_sc"
+    scenario = "scenario"
 
     # FAOSTAT data
     faostat_item_code = "Item Code"

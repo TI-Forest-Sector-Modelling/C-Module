@@ -1,6 +1,5 @@
 from c_module.data_management.data_manager import DataManager
-from c_module.parameters.paths import (FAOSTAT_DATA, FRA_DATA, PKL_CARBON_OUTPUT, PKL_UPDATED_TIMBA_OUTPUT,
-                                       OUTPUT_FOLDER, SC_NAME)
+from c_module.parameters.paths import (FAOSTAT_DATA, FRA_DATA)
 from c_module.parameters.defines import (VarNames, ParamNames)
 from pathlib import Path
 
@@ -55,15 +54,8 @@ class ProcessManager:
     @staticmethod
     def save_carbon_data(self):
         self.logger.info("C-Module - Saving carbon stock and flux data")
-        carbon_data_ext = DataManager.flattening_data(data=self.carbon_data)
-        carbon_data_ext = DataManager.add_additional_info(self, data=carbon_data_ext)
-        self.timba_data[VarNames.timba_data_carbon.value] = self.carbon_data[VarNames.carbon_total.value]
-        self.timba_data[VarNames.timba_data_carbon_flat.value] = carbon_data_ext
-        if self.UserInput[ParamNames.add_on_activated.value]:
-            DataManager.serialize_to_pickle(self.timba_data, f"{PKL_UPDATED_TIMBA_OUTPUT}.pkl")
-        else:
-            DataManager.serialize_to_pickle(
-                self.carbon_data, f"{PKL_CARBON_OUTPUT}{self.time_stamp}_{SC_NAME}.pkl")
+        DataManager.save_data(self)
+        DataManager.merge_sc_data(self)
 
         for df_key in self.carbon_data.keys():
             carbon_data = self.carbon_data[df_key]
