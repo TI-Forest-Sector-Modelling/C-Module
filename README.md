@@ -86,23 +86,25 @@ With a newer Python version, we can not guarantee the full functionality of the 
 Select the correct Python interpreter.   
 Show installed versions: 
    >py -0  
-   >
+
    - If you have installed multiple versions of Python, activate the correct version using the py-Launcher.
    >py -3.12 -m venv venv 
-   > 
+ 
    - If you are using only a single version of Python on your computer:
    >python -m venv venv
-   >
+
 7. Activate the virtual environment  
 Enable the virtual environment to isolate the C-Module dependencies. 
-   >venv\Scripts\activate
-   > 
+   > venv\Scripts\activate
+
 8. Install C-Module requirements  
 Install all required C-Module dependencies listed in the requirements.txt file.
-   >pip install -r requirements.txt
-   >
-9. Install the C-Module in the editable mode  
-   >pip install -e .
+   > pip install -r requirements.txt
+
+9. Install the C-Module in the editable mode (i.) or with the testing stack (dash[testing], pytest, coverage, 
+webdriver_manager) necessary for running the unittests.
+   1. > pip install -e . 
+   2. > pip install -e .[dev]
 
 (If the following error occurs: "ERROR: File "setup.py" or "setup.cfg" not found."
 you might need to update the pip version you use with: 
