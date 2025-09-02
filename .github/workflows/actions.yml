@@ -2,7 +2,7 @@ name: Run CI/CD pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "58-add-data-visualisation" ]
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
