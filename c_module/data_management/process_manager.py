@@ -60,6 +60,7 @@ class ProcessManager:
 
     @staticmethod
     def call_carbon_dashboard(self):
+        self.logger.info("C-Module - Generating carbon dashboard")
         timba_data = self.timba_data[VarNames.all_scenarios.value].copy()
         timba_data = timba_data[timba_data[VarNames.year_name.value] % 5 == 0].reset_index(drop=True)
         Carbon_DashboardPlotter(data=timba_data).run()

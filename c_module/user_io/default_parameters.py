@@ -22,6 +22,9 @@ historical_c_hwp = "average"  # Options: "average" or "historical"
 hist_hwp_start_year = "default"  # Options: "country-specific", "default"
 hist_hwp_start_year_default = 2020
 
+# Visualization parameters
+show_dashboard = True
+
 user_input = {
     ParamNames.add_on_activated.value: add_on_activated,
     ParamNames.start_year.value: start_year,
@@ -35,5 +38,6 @@ user_input = {
     ParamNames.c_hwp_accounting_approach.value: c_hwp_accounting_approach,
     ParamNames.historical_c_hwp.value: historical_c_hwp,
     ParamNames.hist_hwp_start_year.value: hist_hwp_start_year,
-    ParamNames.hist_hwp_start_year_default.value: hist_hwp_start_year_default
+    ParamNames.hist_hwp_start_year_default.value: hist_hwp_start_year_default,
+    ParamNames.show_dashboard.value: show_dashboard
 }
