@@ -28,7 +28,7 @@ class DataManager:
         try:
             data = pd.read_csv(input_filepath, delimiter=';')
         except UnicodeDecodeError:
-            data = pd.read_csv(input_filepath, encoding = "ISO-8859-1")
+            data = pd.read_csv(input_filepath, encoding="ISO-8859-1")
         return data
 
     @staticmethod
@@ -74,14 +74,6 @@ class DataManager:
             pass
 
     @staticmethod
-    def load_add_carbon_data(self):
-        pass
-
-    @staticmethod
-    def process_data():
-        pass
-
-    @staticmethod
     def save_data(self):
         for sc in self.sc_list:
             carbon_data_ext = DataManager.flattening_data(data=self.carbon_data[sc])
@@ -125,7 +117,6 @@ class DataManager:
         commodity_num = len(self.timba_data[self.sc_list[0]][timba_data_all][commodity_code].unique())
         self.add_data[commodity_dict] = {}
         self.add_data[commodity_dict][commodity_num_name] = commodity_num
-
 
     @staticmethod
     def retrieve_commodity_data(self):
@@ -315,7 +306,6 @@ class DataManager:
 
         return faostat_data
 
-
     @staticmethod
     def load_fra_data(self):
         if Path(f"{FRA_DATA}.pkl").is_file():
@@ -355,8 +345,8 @@ class DataManager:
 
         country_data = self.add_data[country_data][[timba_country_name, timba_country_code, iso3, carbon_region]].copy()
         carbon_forest_biomass = country_data.merge(self.add_carbon_data[carbon_forest_biomass_name],
-                                                    left_on=[carbon_region],
-                                                    right_on=[carbon_region], how="left")
+                                                   left_on=[carbon_region],
+                                                   right_on=[carbon_region], how="left")
         commodity_num = self.add_data[commodity_dict_name][commodity_num]
         country_num = len(country_data)
 
