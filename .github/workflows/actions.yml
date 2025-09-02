@@ -30,12 +30,25 @@ jobs:
       run: |
         python -m pip install --upgrade pip setuptools wheel
         pip install -r requirements.txt
-        pip install pytest pytest-cov
+        pip install pytest pytest-cov "dash[testing]" webdriver-manager
+
+    # Install Chromium on Ubuntu
+    - name: Install Chromium (Ubuntu only)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y chromium-browser chromium-chromedriver
 
     # Run test suite and generate coverage report in XML format
     - name: Run test suite with coverage
       run: |
         pytest --cov=c_module --cov-report xml:coverage.xml
+
+    # Run dashboard integration/E2E tests and append coverage
+    - name: Run dashboard integration tests with coverage
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        pytest -s -v --cov=c_module --cov-append test/test_dashboard.py
 
     # Upload the coverage XML report as an artifact
     - name: Upload coverage XML artifact
