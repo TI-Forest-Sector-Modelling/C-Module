@@ -1,5 +1,5 @@
-from c_module.parameters.paths import (PKL_RESULTS_INPUT, ADD_INFO_CARBON_PATH, ADD_INFO_COUNTRY,
-                                       FAOSTAT_DATA, FRA_DATA, OUTPUT_FOLDER, PKL_CARBON_OUTPUT, PKL_UPDATED_TIMBA_OUTPUT)
+from c_module.parameters.paths import (PKL_RESULTS_INPUT, ADD_INFO_CARBON_PATH, ADD_INFO_COUNTRY, FAOSTAT_DATA,
+                                       FRA_DATA, OUTPUT_FOLDER)
 from c_module.parameters.defines import (VarNames, ParamNames, CountryConstants)
 
 import pandas as pd
@@ -80,11 +80,11 @@ class DataManager:
             carbon_data_ext = DataManager.add_additional_info(self, data=carbon_data_ext, sc=sc)
             self.timba_data[sc][VarNames.timba_data_carbon.value] = self.carbon_data[sc][VarNames.carbon_total.value]
             self.timba_data[sc][VarNames.timba_data_carbon_flat.value] = carbon_data_ext
-            if self.UserInput[ParamNames.add_on_activated.value]:
-                DataManager.serialize_to_pickle(self.timba_data[sc], f"{PKL_UPDATED_TIMBA_OUTPUT}_{sc}.pkl")
+            if not self.UserInput[ParamNames.add_on_activated.value]:
+                DataManager.serialize_to_pickle(self.timba_data[sc], OUTPUT_FOLDER / Path(f"{sc}.pkl"))
             else:
                 DataManager.serialize_to_pickle(
-                    self.carbon_data[sc], f"{PKL_CARBON_OUTPUT}{self.time_stamp}_{sc}.pkl")
+                    self.carbon_data[sc], OUTPUT_FOLDER / Path(f"{self.time_stamp}_{sc}.pkl"))
 
             for df_key in self.carbon_data[sc].keys():
                 carbon_data = self.carbon_data[sc][df_key]

@@ -17,39 +17,37 @@ def get_latest_file(folder_path, pattern, use_timestamp, n_latest):
     :param n_latest: How many latest files to return (1 = just the latest, 2 = latest & second latest, etc.)
     :return: The latest generated file and its timestamp
     """
+    folder = Path(folder_path)
+    regex = re.compile(pattern)
     files = []
-    for fname in os.listdir(folder_path):
-        if pattern and not re.match(pattern, fname):
+
+    for fname in os.listdir(folder):
+        full_path = folder / fname
+        if not full_path.is_file():
             continue
 
-        full_path = os.path.join(folder_path, fname)
-        if not os.path.isfile(full_path):
+        match = regex.match(fname)
+        if not match:
             continue
 
         if use_timestamp:
-            match = re.match(pattern, fname)
-            if match:
-                ts_str = match.group(1)
-                ts = dt.datetime.strptime(ts_str, "%Y%m%dT%H-%M-%S")
-                files.append((ts, ts_str, os.path.splitext(full_path)[0]))
+            ts_str = match.group(1)
+            ts = dt.datetime.strptime(ts_str, "%Y%m%dT%H-%M-%S")
         else:
-            ts = dt.datetime.fromtimestamp(os.path.getmtime(full_path))
-            files.append((ts, None, os.path.splitext(full_path)[0]))
+            ts = dt.datetime.fromtimestamp(full_path.stat().st_mtime)
+            ts_str = ts.strftime("%Y%m%dT%H-%M-%S")
 
+        files.append((ts, ts_str, full_path))
+
+    # Sort newest first
     files.sort(key=lambda x: x[0], reverse=True)
+    latest = files[:n_latest]
 
-    latest_files = files[:n_latest]
+    # Split into lists
+    paths = [f[2] for f in latest]  # Path objects
+    timestamps = [f[1] for f in latest]  # string representation
 
-    result = []
-    for f in latest_files:
-        ts, ts_str, fpath = f
-        scenario_name = None
-        match = re.match(r"DataContainer_Sc_(.*)", os.path.basename(fpath))
-        if match:
-            scenario_name = match.group(1)
-        result.append((ts, ts_str, fpath, scenario_name))
-
-    return result
+    return paths, timestamps
 
 
 def count_files_in_folder(folder_path):
@@ -91,34 +89,30 @@ INPUT_FOLDER = PACKAGEDIR / Path("data") / Path("input")
 
 if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone():
     # input paths for add-on c-module
-    AO_RESULTS_INPUT_PATTERN = r"results_D(\d{8}T\d{2}-\d{2}-\d{2})_.*"
-    AO_FOREST_INPUT_PATTERN = r"forest_D(\d{8}T\d{2}-\d{2}-\d{2})_.*"
-    AO_PKL_RESULTS_INPUT_PATTERN = r"DataContainer_Sc_.*"
+    AO_RESULTS_INPUT_PATTERN = r"results_D(\d{8}T\d{2}-\d{2}-\d{2})_(.*)"
+    AO_FOREST_INPUT_PATTERN = r"forest_D(\d{8}T\d{2}-\d{2}-\d{2})_(.*)"
+    AO_PKL_RESULTS_INPUT_PATTERN = r"DataContainer_Sc_(.*)"
 
     n_sc_files = count_files_in_folder(TIMBADIR_INPUT)
 
-    datetime, latest_timestamp_results, latest_result_input = get_latest_file(folder_path=TIMBADIR_OUTPUT,
-                                                                              pattern=AO_RESULTS_INPUT_PATTERN,
-                                                                              use_timestamp=True,
-                                                                              n_latest=n_sc_files)
-    datetime, latest_timestamp_results, latest_forest_input = get_latest_file(folder_path=TIMBADIR_OUTPUT,
-                                                                              pattern=AO_FOREST_INPUT_PATTERN,
-                                                                              use_timestamp=True,
-                                                                              n_latest=n_sc_files)
-    datetime, latest_timestamp, latest_pkl_input, sc_name = get_latest_file(folder_path=TIMBADIR_OUTPUT,
-                                                                            pattern=AO_PKL_RESULTS_INPUT_PATTERN,
-                                                                            use_timestamp=False,
-                                                                            n_latest=n_sc_files)
+    latest_result_input, latest_timestamp_results = get_latest_file(folder_path=TIMBADIR_OUTPUT,
+                                                                    pattern=AO_RESULTS_INPUT_PATTERN,
+                                                                    use_timestamp=True,
+                                                                    n_latest=n_sc_files)
+    latest_forest_input, latest_timestamp_results = get_latest_file(folder_path=TIMBADIR_OUTPUT,
+                                                                    pattern=AO_FOREST_INPUT_PATTERN,
+                                                                    use_timestamp=True,
+                                                                    n_latest=n_sc_files)
+    latest_pkl_input, latest_timestamp = get_latest_file(folder_path=TIMBADIR_OUTPUT,
+                                                         pattern=AO_PKL_RESULTS_INPUT_PATTERN,
+                                                         use_timestamp=False,
+                                                         n_latest=n_sc_files)
     RESULTS_INPUT = latest_result_input
     FOREST_INPUT = latest_forest_input
     PKL_RESULTS_INPUT = latest_pkl_input
 
     # output paths for add-on c-module
     OUTPUT_FOLDER = TIMBADIR_OUTPUT
-    PKL_UPDATED_TIMBA_OUTPUT = latest_pkl_input
-    PKL_CARBON_OUTPUT = OUTPUT_FOLDER / Path(f"c_module_output_{latest_timestamp_results}")
-    PKL_CARBON_OUTPUT_AGG = OUTPUT_FOLDER / Path(f"carbon_results_agg_{latest_timestamp_results}")
-    SC_NAME = sc_name
 
 else:
     # input paths for standalone c-module
@@ -128,9 +122,6 @@ else:
 
     # output paths for standalone c-module
     OUTPUT_FOLDER = PACKAGEDIR / Path("data") / Path("output")
-    PKL_UPDATED_TIMBA_OUTPUT = OUTPUT_FOLDER / Path("updated_timba_output")
-    PKL_CARBON_OUTPUT = OUTPUT_FOLDER / Path("c_module_output_D")
-    PKL_CARBON_OUTPUT_AGG = OUTPUT_FOLDER / Path("carbon_results_agg_D")
 
 
 # Official statistics from the Food and Agriculture Organization
