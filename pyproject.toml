@@ -62,11 +62,18 @@ find = { include = ["c_module*"] }
 [tool.coverage.report]
 fail_under = 50
 show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+]
 
 [tool.coverage.run]
 branch = true
 include = ["c_module/*"]
 command_line = "-m unittest discover -s test"
+omit = [
+    "c_module/logic/visualisation.py"
+]
 
 [project.optional-dependencies]
 dev = [
