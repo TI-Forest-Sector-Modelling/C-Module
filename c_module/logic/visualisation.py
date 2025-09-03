@@ -824,9 +824,15 @@ class Carbon_DashboardPlotter:
 
         return fig_carbon_left, fig_carbon_right
 
-    def open_browser(self):
-        webbrowser.open_new("http://localhost:8050")
+    def open_browser(self, url):
+        import webbrowser
+        webbrowser.open_new(url)
 
-    def run(self):
-        Timer(1, self.open_browser).start()
-        self.app.run(host='localhost', debug=False, dev_tools_ui=False, dev_tools_hot_reload=False, port=8050)
+    def run(self, open_browser=True, port=8050):
+        if open_browser:
+            from threading import Timer
+            Timer(1, lambda: self.open_browser(f"http://localhost:{port}")).start()
+
+        self.app.run(host='localhost', port=port, debug=False, dev_tools_ui=False, dev_tools_hot_reload=False)
+
+
