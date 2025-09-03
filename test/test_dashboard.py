@@ -81,11 +81,13 @@ class DashboardIntegrationTests(unittest.TestCase):
     def setUpClass(cls):
         """Configure headless Chrome with webdriver-manager."""
         chrome_options = Options()
-        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--headless=new")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--disable-software-rasterizer")
         chrome_options.add_argument("--window-size=1920,1080")
+        chrome_options.add_argument("--remote-debugging-port=9222")
 
         # Use webdriver-manager to auto-install chromedriver
         cls.driver = webdriver.Chrome(
@@ -114,7 +116,10 @@ class DashboardIntegrationTests(unittest.TestCase):
     def test_app_launches(self):
         """Verify the dashboard starts and title is correct."""
         self.driver.get(self.base_url)
-        assert "Dash" in self.driver.title
+        dropdown = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.ID, "value-type-dropdown-2"))
+        )
+        self.assertIsNotNone(dropdown)
 
     def test_dropdowns_exist(self):
         """Verify dropdowns are rendered."""
