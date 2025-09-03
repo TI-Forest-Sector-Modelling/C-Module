@@ -37,6 +37,7 @@ class ParamNames(Enum):
     historical_c_hwp = "historical_c_hwp"
     hist_hwp_start_year = "hist_hwp_start_year"
     hist_hwp_start_year_default = "hist_hwp_start_year_default"
+    show_carbon_dashboard = "show_carbon_dashboard"
 
 
 class VarNames(Enum):
@@ -47,6 +48,7 @@ class VarNames(Enum):
     timba_data_forest = "Forest"
     timba_data_all = "data_periods"
     timba_data_carbon = "Carbon"
+    timba_data_carbon_flat = "Carbon_flat"
     region_code = "RegionCode"
     commodity_code = "CommodityCode"
     commodity_name = "CommodityName"
@@ -61,6 +63,8 @@ class VarNames(Enum):
     import_var = "TransportationImport"
     export_var = "TransportationExport"
     production_var = "ManufactureCost"
+    forest_stock_var = "ForStock"
+    forest_area_var = "ForArea"
 
     # Additonal data
     timba_country_name = "TiMBA Area"
@@ -82,6 +86,9 @@ class VarNames(Enum):
     carbon_hwp = "CarbonHWP"
     carbon_hwp_chg = "CarbonChangeHWP"
     carbon_hwp_inflow = "CarbonInflowHWP"
+    carbon_sawnwood = "Carbon_sawnwood"
+    carbon_wood_based_panels = "Carbon_wood-based panels"
+    carbon_paper_and_paperboard = "Carbon_paper and paperboard"
     carbon_agb = "CarbonAboveGround"
     carbon_bgb = "CarbonBelowGround"
     carbon_dw = "CarbonDeadWood"
@@ -107,6 +114,11 @@ class VarNames(Enum):
     start_year = "start year"
     production_approach = "production"
     stock_change_approach = "stock-change"
+    output_variable = "Variable"
+    carbon_stock = "carbon stock"
+    carbon_stock_chg = "carbon stock change"
+    all_scenarios = "all_sc"
+    scenario = "scenario"
 
     # FAOSTAT data
     faostat_item_code = "Item Code"

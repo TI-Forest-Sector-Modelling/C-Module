@@ -1,4 +1,4 @@
-![C-Module_Logo](https://github.com/TI-Forest-Sector-Modelling/C-Module/blob/main/C-Module_Logo_transparent_v1.png?raw=true)
+![C-Module_Logo](https://github.com/TI-Forest-Sector-Modelling/C-Module/blob/main/assets/C-Module_Logo_transparent_v1.png?raw=true)
 
 ------
 [![CI - Test](https://github.com/TI-Forest-Sector-Modelling/C-Module/actions/workflows/actions.yml/badge.svg)](https://github.com/TI-Forest-Sector-Modelling/C-Module/actions/workflows/actions.yml)
@@ -17,6 +17,7 @@
   - [Module settings](#module-settings)
     - [Settings as parameters](#settings-as-parameters)
     - [Advanced settings](#advanced-settings)
+  - [Carbon dashboard](#carbon-dashboard)
 - [Extended module description](#extended-module-description)
 - [Roadmap and project status](#roadmap-and-project-status)
 - [Contributing to the project](#contributing-to-the-project)
@@ -86,23 +87,25 @@ With a newer Python version, we can not guarantee the full functionality of the 
 Select the correct Python interpreter.   
 Show installed versions: 
    >py -0  
-   >
+
    - If you have installed multiple versions of Python, activate the correct version using the py-Launcher.
    >py -3.12 -m venv venv 
-   > 
+ 
    - If you are using only a single version of Python on your computer:
    >python -m venv venv
-   >
+
 7. Activate the virtual environment  
 Enable the virtual environment to isolate the C-Module dependencies. 
-   >venv\Scripts\activate
-   > 
+   > venv\Scripts\activate
+
 8. Install C-Module requirements  
 Install all required C-Module dependencies listed in the requirements.txt file.
-   >pip install -r requirements.txt
-   >
-9. Install the C-Module in the editable mode  
-   >pip install -e .
+   > pip install -r requirements.txt
+
+9. Install the C-Module in the editable mode (i.) or with the testing stack (dash[testing], pytest, coverage, 
+webdriver_manager) necessary for running the unittests.
+   1. > pip install -e . 
+   2. > pip install -e .[dev]
 
 (If the following error occurs: "ERROR: File "setup.py" or "setup.cfg" not found."
 you might need to update the pip version you use with: 
@@ -124,8 +127,9 @@ in forest belowground biomass (-CF_BGB), and in HWP (-C_HWP). Carbon stocks and 
 litter (-CF_DWL) will not be calculated.
 
 ### Test suite and coverage report
-The C-Module comes with a test suite to ensure its functionality and allow for a continous and safe development.
-Run the test suite to check the functionality of the package:
+The C-Module comes with a test suite to ensure its functionality and allow for continuous and safe development. The 
+test suite is triggered automatically in GitHub Actions when pushing or pulling into the main branch. 
+Run the test suite to check the logic-related functionality of the package:
 
   > coverage run
 
@@ -134,6 +138,10 @@ or
 
 The coverage report of the C-Module can be accessed using:
  > coverage report
+
+While the functionality of the dashboard is tested separately from the main logic of the module, these tests are not 
+included in the coverage report. However, these dashboard-related unittests are executed automatically in GitHub 
+Actions.
 
 
 ## Use the C-Module
@@ -154,13 +162,19 @@ mention is user input data that need to be imported from a selected folder. You 
     `-- additional_information
       |--additional_information_carbon.pkl
       |--additional_information_carbon.xlsx
-    |-- 20250703_faostat_data.csv
-    |-- 20250703_fra_data.csv
-    |--default_Sc_forest.csv
-    |--default_Sc_results.csv
-    |--default_Sc_results.pkl
+    `-- historical_data
+      |-- 20250703_faostat_data.csv
+      |-- 20250703_fra_data.csv 
+    `-- projection_data
+      |--default_Sc_forest.csv
+      |--default_Sc_results.csv
+      |--default_Sc_results.pkl
     
 ```
+When running the C-Module as a standalone application all scenario inputs contained in the folder projection_data are processed
+automatically. If the C-Module is run as an add-on to TiMBA, the application retrieves automatically generated scenario inputs by TiMBA
+while running.
+
 Following data from external sources ([FAOSTAT](https://www.fao.org/faostat/en/#data/FO) and [FRA](https://fra-data.fao.org/assessments/fra/2020)) are used:
 - The input data `20250703_faostat_data.csv` is a renamed copy of the file `Forestry_E_All_Data_NOFLAG.csv` provided by the [FAOSTAT bulk data
 download](https://bulks-faostat.fao.org/production/Forestry_E_All_Data.zip).
@@ -196,21 +210,22 @@ The following chapter provides a brief overview of the model settings.
 
 Basic module settings include:
 
-|            Setting            |                                                            Description                                                            |                                                                                                Options                                                                                                 |  Default setting  |
-|:-----------------------------:|:---------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-----------------:|
-|      `add_on_activated`       |                                  Flag to activate if the C-Module is used as an add-on to TiMBA                                   |                                                                                                  Bool                                                                                                  |       True        |
-|         `start_year`          |        Year from which calculations of the C-Module are started. The value should be aligned with the provided input data         |                                                                                                  int                                                                                                   |       2020        |
-|          `end_year`           |        Year until which calculations of the C-Module are running. The value should be aligned with the provided input data        |                                                                                                  int                                                                                                   |       2050        |
-|         `read_in_pkl`         |                                  Flag to control which input files are used for projection data                                   |                                                                                                  Bool                                                                                                  |       True        |
-|      `calc_c_forest_agb`      |                               Flag to control if carbon in aboveground forest biomass is quantified                               |                                                                                                  Bool                                                                                                  |       True        |
-|      `calc_c_forest_bgb`      |                               Flag to control if carbon in belowground forest biomass is quantified                               |                                                                                                  Bool                                                                                                  |       True        |
-|     `calc_c_forest_soil`      |                                      Flag to control if carbon in forest soil is quantified                                       |                                                                                                  Bool                                                                                                  |       True        |
-|       `calc_forest_dwl`       |                                  Flag to control if carbon in deadwood and litter is quantified                                   |                                                                                                  Bool                                                                                                  |       True        |
-|         `calc_c_hwp`          |                                          Flag to control if carbon in HWP is quantified                                           |                                                                                                  Bool                                                                                                  |       True        |
-|  `c_hwp_accounting_approach`  |                           Setting to control the accounting approach to quantify carbon in the HWP pool                           |                                                                                     "stock-change" or "production"                                                                                     |  "stock-change"   |
-|      `historical_c_hwp`       |                          Setting to control the approach to quantify carbon in the historical HWP pool.                           |                                               "average": uses an 5-year average based on a selected year<br/> or<br/> "historical": uses historical data                                               |     "average"     |
-|     `hist_hwp_start_year`     |                           Setting to control the year from which the historical HWP pool is calculated                            | "default": uses a uniform default reference year for all countries and products<br/> or<br/> "country-specific": uses country-specific reference year based on the data availability for each country  |     "default"     |
-| `hist_hwp_start_year_default` | Setting to control the reference year for the historical HWP pool. <br/>Used in combination with `hist_hwp_start_year`="default"  |                                                                                                  int                                                                                                   | 2020 (start year) |
+|            Setting            |                                                           Description                                                            |                                                                                                Options                                                                                                |  Default setting  |
+|:-----------------------------:|:--------------------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-----------------:|
+|      `add_on_activated`       |                                  Flag to activate if the C-Module is used as an add-on to TiMBA                                  |                                                                                                 Bool                                                                                                  |       True        |
+|         `start_year`          |        Year from which calculations of the C-Module are started. The value should be aligned with the provided input data        |                                                                                                  int                                                                                                  |       2020        |
+|          `end_year`           |       Year until which calculations of the C-Module are running. The value should be aligned with the provided input data        |                                                                                                  int                                                                                                  |       2050        |
+|         `read_in_pkl`         |                                  Flag to control which input files are used for projection data                                  |                                                                                                 Bool                                                                                                  |       True        |
+|      `calc_c_forest_agb`      |                              Flag to control if carbon in aboveground forest biomass is quantified                               |                                                                                                 Bool                                                                                                  |       True        |
+|      `calc_c_forest_bgb`      |                              Flag to control if carbon in belowground forest biomass is quantified                               |                                                                                                 Bool                                                                                                  |       True        |
+|     `calc_c_forest_soil`      |                                      Flag to control if carbon in forest soil is quantified                                      |                                                                                                 Bool                                                                                                  |       True        |
+|       `calc_forest_dwl`       |                                  Flag to control if carbon in deadwood and litter is quantified                                  |                                                                                                 Bool                                                                                                  |       True        |
+|         `calc_c_hwp`          |                                          Flag to control if carbon in HWP is quantified                                          |                                                                                                 Bool                                                                                                  |       True        |
+|  `c_hwp_accounting_approach`  |                          Setting to control the accounting approach to quantify carbon in the HWP pool                           |                                                                                    "stock-change" or "production"                                                                                     |  "stock-change"   |
+|      `historical_c_hwp`       |                          Setting to control the approach to quantify carbon in the historical HWP pool.                          |                                              "average": uses an 5-year average based on a selected year<br/> or<br/> "historical": uses historical data                                               |     "average"     |
+|     `hist_hwp_start_year`     |                           Setting to control the year from which the historical HWP pool is calculated                           | "default": uses a uniform default reference year for all countries and products<br/> or<br/> "country-specific": uses country-specific reference year based on the data availability for each country |     "default"     |
+| `hist_hwp_start_year_default` | Setting to control the reference year for the historical HWP pool. <br/>Used in combination with `hist_hwp_start_year`="default" |                                                                                                  int                                                                                                  | 2020 (start year) |
+|    `show_carbon_dashboard`    |                        Setting to control if the dashboard for explorative result exploration is launched                        |                                                                                                 Bool                                                                                                  |       True        |
 
 
 If the C-Module is used as an add-on to TiMBA, the start and end year parameters are automatically adjusted to match TiMBA's start and end years.
@@ -230,6 +245,28 @@ The CLI allows to access basic model settings and their default values. Run foll
 In addition to the settings accessible via the CLI, users can control advanced settings through changes in `default_parameter.py`.
 Further, users can enhance additional input data related to carbon factors with country-specific data to conduct analyses 
 focused on specific countries.
+
+### Carbon Dashboard
+The C-Module comes with an integrated dashboard allowing for an interactive and intuitive exploration of modelling results.
+The dashboard is composed of two main figures:
+- A stacked bar chart depicting carbon stocks or stock changes over a predefined time period and geographical scope for a selection of scenarios. 
+This figure allows for rapid identification of global, regional, or national trends in carbon stocks and 
+stock changes in each selected pool. These trends can then be compared across selected scenarios. Carbon stocks and stock changes are summed up for each geographical selection.
+- A world map depicting averaged carbon stocks, or stock changes over a predefined time period and geographical scope.
+The figure allows for capturing geographical patterns while comparing results at the country-level within one scenario.
+
+In default mode, both figures are generated for all carbon pools over the entire time period covered by the scenario results
+on a global level (see figure 1).
+
+In both figures, carbon stocks can either be displayed in absolute or relative terms. The dashboard integrates multiple dropdown 
+fields and interactive options to tailor the figures to the user's needs. Filtered data and generated figures can be exported 
+from the dashboard for external use with adequate citation.
+
+Carbon in HWP can be displayed separately in the dashboard for sawnwood, wood-based panels, and paper and paper products.
+
+![Carbon-Dashboard](https://github.com/TI-Forest-Sector-Modelling/C-Module/blob/main/assets/C-Module_dashboard_v1.png?raw=true)
+
+**Figure 1:** Illustrative screenshot of the carbon dashboard.
 
 ## Extended module description
 Forest ecosystems and related forest products constitute important natural carbon sinks. Owing to their cost-effectiveness,

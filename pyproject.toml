@@ -17,12 +17,18 @@ dependencies = [
     "click==8.1.7",
     "coverage==7.6.3",
     "DateTime==5.5",
+    "dash==3.0.0",
+    "dash-bootstrap-components==2.0.0",
     "numpy==1.26.4",
     "openpyxl==3.1.5",
     "pandas==1.5.3",
     "pathlib==1.0.1",
+    "plotly==6.0.1",
+    "seaborn==0.13.2",
+    "selenium==4.2.0",
     "tqdm==4.67.1",
-    "tomli==2.0.2"
+    "tomli==2.0.2",
+    "typing==3.7.4.3"
 ]
 
 classifiers = [
@@ -58,9 +64,23 @@ find = { include = ["c_module*"] }
 [tool.coverage.report]
 fail_under = 50
 show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+]
 
 [tool.coverage.run]
 branch = true
 include = ["c_module/*"]
 command_line = "-m unittest discover -s test"
+omit = [
+    "c_module/logic/visualisation.py"
+]
+
+[project.optional-dependencies]
+dev = [
+    "dash[testing]",
+    "coverage",
+    "webdriver-manager"
+]
 

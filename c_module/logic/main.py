@@ -11,7 +11,8 @@ class C_Module(object):
         self.add_on_activated = UserInput[ParamNames.add_on_activated.value]
         self.time_stamp = dt.datetime.now().strftime("%Y%m%dT%H-%M-%S")
         self.logger = get_logger(None, add_on_activated=self.add_on_activated)
-        self.timba_data = None
+        self.sc_list = []
+        self.timba_data = {}
         self.add_data = {}
         self.carbon_data = {}
         self.add_carbon_data = {}
@@ -23,5 +24,7 @@ class C_Module(object):
         ProcessManager.run_readin_process(self)
         CarbonCalculator.run_carbon_calc(self)
         ProcessManager.save_carbon_data(self)
+        if self.UserInput[ParamNames.show_carbon_dashboard.value]:
+            ProcessManager.call_carbon_dashboard(self)
 
 

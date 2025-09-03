@@ -134,49 +134,49 @@ Samoa;n1;WSM;244;Oceania;Oceania
 Solomon Islands;n2;SLB;25;Oceania;Oceania
 Tonga;n3;TON;219;Oceania;Oceania
 Vanuatu;n4;VUT;155;Oceania;Oceania
-Albania;n5;ALB;3;Europe;Europe
-Austria;n6;AUT;11;Europe;Europe
-Belgium;n7;BEL;255;Europe;Europe
-Bosnia and Herzegovina;n8;BIH;80;Europe;Europe
-Bulgaria;n9;BGR;27;Europe;Europe
-Croatia;o0;HRV;98;Europe;Europe
-Czech Republic;o1;CZE;167;Europe;Europe
-Denmark;o2;DNK;54;Europe;Europe
-Finland;o3;FIN;67;Europe;Europe
-France;o4;FRA;68;Europe;Europe
-Germany;o5;DEU;79;Europe;Europe
-Greece;o6;GRC;84;Europe;Europe
-Hungary;o7;HUN;97;Europe;Europe
-Luxembourg;o8;LUX;256;Europe;Europe
-Ireland;o9;IRL;104;Europe;Europe
-Italy;p0;ITA;106;Europe;Europe
-MacedoniaThe Fmr Yug Rp;p1;MKD;154;Europe;Europe
-Montenegro;p2;MNE;273;Europe;Europe
-Netherlands;p3;NLD;150;Europe;Europe
-Norway;p4;NOR;162;Europe;Europe
-Poland;p5;POL;173;Europe;Europe
-Portugal;p6;PRT;174;Europe;Europe
-Romania;p7;ROU;183;Europe;Europe
-Slovakia;p8;SVK;199;Europe;Europe
-Slovenia;p9;SVN;198;Europe;Europe
-Spain;q0;ESP;203;Europe;Europe
-Sweden;q1;SWE;210;Europe;Europe
-Switzerland;q2;CHE;211;Europe;Europe
-United Kingdom;q3;GBR;229;Europe;Europe
-Serbia;q4;SRB;272;Europe;Europe
+Albania;n5;ALB;3;Europe;South-Eastern Europe
+Austria;n6;AUT;11;Europe;Central Europe
+Belgium;n7;BEL;255;Europe;Western Europe
+Bosnia and Herzegovina;n8;BIH;80;Europe;South-Eastern Europe
+Bulgaria;n9;BGR;27;Europe;South-Eastern Europe
+Croatia;o0;HRV;98;Europe;South-Eastern Europe
+Czech Republic;o1;CZE;167;Europe;Central Europe
+Denmark;o2;DNK;54;Europe;Northern Europe
+Finland;o3;FIN;67;Europe;Northern Europe
+France;o4;FRA;68;Europe;Western Europe
+Germany;o5;DEU;79;Europe;Central Europe
+Greece;o6;GRC;84;Europe;Southern Europe
+Hungary;o7;HUN;97;Europe;Central Europe
+Luxembourg;o8;LUX;256;Europe;Western Europe
+Ireland;o9;IRL;104;Europe;Western Europe
+Italy;p0;ITA;106;Europe;Southern Europe
+MacedoniaThe Fmr Yug Rp;p1;MKD;154;Europe;South-Eastern Europe
+Montenegro;p2;MNE;273;Europe;South-Eastern Europe
+Netherlands;p3;NLD;150;Europe;Western Europe
+Norway;p4;NOR;162;Europe;Northern Europe
+Poland;p5;POL;173;Europe;Central Europe
+Portugal;p6;PRT;174;Europe;South-Western Europe
+Romania;p7;ROU;183;Europe;South-Eastern Europe
+Slovakia;p8;SVK;199;Europe;Central Europe
+Slovenia;p9;SVN;198;Europe;Central Europe
+Spain;q0;ESP;203;Europe;South-Western Europe
+Sweden;q1;SWE;210;Europe;Northern Europe
+Switzerland;q2;CHE;211;Europe;Central Europe
+United Kingdom;q3;GBR;229;Europe;Western Europe
+Serbia;q4;SRB;272;Europe;South-Eastern Europe
 Armenia;q5;ARM;1;Asia;Western and Central Asia
 Azerbaijan Republic of;q6;AZE;52;Asia;Western and Central Asia
-Belarus;q7;BLR;57;Europe;Europe
-Estonia;q8;EST;63;Europe;Europe
+Belarus;q7;BLR;57;Europe;Eastern Europe
+Estonia;q8;EST;63;Europe;Eastern Europe
 Georgia;q9;GEO;73;Asia;Western and Central Asia
 Kazakhstan;r0;KAZ;108;Asia;Western and Central Asia
 Kyrgyzstan;r1;KGZ;113;Asia;Western and Central Asia
-Latvia;r2;LVA;119;Europe;Europe
-Lithuania;r3;LTU;126;Europe;Europe
-Moldova Republic of;r4;MDA;146;Europe;Europe
+Latvia;r2;LVA;119;Europe;Eastern Europe
+Lithuania;r3;LTU;126;Europe;Eastern Europe
+Moldova Republic of;r4;MDA;146;Europe;South-Eastern Europe
 Russian Federation;r5;RUS;185;Asia;Russian Federation
 Tajikistan;r6;TJK;208;Asia;Western and Central Asia
 Turkmenistan;r7;TKM;213;Asia;Western and Central Asia
-Ukraine;r8;UKR;230;Europe;Europe
+Ukraine;r8;UKR;230;Europe;Eastern Europe
 Uzbekistan;r9;UZB;235;Asia;Western and Central Asia
 Rest of World;zy;WRL;0;World;World

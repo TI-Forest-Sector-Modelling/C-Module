@@ -1,5 +1,5 @@
 from c_module.parameters.paths import (PKL_RESULTS_INPUT, ADD_INFO_CARBON_PATH, ADD_INFO_COUNTRY, FAOSTAT_DATA,
-                                       FRA_DATA)
+                                       FRA_DATA, OUTPUT_FOLDER)
 from c_module.parameters.defines import (VarNames, ParamNames, CountryConstants)
 
 import pandas as pd
@@ -28,7 +28,7 @@ class DataManager:
         try:
             data = pd.read_csv(input_filepath, delimiter=';')
         except UnicodeDecodeError:
-            data = pd.read_csv(input_filepath, encoding = "ISO-8859-1")
+            data = pd.read_csv(input_filepath, encoding="ISO-8859-1")
         return data
 
     @staticmethod
@@ -58,22 +58,48 @@ class DataManager:
     @staticmethod
     def load_timba_data(self):
         if self.UserInput[ParamNames.read_in_pkl.value]:
-            self.timba_data = DataManager.restore_from_pickle(f"{PKL_RESULTS_INPUT}.pkl")
+            timba_data = {}
+            sc_list = []
+            for pkl_file in PKL_RESULTS_INPUT:
+                timba_data_tmp = DataManager.restore_from_pickle(pkl_file)
+                sc_name = pkl_file.stem
+                sc_list.append(sc_name)
+                timba_data[sc_name] = timba_data_tmp
+
+            self.timba_data = timba_data
+            self.sc_list = sc_list
+
         else:
             # TODO implement possibility to read in xlsx data
             pass
 
     @staticmethod
-    def load_add_carbon_data(self):
-        pass
+    def save_data(self):
+        for sc in self.sc_list:
+            carbon_data_ext = DataManager.flattening_data(data=self.carbon_data[sc])
+            carbon_data_ext = DataManager.add_additional_info(self, data=carbon_data_ext, sc=sc)
+            self.timba_data[sc][VarNames.timba_data_carbon.value] = self.carbon_data[sc][VarNames.carbon_total.value]
+            self.timba_data[sc][VarNames.timba_data_carbon_flat.value] = carbon_data_ext
+            if not self.UserInput[ParamNames.add_on_activated.value]:
+                DataManager.serialize_to_pickle(self.timba_data[sc], OUTPUT_FOLDER / Path(f"{sc}.pkl"))
+            else:
+                DataManager.serialize_to_pickle(
+                    self.carbon_data[sc], OUTPUT_FOLDER / Path(f"{self.time_stamp}_{sc}.pkl"))
+
+            for df_key in self.carbon_data[sc].keys():
+                carbon_data = self.carbon_data[sc][df_key]
+                carbon_data_path = OUTPUT_FOLDER / Path(f"{df_key}_D{self.time_stamp}_{sc}")
+                carbon_data.to_csv(f"{carbon_data_path}.csv", index=False)
 
     @staticmethod
-    def process_data():
-        pass
+    def merge_sc_data(self):
+        carbon_data_all_sc = pd.DataFrame()
+        for sc in self.sc_list:
+            carbon_data_sc = self.timba_data[sc][VarNames.timba_data_carbon_flat.value].copy()
+            carbon_data_sc[VarNames.scenario.value] = sc
+            carbon_data_all_sc = pd.concat([carbon_data_all_sc, carbon_data_sc], axis=0).reset_index(drop=True)
 
-    @staticmethod
-    def save_data():
-        pass
+        self.timba_data[VarNames.all_scenarios.value] = carbon_data_all_sc
 
     @staticmethod
     def load_additional_data(self):
@@ -88,10 +114,9 @@ class DataManager:
         commodity_code = VarNames.commodity_code.value
         commodity_num_name = VarNames.commodity_num.value
 
-        commodity_num = len(self.timba_data[timba_data_all][commodity_code].unique())
+        commodity_num = len(self.timba_data[self.sc_list[0]][timba_data_all][commodity_code].unique())
         self.add_data[commodity_dict] = {}
         self.add_data[commodity_dict][commodity_num_name] = commodity_num
-
 
     @staticmethod
     def retrieve_commodity_data(self):
@@ -114,8 +139,8 @@ class DataManager:
         commodity_code = VarNames.commodity_code.value
         for sheet_name in pd.ExcelFile(f"{ADD_INFO_CARBON_PATH}.xlsx").sheet_names:
             if "CarbonHWP_" in sheet_name:
-                commodity_data_timba = pd.DataFrame(self.timba_data[VarNames.timba_data_all.value
-                ][f"{VarNames.commodity_code.value}"].unique())
+                commodity_data_timba = pd.DataFrame(self.timba_data[self.sc_list[0]][VarNames.timba_data_all.value]
+                                                    [f"{VarNames.commodity_code.value}"].unique())
                 commodity_data_add_info = DataManager.load_data(f"{ADD_INFO_CARBON_PATH}.xlsx", sheet_name, "Excel")
                 new_sheet_name = sheet_name.split('_')[0]
 
@@ -281,7 +306,6 @@ class DataManager:
 
         return faostat_data
 
-
     @staticmethod
     def load_fra_data(self):
         if Path(f"{FRA_DATA}.pkl").is_file():
@@ -321,8 +345,8 @@ class DataManager:
 
         country_data = self.add_data[country_data][[timba_country_name, timba_country_code, iso3, carbon_region]].copy()
         carbon_forest_biomass = country_data.merge(self.add_carbon_data[carbon_forest_biomass_name],
-                                                    left_on=[carbon_region],
-                                                    right_on=[carbon_region], how="left")
+                                                   left_on=[carbon_region],
+                                                   right_on=[carbon_region], how="left")
         commodity_num = self.add_data[commodity_dict_name][commodity_num]
         country_num = len(country_data)
 
@@ -366,9 +390,88 @@ class DataManager:
         carbon_substitution_name = VarNames.carbon_substitution.value
         carbon_total_name = VarNames.carbon_total.value
 
-        self.carbon_data[carbon_forest_biomass_name] = pd.DataFrame([0], columns=[carbon_forest_biomass_name])
-        self.carbon_data[carbon_dwl_name] = pd.DataFrame([0], columns=[carbon_dwl_name])
-        self.carbon_data[carbon_soil_name] = pd.DataFrame([0], columns=[carbon_soil_name])
-        self.carbon_data[carbon_hwp_name] = pd.DataFrame([0], columns=[carbon_hwp_name])
-        self.carbon_data[carbon_substitution_name] = pd.DataFrame([0], columns=[carbon_substitution_name])
-        self.carbon_data[carbon_total_name] = pd.DataFrame([0], columns=[carbon_total_name])
+        for sc in self.sc_list:
+            self.carbon_data[sc] = {}
+            if self.UserInput[ParamNames.calc_c_forest_agb.value] or self.UserInput[ParamNames.calc_c_forest_bgb.value]:
+                self.carbon_data[sc][carbon_forest_biomass_name] = pd.DataFrame(
+                    [0], columns=[carbon_forest_biomass_name])
+            if self.UserInput[ParamNames.calc_c_forest_dwl.value]:
+                self.carbon_data[sc][carbon_dwl_name] = pd.DataFrame([0], columns=[carbon_dwl_name])
+            if self.UserInput[ParamNames.calc_c_forest_soil.value]:
+                self.carbon_data[sc][carbon_soil_name] = pd.DataFrame([0], columns=[carbon_soil_name])
+            if self.UserInput[ParamNames.calc_c_hwp.value]:
+                self.carbon_data[sc][carbon_hwp_name] = pd.DataFrame([0], columns=[carbon_hwp_name])
+            self.carbon_data[sc][carbon_substitution_name] = pd.DataFrame([0], columns=[carbon_substitution_name])
+            self.carbon_data[sc][carbon_total_name] = pd.DataFrame([0], columns=[carbon_total_name])
+
+    @staticmethod
+    def flattening_data(data):
+        """
+        Flattens dictionary data into 2D dataframe.
+        :param data: dictionary data
+        :return: flattened dataframe
+        """
+        flat_data = pd.DataFrame()
+        change_var_list = [VarNames.carbon_forest_biomass_chg.value, VarNames.carbon_dwl_chg.value,
+                           VarNames.carbon_soil_chg.value, VarNames.carbon_hwp_chg.value,
+                           VarNames.total_substitution_chg.value, VarNames.carbon_total_chg.value]
+        for key, key_change in zip(data.keys(), change_var_list):
+            data_tmp = data[key].copy()
+            if key == VarNames.carbon_hwp.value:
+                data_tmp[VarNames.output_variable.value] = "Carbon" + "_" + data_tmp[VarNames.hwp_category.value]
+            else:
+                data_tmp[VarNames.output_variable.value] = key
+
+            if key == VarNames.carbon_substitution.value:
+                key = VarNames.total_substitution.value
+                data_tmp = data_tmp.groupby([VarNames.region_code.value, VarNames.ISO3.value,
+                                             VarNames.period_var.value, VarNames.output_variable.value], as_index=False
+                                            ).agg({key: "sum", key_change: "sum"})
+
+            data_tmp = data_tmp.rename(columns={key: VarNames.carbon_stock.value,
+                                                key_change: VarNames.carbon_stock_chg.value})
+
+            data_tmp = data_tmp[[VarNames.region_code.value, VarNames.ISO3.value, VarNames.period_var.value,
+                                 VarNames.output_variable.value, VarNames.carbon_stock.value,
+                                 VarNames.carbon_stock_chg.value]]
+            flat_data = pd.concat([flat_data, data_tmp], axis=0).reset_index(drop=True)
+
+        data_hwp = flat_data[flat_data[VarNames.output_variable.value].str.contains("Carbon_", na=False)]
+        data_hwp = data_hwp.groupby([VarNames.region_code.value,
+                                     VarNames.ISO3.value, VarNames.period_var.value],
+                                    as_index=False).agg({VarNames.carbon_stock.value: "sum",
+                                                         VarNames.carbon_stock_chg.value: "sum"})
+        data_hwp[VarNames.output_variable.value] = VarNames.carbon_hwp.value
+        flat_data = pd.concat([flat_data, data_hwp], axis=0).reset_index(drop=True)
+        flat_data = flat_data[flat_data[VarNames.ISO3.value] != "WRL"].reset_index(drop=True)
+        return flat_data
+
+    @staticmethod
+    def add_additional_info(self, data, sc):
+        """
+        Adds additional information related to regional aggregation and projection years
+        :param self: C-Module object
+        :param data: Data to which the additional information will be added
+        :param sc: Scenario name
+        :return: Data enhanced by additional information
+        """
+        geo_data = self.add_data[VarNames.country_data.value]
+        geo_data = geo_data[[VarNames.ISO3.value, VarNames.continent.value, VarNames.carbon_region.value]]
+        year_data = self.timba_data[sc][VarNames.timba_data_all.value]
+        year_data = year_data[[VarNames.period_var.value,
+                               VarNames.year_name.value]].drop_duplicates().reset_index(drop=True)
+
+        data = data.merge(geo_data, left_on=VarNames.ISO3.value, right_on=VarNames.ISO3.value, how='left')
+        data = data.merge(year_data, left_on=VarNames.period_var.value, right_on=VarNames.period_var.value, how='left')
+
+        return data
+
+    @staticmethod
+    def generate_tickvals(n_scenarios, n_years):
+        tickvals = []
+        for i in range(n_years):
+            start_index = i * n_scenarios
+            tickvals.append(start_index + (n_scenarios - 1) / 2)
+        return tickvals
+
+

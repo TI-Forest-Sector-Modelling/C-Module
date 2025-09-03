@@ -1,8 +1,8 @@
 from c_module.data_management.data_manager import DataManager
-from c_module.parameters.paths import (FAOSTAT_DATA, FRA_DATA, PKL_CARBON_OUTPUT, PKL_UPDATED_TIMBA_OUTPUT,
-                                       OUTPUT_FOLDER, SC_NAME)
+from c_module.parameters.paths import (FAOSTAT_DATA, FRA_DATA)
 from c_module.parameters.defines import (VarNames, ParamNames)
 from pathlib import Path
+from c_module.logic.visualisation import Carbon_DashboardPlotter
 
 
 class ProcessManager:
@@ -55,44 +55,43 @@ class ProcessManager:
     @staticmethod
     def save_carbon_data(self):
         self.logger.info("C-Module - Saving carbon stock and flux data")
-        self.timba_data[VarNames.timba_data_carbon.value] = self.carbon_data[VarNames.carbon_total.value]
-        if self.UserInput[ParamNames.add_on_activated.value]:
-            DataManager.serialize_to_pickle(self.timba_data, f"{PKL_UPDATED_TIMBA_OUTPUT}.pkl")
-        else:
-            DataManager.serialize_to_pickle(
-                self.carbon_data, f"{PKL_CARBON_OUTPUT}{self.time_stamp}_{SC_NAME}.pkl")
+        DataManager.save_data(self)
+        DataManager.merge_sc_data(self)
 
-        for df_key in self.carbon_data.keys():
-            carbon_data = self.carbon_data[df_key]
-            carbon_data_path = OUTPUT_FOLDER / Path(f"{df_key}_D{self.time_stamp}_{SC_NAME}")
-            carbon_data.to_csv(f"{carbon_data_path}.csv", index=False)
+    @staticmethod
+    def call_carbon_dashboard(self):
+        self.logger.info("C-Module - Generating carbon dashboard")
+        timba_data = self.timba_data[VarNames.all_scenarios.value].copy()
+        timba_data = timba_data[timba_data[VarNames.year_name.value] % 5 == 0].reset_index(drop=True)
+        Carbon_DashboardPlotter(data=timba_data).run()
 
     @staticmethod
     def start_header(self):
-        print("            ---------------------------------")
-        print("                  Starting the C-Module      ")
-        print("            ---------------------------------")
-        print(f"               Time: {self.time_stamp}")
-        print(f"")
-        print(f"            Module settings:")
-        if self.add_on_activated:
-            print(f"            Used as TiMBA add-on: {self.UserInput[ParamNames.add_on_activated.value]}")
-        else:
+        if not self.add_on_activated:
+            print("            ---------------------------------")
+            print("                  Starting the C-Module      ")
+            print("            ---------------------------------")
+            print(f"               Time: {self.time_stamp}")
+            print(f"")
+            print(f"            Module settings:")
+
             print(f"            Used as standalone module: {self.UserInput[ParamNames.add_on_activated.value]}")
             print(f"            Start year: {self.UserInput[ParamNames.start_year.value]}")
             print(f"            End year: {self.UserInput[ParamNames.end_year.value]}")
-        print(f"            ---------------------------------")
-        print(f"")
-        print(f"            Forest carbon related parameters: ")
-        print(f"            Quantify forest aboveground carbon: {self.UserInput[ParamNames.calc_c_forest_agb.value]}")
-        print(f"            Quantify forest belowground carbon: {self.UserInput[ParamNames.calc_c_forest_bgb.value]}")
-        print(f"            Quantify forest soil carbon: {self.UserInput[ParamNames.calc_c_forest_soil.value]}")
-        print(f"            Quantify forest dwl carbon: {self.UserInput[ParamNames.calc_c_forest_dwl.value]}")
-        print(f"            ---------------------------------")
-        print(f"")
-        print(f"            HWP carbon related parameters:")
-        print(f"            Quantify HWP carbon: {self.UserInput[ParamNames.calc_c_hwp.value]}")
-        print(f"            Accounting approach: {self.UserInput[ParamNames.c_hwp_accounting_approach.value]}")
-        print(f"            Accounting approach for historical HWP pool: "
-              f"{self.UserInput[ParamNames.historical_c_hwp.value]}")
-        print(f"            ---------------------------------")
+            print(f"            ---------------------------------")
+            print(f"")
+            print(f"            Forest carbon related parameters: ")
+            print(f"            Quantify forest aboveground carbon:"
+                  f" {self.UserInput[ParamNames.calc_c_forest_agb.value]}")
+            print(f"            Quantify forest belowground carbon:"
+                  f" {self.UserInput[ParamNames.calc_c_forest_bgb.value]}")
+            print(f"            Quantify forest soil carbon: {self.UserInput[ParamNames.calc_c_forest_soil.value]}")
+            print(f"            Quantify forest dwl carbon: {self.UserInput[ParamNames.calc_c_forest_dwl.value]}")
+            print(f"            ---------------------------------")
+            print(f"")
+            print(f"            HWP carbon related parameters:")
+            print(f"            Quantify HWP carbon: {self.UserInput[ParamNames.calc_c_hwp.value]}")
+            print(f"            Accounting approach: {self.UserInput[ParamNames.c_hwp_accounting_approach.value]}")
+            print(f"            Accounting approach for historical HWP pool: "
+                  f"{self.UserInput[ParamNames.historical_c_hwp.value]}")
+            print(f"            ---------------------------------")
