@@ -1,4 +1,4 @@
-![C-Module_Logo](https://github.com/TI-Forest-Sector-Modelling/C-Module/blob/main/C-Module_Logo_transparent_v1.png?raw=true)
+![C-Module_Logo](https://github.com/TI-Forest-Sector-Modelling/C-Module/blob/main/assets/C-Module_Logo_transparent_v1.png?raw=true)
 
 ------
 [![CI - Test](https://github.com/TI-Forest-Sector-Modelling/C-Module/actions/workflows/actions.yml/badge.svg)](https://github.com/TI-Forest-Sector-Modelling/C-Module/actions/workflows/actions.yml)
@@ -264,7 +264,7 @@ from the dashboard for external use with adequate citation.
 
 Carbon in HWP can be displayed separately in the dashboard for sawnwood, wood-based panels, and paper and paper products.
 
-![Carbon-Dashboard](placeholder)
+![Carbon-Dashboard](https://github.com/TI-Forest-Sector-Modelling/C-Module/blob/main/assets/C-Module_dashboard_v1.png?raw=true)
 
 **Figure 1:** Illustrative screenshot of the carbon dashboard.
 
