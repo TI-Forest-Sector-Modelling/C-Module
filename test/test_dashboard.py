@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 import pandas as pd
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
@@ -76,7 +77,6 @@ class TestLayout(unittest.TestCase):
 
 
 class DashboardIntegrationTests(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         """Configure headless Chrome with webdriver-manager."""
@@ -98,6 +98,9 @@ class DashboardIntegrationTests(unittest.TestCase):
         cls.driver.quit()
 
     def setUp(self):
+        self.patcher = patch("webbrowser.open_new", lambda url: None)
+        self.patcher.start()
+        self.addCleanup(self.patcher.stop)
         # Import the dashboard app dynamically
         self.dashboard = Carbon_DashboardPlotter(data=data)
         self.app = self.dashboard.app
@@ -106,10 +109,7 @@ class DashboardIntegrationTests(unittest.TestCase):
         self.runner.start(self.app)
 
         self.base_url = self.runner.url
-
-    def tearDown(self):
-        if hasattr(self, "runner") and self.runner:
-            self.runner.stop()
+        assert self.base_url is not None
 
     def test_app_launches(self):
         """Verify the dashboard starts and title is correct."""
@@ -154,4 +154,10 @@ class DashboardIntegrationTests(unittest.TestCase):
         )
 
         self.assertIsNotNone(map_graph)
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+
 
