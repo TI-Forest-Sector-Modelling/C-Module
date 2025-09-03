@@ -119,17 +119,17 @@ if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone():
 
 else:
     # input paths for standalone c-module
-    RESULTS_INPUT = INPUT_FOLDER / Path("default_Sc_results")
-    FOREST_INPUT = INPUT_FOLDER / Path("default_Sc_forest")
-    PKL_RESULTS_INPUT = list(INPUT_FOLDER.glob("default_Sc_results_*.pkl"))
+    RESULTS_INPUT = list((INPUT_FOLDER / Path("projection_data")).glob(r"*results.pkl"))
+    FOREST_INPUT = list((INPUT_FOLDER / Path("projection_data")).glob(r"*forest.pkl"))
+    PKL_RESULTS_INPUT = list((INPUT_FOLDER / Path("projection_data")).glob(r"*.pkl"))
 
     # output paths for standalone c-module
     OUTPUT_FOLDER = PACKAGEDIR / Path("data") / Path("output")
 
 
 # Official statistics from the Food and Agriculture Organization
-FAOSTAT_DATA = INPUT_FOLDER / Path("20250703_faostat_data")
-FRA_DATA = INPUT_FOLDER / Path("20250703_fra_data")
+FAOSTAT_DATA = INPUT_FOLDER / Path("historical_data") / Path("20250703_faostat_data")
+FRA_DATA = INPUT_FOLDER / Path("historical_data") / Path("20250703_fra_data")
 
 # additional information
 ADD_INFO_FOLDER = PACKAGEDIR / INPUT_FOLDER / Path("additional_information")
