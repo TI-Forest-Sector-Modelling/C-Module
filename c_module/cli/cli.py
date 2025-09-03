@@ -1,7 +1,4 @@
-from pathlib import Path
 import click
-import os
-import datetime as dt
 from c_module.logic.main import C_Module
 from c_module.user_io.default_parameters import user_input
 from c_module.parameters.defines import ParamNames
@@ -38,24 +35,24 @@ from c_module.parameters.defines import ParamNames
 @click.option('-R', '--read_in_pkl', "read_in_pkl",
               default=user_input[ParamNames.read_in_pkl.value], show_default=True, required=True, type=bool,
               help="Flag to control if pkl- or csv-files are read; reads in if True.")
-@click.option('-S', '--save_data_as', 'save_data_as', default=user_input[ParamNames.save_data_as.value],
-              show_default=True, required=False, type=str,
-              help="Flag to select the format of output files (csv or pkl).")
+@click.option('-SD', '--show_carbon_dashboard', 'show_carbon_dashboard',
+              default=user_input[ParamNames.show_carbon_dashboard.value], show_default=True, required=False, type=bool,
+              help="Flag to launch carbon dashboard.")
 def cli(add_on_activated, start_year, end_year, calc_c_forest_agb, calc_c_forest_bgb, calc_c_forest_soil,
-        calc_c_forest_dwl, calc_c_hwp, c_hwp_accounting_approach, read_in_pkl, save_data_as):
+        calc_c_forest_dwl, calc_c_hwp, c_hwp_accounting_approach, read_in_pkl, show_carbon_dashboard):
 
     user_input_cli = {
         ParamNames.add_on_activated.value: add_on_activated,
         ParamNames.start_year.value: start_year,
         ParamNames.end_year.value: end_year,
         ParamNames.read_in_pkl.value: read_in_pkl,
-        ParamNames.save_data_as.value: save_data_as,
         ParamNames.calc_c_forest_agb.value: calc_c_forest_agb,
         ParamNames.calc_c_forest_bgb.value: calc_c_forest_bgb,
         ParamNames.calc_c_forest_soil.value: calc_c_forest_soil,
         ParamNames.calc_c_forest_dwl.value: calc_c_forest_dwl,
         ParamNames.calc_c_hwp.value: calc_c_hwp,
         ParamNames.c_hwp_accounting_approach.value: c_hwp_accounting_approach,
+        ParamNames.show_carbon_dashboard.value: show_carbon_dashboard,
         # Adavanced settings not available via CLI
         ParamNames.historical_c_hwp.value: user_input[ParamNames.historical_c_hwp.value],
         ParamNames.hist_hwp_start_year.value: user_input[ParamNames.hist_hwp_start_year.value],
