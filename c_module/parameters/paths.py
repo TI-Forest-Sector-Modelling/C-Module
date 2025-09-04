@@ -8,55 +8,20 @@ from c_module.parameters.defines import ParamNames
 current_dt = dt.datetime.now().strftime("%Y%m%dT%H-%M-%S")
 
 
-def get_latest_file(folder_path, pattern, use_timestamp, n_latest):
+def extract_scenarios(input_folder, output_folder):
     """
-    Get the N-latest generated file with the provided pattern in the provided folder.
-    :param folder_path: Path of the folder where the file is located
-    :param pattern: Pattern of the file to match
-    :param use_timestamp: Use timestamp when matching
-    :param n_latest: How many latest files to return (1 = just the latest, 2 = latest & second latest, etc.)
-    :return: The latest generated file and its timestamp
+    Extract scenario names from Excel files in a folder and merge them with 'DataContainer_Sc_' prefix.
+    :param input_folder: Path to the folder containing scenario files.
+    :param output_folder: Path to the folder where the output files will be stored.
+    :return: List of merged scenario names.
     """
-    folder = Path(folder_path)
-    regex = re.compile(pattern)
-    files = []
-
-    for fname in os.listdir(folder):
-        full_path = folder / fname
-        if not full_path.is_file():
-            continue
-
-        match = regex.match(fname)
-        if not match:
-            continue
-
-        if use_timestamp:
-            ts_str = match.group(1)
-            ts = dt.datetime.strptime(ts_str, "%Y%m%dT%H-%M-%S")
-        else:
-            ts = dt.datetime.fromtimestamp(full_path.stat().st_mtime)
-            ts_str = ts.strftime("%Y%m%dT%H-%M-%S")
-
-        files.append((ts, ts_str, full_path))
-
-    # Sort newest first
-    files.sort(key=lambda x: x[0], reverse=True)
-    latest = files[:n_latest]
-
-    # Split into lists
-    paths = [f[2] for f in latest]  # Path objects
-    timestamps = [f[1] for f in latest]  # string representation
-
-    return paths, timestamps
-
-
-def count_files_in_folder(folder_path):
-    """
-    Count the number of files in a specific folder.
-    :param folder_path: Path of the folder
-    :return: Number of files in the folder
-    """
-    return sum(1 for fname in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, fname)))
+    folder_path = Path(input_folder)
+    scenarios = []
+    for file in folder_path.glob("*.xlsx"):
+        scenario_name = f"DataContainer_Sc_{file.stem}.pkl"
+        scenario_path = Path(output_folder) / Path(scenario_name)
+        scenarios.append(scenario_path)
+    return scenarios
 
 
 def cmodule_is_standalone():
@@ -96,23 +61,8 @@ if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone():
     AO_FOREST_INPUT_PATTERN = r"forest_D(\d{8}T\d{2}-\d{2}-\d{2})_(.*)"
     AO_PKL_RESULTS_INPUT_PATTERN = r"DataContainer_Sc_(.*)"
 
-    n_sc_files = count_files_in_folder(TIMBADIR_INPUT)
-
-    latest_result_input, latest_timestamp_results = get_latest_file(folder_path=TIMBADIR_OUTPUT,
-                                                                    pattern=AO_RESULTS_INPUT_PATTERN,
-                                                                    use_timestamp=True,
-                                                                    n_latest=n_sc_files)
-    latest_forest_input, latest_timestamp_results = get_latest_file(folder_path=TIMBADIR_OUTPUT,
-                                                                    pattern=AO_FOREST_INPUT_PATTERN,
-                                                                    use_timestamp=True,
-                                                                    n_latest=n_sc_files)
-    latest_pkl_input, latest_timestamp = get_latest_file(folder_path=TIMBADIR_OUTPUT,
-                                                         pattern=AO_PKL_RESULTS_INPUT_PATTERN,
-                                                         use_timestamp=False,
-                                                         n_latest=n_sc_files)
-    RESULTS_INPUT = latest_result_input
-    FOREST_INPUT = latest_forest_input
-    PKL_RESULTS_INPUT = latest_pkl_input
+    scenarios = extract_scenarios(TIMBADIR_INPUT, TIMBADIR_OUTPUT)
+    PKL_RESULTS_INPUT = scenarios
 
     # output paths for add-on c-module
     OUTPUT_FOLDER = TIMBADIR_OUTPUT
