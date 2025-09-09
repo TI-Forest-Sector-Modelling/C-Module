@@ -50,7 +50,7 @@ or as a standalone module (see [Use the C-Module](#use-the-c-module)).
 We are happy that you use the C-Module for your research. When publishing your work in articles, working paper, presentations
 or elsewhere, please cite the module as: 
 
-[Honkomp (2025) C-Module v1](CITATION.cff)
+[Honkomp (2025) C-Module v1.1.1](CITATION.cff)
 
 ## Install the C-Module
 
