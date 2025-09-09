@@ -680,8 +680,16 @@ class Carbon_DashboardPlotter:
             "global": "Global"
         }[active_level]
 
+        if value_type == "shares":
+            value_type_title = "Shares"
+        else:
+            if stock_type == VarNames.carbon_stock.value:
+                value_type_title = "Carbon Stocks"
+            else:
+                value_type_title = "Carbon Stock Changes"
+
         fig.update_layout(
-            title=f"Carbon Stocks by Pool — {title_level}: {active_label}",
+            title=f"{value_type_title} by Pool — {title_level}: {active_label}",
             barmode="relative",
             xaxis=dict(title=VarNames.year_name.value,
                        tickvals=tickvals,
@@ -779,8 +787,16 @@ class Carbon_DashboardPlotter:
             hovertemplate="%{customdata[0]}<extra>%{customdata[1]}</extra>"
         )
 
+        if value_type == "shares":
+            value_type_title = "Shares"
+        else:
+            if stock_type == VarNames.carbon_stock.value:
+                value_type_title = "Carbon Stocks"
+            else:
+                value_type_title = "Carbon Stock Changes"
+
         fig.update_layout(
-            title=f"<br><br>Carbon Stock by Pool – {active_level}: {active_label}",
+            title=f"<br><br>Average {value_type_title} by Pool – {active_level}: {active_label}",
             geo=dict(
                 showcoastlines=True,
                 coastlinecolor="LightGray",
@@ -792,7 +808,7 @@ class Carbon_DashboardPlotter:
                 projection=dict(scale=0.8)
             ),
             margin=dict(l=1, r=1, t=1, b=1),
-            coloraxis_showscale=False,
+            coloraxis_showscale=True,
             template='plotly_white'
         )
         return fig
