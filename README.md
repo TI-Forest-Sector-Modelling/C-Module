@@ -11,6 +11,8 @@
 
 - [Cite the C-Module](#cite-the-c-module)
 - [Install the C-Module](#install-the-c-module)
+  - [Installation via PyPI](#installation-via-pypi)
+  - [Installation via GitHub](#installation-via-github)
   - [Double check installation](#doublecheck-installation)
   - [Test suite and coverage](#test-suite-and-coverage-report)
 - [Use the C-Module](#use-the-c-module)
@@ -61,6 +63,14 @@ The following steps apply if the C-Module is used as a standalone module.
 Before proceeding, please ensure that Python is installed on your system. It can be downloaded and installed 
 from [Python.org](https://www.python.org/downloads/release/python-389/).
 
+The C-Module can be installed in two ways via PyPI or GitHub.
+
+### Installation via PyPI
+To install the newest version of the C-Module via PyPI, use following command in your terminal or PowerShell:
+   >pip install Carbon-Module
+   >
+
+### Installation via GitHub
 1. Clone the repository   
 Begin by cloning the repository to your local machine using the following command: 
     >git clone https://github.com/TI-Forest-Sector-Modelling/C-Module
