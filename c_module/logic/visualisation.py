@@ -828,7 +828,7 @@ class Carbon_DashboardPlotter:
         import webbrowser
         webbrowser.open_new(url)
 
-    def run(self, open_browser=True, port=8050):
+    def run(self, open_browser=True, port=9000):
         if open_browser:
             from threading import Timer
             Timer(1, lambda: self.open_browser(f"http://localhost:{port}")).start()
