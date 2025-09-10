@@ -2,6 +2,7 @@ from c_module.parameters.defines import ParamNames
 
 # Overall parameters
 add_on_activated = False
+sc_num = None
 
 # Activate the option of controling start and end year of the calculations if the module is used as standalone
 start_year = 2020  # Not activated
@@ -27,6 +28,7 @@ show_carbon_dashboard = True
 
 user_input = {
     ParamNames.add_on_activated.value: add_on_activated,
+    ParamNames.sc_num.value: sc_num,
     ParamNames.start_year.value: start_year,
     ParamNames.end_year.value: end_year,
     ParamNames.read_in_pkl.value: read_in_pkl,
