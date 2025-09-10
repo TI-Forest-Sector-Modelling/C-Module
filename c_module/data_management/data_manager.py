@@ -1,13 +1,33 @@
-from c_module.parameters.paths import (PKL_RESULTS_INPUT, ADD_INFO_CARBON_PATH, ADD_INFO_COUNTRY, FAOSTAT_DATA,
-                                       FRA_DATA, OUTPUT_FOLDER)
+from c_module.parameters.paths import (INPUT_FOLDER, TIMBADIR_INPUT, ADD_INFO_CARBON_PATH, ADD_INFO_COUNTRY,
+                                       FAOSTAT_DATA, FRA_DATA, OUTPUT_FOLDER, TIMBADIR_OUTPUT)
+from c_module.parameters.paths import cmodule_is_standalone, extract_scenarios
 from c_module.parameters.defines import (VarNames, ParamNames, CountryConstants)
-
+from c_module.user_io.default_parameters import user_input
 import pandas as pd
 from tqdm import tqdm
 from pathlib import Path
 
 
 class DataManager:
+
+    @staticmethod
+    def set_sc_paths(self):
+        if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone():
+            # input paths for add-on c-module
+
+            scenarios = extract_scenarios(input_folder=TIMBADIR_INPUT,
+                                          output_folder=TIMBADIR_OUTPUT,
+                                          sc_num=user_input[ParamNames.sc_num.value])
+            PKL_RESULTS_INPUT = scenarios
+        else:
+            # input paths for standalone c-module
+            scenarios = list((INPUT_FOLDER / Path("projection_data")).glob(r"*.pkl"))
+            if user_input[ParamNames.sc_num.value] is not None:
+                scenarios.sort(key=lambda f: f.stat().st_mtime)
+                scenarios = scenarios[-user_input[ParamNames.sc_num.value]:]
+            PKL_RESULTS_INPUT = scenarios
+
+        self.sc_path = PKL_RESULTS_INPUT
 
     @staticmethod
     def load_data(filepath, table_name, input_source):
@@ -60,7 +80,7 @@ class DataManager:
         if self.UserInput[ParamNames.read_in_pkl.value]:
             timba_data = {}
             sc_list = []
-            for pkl_file in PKL_RESULTS_INPUT:
+            for pkl_file in self.sc_path:
                 timba_data_tmp = DataManager.restore_from_pickle(pkl_file)
                 sc_name = pkl_file.stem
                 sc_list.append(sc_name)

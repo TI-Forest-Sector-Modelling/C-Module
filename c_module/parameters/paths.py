@@ -64,25 +64,10 @@ TIMBADIR_OUTPUT = TIMBADIR / Path("TiMBA") / Path("data") / Path("output")
 INPUT_FOLDER = PACKAGEDIR / Path("data") / Path("input")
 
 if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone():
-    # input paths for add-on c-module
-    AO_RESULTS_INPUT_PATTERN = r"results_D(\d{8}T\d{2}-\d{2}-\d{2})_(.*)"
-    AO_FOREST_INPUT_PATTERN = r"forest_D(\d{8}T\d{2}-\d{2}-\d{2})_(.*)"
-    AO_PKL_RESULTS_INPUT_PATTERN = r"DataContainer_Sc_(.*)"
-
-    scenarios = extract_scenarios(input_folder=TIMBADIR_INPUT,
-                                  output_folder=TIMBADIR_OUTPUT,
-                                  sc_num=user_input[ParamNames.sc_num.value])
-    PKL_RESULTS_INPUT = scenarios
-
     # output paths for add-on c-module
     OUTPUT_FOLDER = TIMBADIR_OUTPUT
 
 else:
-    # input paths for standalone c-module
-    RESULTS_INPUT = list((INPUT_FOLDER / Path("projection_data")).glob(r"*results.pkl"))
-    FOREST_INPUT = list((INPUT_FOLDER / Path("projection_data")).glob(r"*forest.pkl"))
-    PKL_RESULTS_INPUT = list((INPUT_FOLDER / Path("projection_data")).glob(r"*.pkl"))
-
     # output paths for standalone c-module
     OUTPUT_FOLDER = PACKAGEDIR / Path("data") / Path("output")
 
