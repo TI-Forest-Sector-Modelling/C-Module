@@ -20,7 +20,6 @@ class ProcessManager:
         self.logger.info("C-Module - Reading in additional data")
         DataManager.load_additional_data(self)
 
-
     @staticmethod
     def readin_timba_process(self):
         self.logger.info("C-Module - Reading in input data")
