@@ -173,8 +173,12 @@ mention is user input data that need to be imported from a selected folder. You 
       |--additional_information_carbon.pkl
       |--additional_information_carbon.xlsx
     `-- historical_data
-      |-- 20250703_faostat_data.csv
-      |-- 20250703_fra_data.csv 
+      |-- Forestry_E_All_Data_NOFLAG.csv
+      |-- Forestry_E_All_Data_NOFLAG.pkl
+      |-- Forestry_E_All_Data_NOFLAG_processed.pkl
+      |-- FRA_Years_All_Data.csv
+      |-- FRA_Years_All_Data.pkl
+      |-- FRA_Years_All_Data_processed.pkl
     `-- projection_data
       |--default_Sc_forest.csv
       |--default_Sc_results.csv
@@ -186,15 +190,18 @@ automatically. If the C-Module is run as an add-on to TiMBA, the application ret
 while running.
 
 Following data from external sources ([FAOSTAT](https://www.fao.org/faostat/en/#data/FO) and [FRA](https://fra-data.fao.org/assessments/fra/2020)) are used:
-- The input data `20250703_faostat_data.csv` is a renamed copy of the file `Forestry_E_All_Data_NOFLAG.csv` provided by the [FAOSTAT bulk data
-download](https://bulks-faostat.fao.org/production/Forestry_E_All_Data.zip).
-- The input data `20250703_fra_data.csv` is a renamed copy of the file `FRA_Years_YYYY_MM_DD.csv` provided by the [FRA bulk data
-download](https://fra-data.fao.org/api/file/bulk-download?assessmentName=fra&cycleName=2020&countryIso=WO).
+- The input data `Forestry_E_All_Data_NOFLAG.csv` is retrieved from the [FAOSTAT bulk data
+download](https://bulks-faostat.fao.org/production/Forestry_E_All_Data.zip). This data is serialized (`Forestry_E_All_Data_NOFLAG.pkl`)
+and processed (`Forestry_E_All_Data_NOFLAG_processed.pkl`).
+- The input data `FRA_Years_All_Data.csv` is retrieved from the [FRA bulk data
+download](https://fra-data.fao.org/api/file/bulk-download?assessmentName=fra&cycleName=2020&countryIso=WO). This data is serialized (`FRA_Years_All_Data.pkl`)
+and processed (`FRA_Years_All_Data_processed.pkl`).
 
-The original FAOSTAT and FRA files are manually saved as CSV UTF-8 files. The most recent copy of the FAOSTAT and FRA datasets
-was downloaded on 2025-07-03 and contains data up to 2023 for FAOSTAT and up to 2020 for FRA. For production and trade, the module
-includes data from 1961 onwards. For forest area and stock, data are available from 1990 onwards. FAOSTAT and FRA data will be
-updated regularly; however, users of the C-Module should verify whether more recent FAOSTAT or FRA data are available before use.
+The update of the FAOSTAT and FRA files can be controlled using the parameter `fao_data_update = True` under `default_parameters.py`. Otherwise, the
+FAOSTAT and FRA data is automatically updated every 2 months. The data is downloaded when running the C-Module
+the first time. A stable internet connection is needed to execute the data update. Current copy contains data up to 2023 for FAOSTAT and up to 2020 for FRA. For production and trade, the module
+includes data from 1961 onwards. For forest area and stock, data are available from 1990 onwards. Users of the C-Module should
+verify whether more recent FAOSTAT or FRA data are available before use.
 
 The package will generate a results directory called `output` which is located inside the data folder. The final directory after one run will look something like this:
 ```bash
@@ -237,7 +244,7 @@ Basic module settings include:
 |     `hist_hwp_start_year`     |                           Setting to control the year from which the historical HWP pool is calculated                           | "default": uses a uniform default reference year for all countries and products<br/> or<br/> "country-specific": uses country-specific reference year based on the data availability for each country |     "default"     |
 | `hist_hwp_start_year_default` | Setting to control the reference year for the historical HWP pool. <br/>Used in combination with `hist_hwp_start_year`="default" |                                                                                                  int                                                                                                  | 2020 (start year) |
 |    `show_carbon_dashboard`    |                        Setting to control if the dashboard for explorative result exploration is launched                        |                                                                                                 Bool                                                                                                  |       True        |
-
+|       `fao_data_update`       |                                Setting to control if FAO data (FRA and FAOSTAT) is updated or not                                |                                                                                                 Bool                                                                                                  |       False       |
 
 If the C-Module is used as an add-on to TiMBA, the start and end year parameters are automatically adjusted to match TiMBA's start and end years.
 The C-Module is delivered with a set of default settings, which were tested and validated. The default settings can be changed when executing the
