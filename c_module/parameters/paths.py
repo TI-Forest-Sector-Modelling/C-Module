@@ -73,8 +73,11 @@ else:
 
 
 # Official statistics from the Food and Agriculture Organization
-FAOSTAT_DATA = INPUT_FOLDER / Path("historical_data") / Path("20250703_faostat_data")
-FRA_DATA = INPUT_FOLDER / Path("historical_data") / Path("20250703_fra_data")
+FAO_DIR = INPUT_FOLDER / Path("historical_data")
+FAOSTAT_URL = "https://bulks-faostat.fao.org/production/Forestry_E_All_Data.zip"
+FAOSTAT_DATA = INPUT_FOLDER / Path("historical_data") / Path("Forestry_E_All_Data_NOFLAG")
+FRA_URL = "https://fra-data.fao.org/api/file/bulk-download?assessmentName=fra&cycleName=2020&countryIso=WO"
+FRA_DATA = INPUT_FOLDER / Path("historical_data") / Path(f"FRA_Years_All_Data")
 
 # additional information
 ADD_INFO_FOLDER = PACKAGEDIR / INPUT_FOLDER / Path("additional_information")
