@@ -8,6 +8,7 @@ from c_module.logic.visualisation import Carbon_DashboardPlotter
 class ProcessManager:
     @staticmethod
     def run_readin_process(self):
+        DataManager.set_sc_paths(self)
         ProcessManager.readin_add_data_process(self)
         ProcessManager.readin_timba_process(self)
         ProcessManager.readin_carbon_process(self)
@@ -18,7 +19,6 @@ class ProcessManager:
     def readin_add_data_process(self):
         self.logger.info("C-Module - Reading in additional data")
         DataManager.load_additional_data(self)
-
 
     @staticmethod
     def readin_timba_process(self):
@@ -37,20 +37,22 @@ class ProcessManager:
     @staticmethod
     def readin_faostat_process(self):
         self.logger.info("C-Module - Reading in FAOSTAT data")
-        DataManager.load_faostat_data(self)
-        if not Path(f"{FAOSTAT_DATA}.pkl").is_file():
+        DataManager.load_faostat_data(self, update_data=self.UserInput[ParamNames.fao_data_update.value])
+        if not Path(f"{FAOSTAT_DATA}_processed.pkl").is_file():
             DataManager.prep_faostat_data(self)
             DataManager.aggregate_faostat_data(self)
-            DataManager.serialize_to_pickle(self.faostat_data["data_aligned"], f"{FAOSTAT_DATA}.pkl")
+            DataManager.serialize_to_pickle(self.faostat_data["data_aligned"], f"{FAOSTAT_DATA}_processed.pkl")
+        else:
+            self.faostat_data["data_aligned"] = DataManager.restore_from_pickle(f"{FAOSTAT_DATA}_processed.pkl")
 
     @staticmethod
     def readin_fra_process(self):
         self.logger.info("C-Module - Reading in FRA data")
         # TODO implement fra processing steps
-        DataManager.load_fra_data(self)
-        if not Path(f"{FRA_DATA}.pkl").is_file():
+        DataManager.load_fra_data(self, update_data=self.UserInput[ParamNames.fao_data_update.value])
+        if not Path(f"{FRA_DATA}_processed.pkl").is_file():
             DataManager.prep_fra_data(self)
-            DataManager.serialize_to_pickle(self.fra_data["data_aligned"], f"{FRA_DATA}.pkl")
+            DataManager.serialize_to_pickle(self.fra_data["data_aligned"], f"{FRA_DATA}_processed.pkl")
 
     @staticmethod
     def save_carbon_data(self):

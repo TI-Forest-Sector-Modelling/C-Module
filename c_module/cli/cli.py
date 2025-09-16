@@ -8,6 +8,9 @@ from c_module.parameters.defines import ParamNames
 @click.option('-ADD_ON', '--add_on_activated', "add_on_activated",
               default=user_input[ParamNames.add_on_activated.value], show_default=True, required=True, type=bool,
               help="Flag to use the carbon module as a standalone module or as a TiMBA add-on.")
+@click.option('-SC', '--sc_num', "sc_num",
+              default=user_input[ParamNames.sc_num.value], show_default=True, required=True, type=int,
+              help="Flag to control the number of processed scenarios.")
 @click.option('-SY', '--start_year', 'start_year', default=user_input[ParamNames.start_year.value],
               show_default=True, required=True, type=int,
               help="Start year of carbon calculations.")
@@ -38,11 +41,12 @@ from c_module.parameters.defines import ParamNames
 @click.option('-SD', '--show_carbon_dashboard', 'show_carbon_dashboard',
               default=user_input[ParamNames.show_carbon_dashboard.value], show_default=True, required=False, type=bool,
               help="Flag to launch carbon dashboard.")
-def cli(add_on_activated, start_year, end_year, calc_c_forest_agb, calc_c_forest_bgb, calc_c_forest_soil,
+def cli(add_on_activated, sc_num, start_year, end_year, calc_c_forest_agb, calc_c_forest_bgb, calc_c_forest_soil,
         calc_c_forest_dwl, calc_c_hwp, c_hwp_accounting_approach, read_in_pkl, show_carbon_dashboard):
 
     user_input_cli = {
         ParamNames.add_on_activated.value: add_on_activated,
+        ParamNames.sc_num.value: sc_num,
         ParamNames.start_year.value: start_year,
         ParamNames.end_year.value: end_year,
         ParamNames.read_in_pkl.value: read_in_pkl,

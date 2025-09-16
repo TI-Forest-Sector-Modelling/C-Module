@@ -2,6 +2,7 @@ from c_module.parameters.defines import ParamNames
 
 # Overall parameters
 add_on_activated = False
+sc_num = None
 
 # Activate the option of controling start and end year of the calculations if the module is used as standalone
 start_year = 2020  # Not activated
@@ -25,8 +26,12 @@ hist_hwp_start_year_default = 2020
 # Visualization parameters
 show_carbon_dashboard = True
 
+# FAO data update
+fao_data_update = False
+
 user_input = {
     ParamNames.add_on_activated.value: add_on_activated,
+    ParamNames.sc_num.value: sc_num,
     ParamNames.start_year.value: start_year,
     ParamNames.end_year.value: end_year,
     ParamNames.read_in_pkl.value: read_in_pkl,
@@ -39,5 +44,6 @@ user_input = {
     ParamNames.historical_c_hwp.value: historical_c_hwp,
     ParamNames.hist_hwp_start_year.value: hist_hwp_start_year,
     ParamNames.hist_hwp_start_year_default.value: hist_hwp_start_year_default,
-    ParamNames.show_carbon_dashboard.value: show_carbon_dashboard
+    ParamNames.show_carbon_dashboard.value: show_carbon_dashboard,
+    ParamNames.fao_data_update.value: fao_data_update
 }

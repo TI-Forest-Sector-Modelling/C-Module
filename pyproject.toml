@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "Carbon-Module"
-version = "1.1.0"
+version = "1.1.1"
 authors = [{name = "Tomke Honkomp", email = "tomke.honkomp@thuenen.de"}]
-description = "The C-Module tracks global carbon stocks and flows across pools of the forestry sector"
+description = "The C-Module tracks global carbon stocks and stock changes across pools of the forestry sector, displaying them interactively"
 readme = "README.md"
 license = "AGPL-3.0-or-later"
 license-files = ["COPYING"]
-keywords = ["c-module", "model", "carbon accounting", "thuenen institute", "economics of forests", "research"]
+keywords = ["forestry", "climate change", "carbon accounting", "land use change", "climate change mitigation", "wood products", "forest sector modelling"]
 
 requires-python = ">=3.9"
 dependencies = [

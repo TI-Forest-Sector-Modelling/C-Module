@@ -1,6 +1,4 @@
 import datetime as dt
-import re
-import os
 from pathlib import Path
 from c_module.user_io.default_parameters import user_input
 from c_module.parameters.defines import ParamNames
@@ -8,19 +6,29 @@ from c_module.parameters.defines import ParamNames
 current_dt = dt.datetime.now().strftime("%Y%m%dT%H-%M-%S")
 
 
-def extract_scenarios(input_folder, output_folder):
+def extract_scenarios(input_folder, output_folder, sc_num):
     """
     Extract scenario names from Excel files in a folder and merge them with 'DataContainer_Sc_' prefix.
     :param input_folder: Path to the folder containing scenario files.
     :param output_folder: Path to the folder where the output files will be stored.
+    :param sc_num: Number of scenarios to extract.
     :return: List of merged scenario names.
     """
-    folder_path = Path(input_folder)
     scenarios = []
-    for file in folder_path.glob("*.xlsx"):
-        scenario_name = f"DataContainer_Sc_{file.stem}.pkl"
-        scenario_path = Path(output_folder) / Path(scenario_name)
-        scenarios.append(scenario_path)
+    if sc_num is None:
+        folder_path = Path(input_folder)
+        for file in folder_path.glob("*.xlsx"):
+            scenario_name = f"DataContainer_Sc_{file.stem}.pkl"
+            scenario_path = Path(output_folder) / Path(scenario_name)
+            scenarios.append(scenario_path)
+
+    else:
+        folder_path = Path(output_folder)
+        files = list(folder_path.glob("*.pkl"))
+        files.sort(key=lambda f: f.stat().st_mtime)
+        files = files[-user_input[ParamNames.sc_num.value]:]
+        scenarios = files
+
     return scenarios
 
 
@@ -56,30 +64,20 @@ TIMBADIR_OUTPUT = TIMBADIR / Path("TiMBA") / Path("data") / Path("output")
 INPUT_FOLDER = PACKAGEDIR / Path("data") / Path("input")
 
 if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone():
-    # input paths for add-on c-module
-    AO_RESULTS_INPUT_PATTERN = r"results_D(\d{8}T\d{2}-\d{2}-\d{2})_(.*)"
-    AO_FOREST_INPUT_PATTERN = r"forest_D(\d{8}T\d{2}-\d{2}-\d{2})_(.*)"
-    AO_PKL_RESULTS_INPUT_PATTERN = r"DataContainer_Sc_(.*)"
-
-    scenarios = extract_scenarios(TIMBADIR_INPUT, TIMBADIR_OUTPUT)
-    PKL_RESULTS_INPUT = scenarios
-
     # output paths for add-on c-module
     OUTPUT_FOLDER = TIMBADIR_OUTPUT
 
 else:
-    # input paths for standalone c-module
-    RESULTS_INPUT = list((INPUT_FOLDER / Path("projection_data")).glob(r"*results.pkl"))
-    FOREST_INPUT = list((INPUT_FOLDER / Path("projection_data")).glob(r"*forest.pkl"))
-    PKL_RESULTS_INPUT = list((INPUT_FOLDER / Path("projection_data")).glob(r"*.pkl"))
-
     # output paths for standalone c-module
     OUTPUT_FOLDER = PACKAGEDIR / Path("data") / Path("output")
 
 
 # Official statistics from the Food and Agriculture Organization
-FAOSTAT_DATA = INPUT_FOLDER / Path("historical_data") / Path("20250703_faostat_data")
-FRA_DATA = INPUT_FOLDER / Path("historical_data") / Path("20250703_fra_data")
+FAO_DIR = INPUT_FOLDER / Path("historical_data")
+FAOSTAT_URL = "https://bulks-faostat.fao.org/production/Forestry_E_All_Data.zip"
+FAOSTAT_DATA = INPUT_FOLDER / Path("historical_data") / Path("Forestry_E_All_Data_NOFLAG")
+FRA_URL = "https://fra-data.fao.org/api/file/bulk-download?assessmentName=fra&cycleName=2020&countryIso=WO"
+FRA_DATA = INPUT_FOLDER / Path("historical_data") / Path(f"FRA_Years_All_Data")
 
 # additional information
 ADD_INFO_FOLDER = PACKAGEDIR / INPUT_FOLDER / Path("additional_information")

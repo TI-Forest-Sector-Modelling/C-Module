@@ -1,13 +1,39 @@
-from c_module.parameters.paths import (PKL_RESULTS_INPUT, ADD_INFO_CARBON_PATH, ADD_INFO_COUNTRY, FAOSTAT_DATA,
-                                       FRA_DATA, OUTPUT_FOLDER)
+from c_module.parameters.paths import (INPUT_FOLDER, TIMBADIR_INPUT, ADD_INFO_CARBON_PATH, ADD_INFO_COUNTRY,
+                                       FAOSTAT_DATA, FRA_DATA, OUTPUT_FOLDER, TIMBADIR_OUTPUT, FAOSTAT_URL, FAO_DIR,
+                                       FRA_URL)
+from c_module.parameters.paths import cmodule_is_standalone, extract_scenarios
 from c_module.parameters.defines import (VarNames, ParamNames, CountryConstants)
-
+from c_module.user_io.default_parameters import user_input
 import pandas as pd
 from tqdm import tqdm
 from pathlib import Path
+import requests
+import zipfile
+import io
+import time
+import datetime as dt
 
 
 class DataManager:
+
+    @staticmethod
+    def set_sc_paths(self):
+        if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone():
+            # input paths for add-on c-module
+
+            scenarios = extract_scenarios(input_folder=TIMBADIR_INPUT,
+                                          output_folder=TIMBADIR_OUTPUT,
+                                          sc_num=user_input[ParamNames.sc_num.value])
+            PKL_RESULTS_INPUT = scenarios
+        else:
+            # input paths for standalone c-module
+            scenarios = list((INPUT_FOLDER / Path("projection_data")).glob(r"*.pkl"))
+            if user_input[ParamNames.sc_num.value] is not None:
+                scenarios.sort(key=lambda f: f.stat().st_mtime)
+                scenarios = scenarios[-user_input[ParamNames.sc_num.value]:]
+            PKL_RESULTS_INPUT = scenarios
+
+        self.sc_path = PKL_RESULTS_INPUT
 
     @staticmethod
     def load_data(filepath, table_name, input_source):
@@ -60,7 +86,7 @@ class DataManager:
         if self.UserInput[ParamNames.read_in_pkl.value]:
             timba_data = {}
             sc_list = []
-            for pkl_file in PKL_RESULTS_INPUT:
+            for pkl_file in self.sc_path:
                 timba_data_tmp = DataManager.restore_from_pickle(pkl_file)
                 sc_name = pkl_file.stem
                 sc_list.append(sc_name)
@@ -153,16 +179,62 @@ class DataManager:
                                                                               "Excel")
 
     @staticmethod
-    def load_faostat_data(self):
+    def load_faostat_data(self, update_data: bool):
         """
         Loads the Forestry data with no flags from the bulk data provided by FAOSTAT
         (Forestry_E_All_Data/Forestry_E_All_Data_NOFLAG.csv). See README.md for details.
         :param self: object of class C-Module
+        :param update_data: Flag to update FAOSTAT data even if max cache age is not reached
         """
-        if Path(f"{FAOSTAT_DATA}.pkl").is_file():
-            self.faostat_data["data_aligned"] = DataManager.restore_from_pickle(f"{FAOSTAT_DATA}.pkl")
+        CSV_FILE = Path(f"{FAOSTAT_DATA}.csv")
+
+        CACHE_MAX_AGE = 2 * 30 * 24 * 60 * 60  # 2 months
+
+        FAO_DIR.mkdir(parents=True, exist_ok=True)
+
+        if CSV_FILE.exists():
+            age = time.time() - CSV_FILE.stat().st_mtime
+            if age < CACHE_MAX_AGE and not update_data:
+                df = pd.read_csv(CSV_FILE, delimiter=",")
+            else:
+                df = DataManager.download_fao_api_data(self, database="FAOSTAT")
+                if Path(f"{FAOSTAT_DATA}_processed.pkl").exists():
+                    Path(f"{FAOSTAT_DATA}_processed.pkl").unlink()
         else:
-            self.faostat_data["data"] = DataManager.load_data(f"{FAOSTAT_DATA}.csv", FAOSTAT_DATA, "csv")
+            df = DataManager.download_fao_api_data(self, database="FAOSTAT")
+            if Path(f"{FAOSTAT_DATA}_processed.pkl").exists():
+                Path(f"{FAOSTAT_DATA}_processed.pkl").unlink()
+
+        df.to_csv(CSV_FILE, index=False)
+        self.faostat_data["data"] = df
+
+    @staticmethod
+    def download_fao_api_data(self, database: str):
+        """
+        Downloads data from FAO API (FAOSTAT and FRA)
+        :param self: object of class C-Module
+        :param database: Database name
+        :return: FAOSTAT data as DataFrame
+        """
+        self.logger.info(f"C-Module - Download {database} data from API")
+        if database == "FRA":
+            database_url = FRA_URL
+            file_filter = f"FRA_Years_{dt.datetime.now().strftime('%Y_%m_%d')}"
+            data_pkl = f"{FRA_DATA}.pkl"
+        if database == "FAOSTAT":
+            database_url = FAOSTAT_URL
+            file_filter = "NOFLAG.csv"
+            data_pkl = f"{FAOSTAT_DATA}.pkl"
+        response = requests.get(database_url)
+        response.raise_for_status()
+        cached_data = io.BytesIO(response.content)
+        with zipfile.ZipFile(cached_data) as z:
+            csv_name = [f for f in z.namelist() if file_filter in f][0]
+            with z.open(csv_name) as csv_file:
+                df = pd.read_csv(csv_file, delimiter=",")
+
+        DataManager.serialize_to_pickle(df, data_pkl)
+        return df
 
     @staticmethod
     def prep_faostat_data(self):
@@ -307,11 +379,35 @@ class DataManager:
         return faostat_data
 
     @staticmethod
-    def load_fra_data(self):
-        if Path(f"{FRA_DATA}.pkl").is_file():
-            self.fra_data["data_aligned"] = DataManager.restore_from_pickle(f"{FRA_DATA}.pkl")
+    def load_fra_data(self, update_data: bool):
+        """
+        Loads the Forestry data with no flags from the bulk data provided by FAOSTAT
+        (Forestry_E_All_Data/Forestry_E_All_Data_NOFLAG.csv). See README.md for details.
+        :param self: object of class C-Module
+        :param update_data: Flag to update FAOSTAT data even if max cache age is not reached
+        """
+        # Paths
+        CSV_FILE = Path(f"{FRA_DATA}.csv")
+
+        CACHE_MAX_AGE = 2 * 30 * 24 * 60 * 60  # 2 months
+
+        FAO_DIR.mkdir(parents=True, exist_ok=True)
+
+        if CSV_FILE.exists():
+            age = time.time() - CSV_FILE.stat().st_mtime
+            if age < CACHE_MAX_AGE and not update_data:
+                df = pd.read_csv(CSV_FILE, delimiter=",")
+            else:
+                df = DataManager.download_fao_api_data(self, database="FRA")
+                if Path(f"{FRA_DATA}_processed.pkl").exists():
+                    Path(f"{FRA_DATA}_processed.pkl").unlink()
         else:
-            self.fra_data["data"] = DataManager.load_data(f"{FRA_DATA}.csv", FRA_DATA, "csv")
+            df = DataManager.download_fao_api_data(self, database="FRA")
+            if Path(f"{FRA_DATA}_processed.pkl").exists():
+                Path(f"{FRA_DATA}_processed.pkl").unlink()
+
+        df.to_csv(CSV_FILE, index=False)
+        self.fra_data["data"] = df
 
     @staticmethod
     def prep_fra_data(self):
