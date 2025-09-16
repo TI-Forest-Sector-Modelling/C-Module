@@ -219,7 +219,7 @@ class DataManager:
         self.logger.info(f"C-Module - Download {database} data from API")
         if database == "FRA":
             database_url = FRA_URL
-            file_filter = f"FRA_Years_{dt.datetime.now().strftime("%Y_%m_%d")}"
+            file_filter = f"FRA_Years_{dt.datetime.now().strftime('%Y_%m_%d')}"
             data_pkl = f"{FRA_DATA}.pkl"
         if database == "FAOSTAT":
             database_url = FAOSTAT_URL
