@@ -1,5 +1,12 @@
 # Changelog
 
+## [v1.1.1] - 2025-09-16
+
+### Added
+
+- Automated FAO data download from FAOSTAT and FRA API
+- CLI as standalone and add-on module for TiMBA
+
 ## [v1.1.0] - 2025-09-03
 
 ### Added
