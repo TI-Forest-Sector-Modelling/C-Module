@@ -301,7 +301,14 @@ For quantifying carbon in harvested wood products (HWP), the C-Module offers sev
 and production), which primarily differ in how trade is integrated. The stock-change approach is based on domestic consumption,
 accounting for both exports and imports, whereas the production approach considers only carbon in HWP manufactured from nationally
 harvested wood, excluding imports of raw wood (Rüter et al., 2019). The C-Module applies default Tier 1 parameters for HWP
-half-lives and carbon content (Pingoud et al., 2006; Rüter et al., 2019).
+half-lives and carbon content (Pingoud et al., 2006; Rüter et al., 2019) (see figure 2).
+
+![figure_2](https://github.com/TI-Forest-Sector-Modelling/C-Module/blob/main/assets/C-Module_HWP_calculation_steps.png?raw=true)
+
+**Figure 2:** Workflow for quantifying carbon stock and stock changes in HWP following the IPCC (2019). Abbreviations used
+in the figure: θ: HWP category; k: decay constant; cf_θ: carbon factor for HWP category θ; P_θ: Production of HWP category θ;
+Imp_θ: Import of HWP category θ; Exp_θ: Export of HWP category θ; f_r: fraction of roundwood (irw), wood pulp (pulp),
+and recovered paper (recp) originating from domestic harvest; q: recovered paper utilization rate.
 
 In addition, substitution effects from the use of HWP are calculated using constant default substitution factors from 
 Sathre and O'Connor (2010) and Hurmekoski et al. (2021). Due to the lack of country-specific data, these substitution
