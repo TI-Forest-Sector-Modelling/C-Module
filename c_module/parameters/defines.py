@@ -28,6 +28,7 @@ class ParamNames(Enum):
     start_year = "start_year"
     end_year = "end_year"
     read_in_pkl = "read_in_pkl"
+    folderpath = "folderpath"
     save_data_as = "save_data_as"
     calc_c_forest_agb = "calc_c_forest_agb"
     calc_c_forest_bgb = "calc_c_forest_bgb"
