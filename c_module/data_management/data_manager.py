@@ -109,12 +109,11 @@ class DataManager:
             if not self.UserInput[ParamNames.add_on_activated.value]:
                 DataManager.serialize_to_pickle(self.timba_data[sc], OUTPUT_FOLDER / Path(f"{sc}.pkl"))
             else:
-                DataManager.serialize_to_pickle(
-                    self.carbon_data[sc], OUTPUT_FOLDER / Path(f"{self.time_stamp}_{sc}.pkl"))
+                DataManager.serialize_to_pickle(self.carbon_data[sc], OUTPUT_FOLDER / Path(f"{sc}.pkl"))
 
             for df_key in self.carbon_data[sc].keys():
                 carbon_data = self.carbon_data[sc][df_key]
-                carbon_data_path = OUTPUT_FOLDER / Path(f"{df_key}_D{self.time_stamp}_{sc}")
+                carbon_data_path = OUTPUT_FOLDER / Path(f"{df_key}_{sc}")
                 carbon_data.to_csv(f"{carbon_data_path}.csv", index=False)
 
     @staticmethod
