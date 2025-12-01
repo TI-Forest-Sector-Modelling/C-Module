@@ -20,7 +20,9 @@ class DataManager:
     def set_sc_paths(self):
         if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone():
             # input paths for add-on c-module
-
+            print(TIMBADIR_INPUT)
+            print(TIMBADIR_INPUT)
+            print(TIMBADIR_INPUT)
             scenarios = extract_scenarios(input_folder=TIMBADIR_INPUT,
                                           output_folder=TIMBADIR_OUTPUT,
                                           sc_num=user_input[ParamNames.sc_num.value])
@@ -138,7 +140,9 @@ class DataManager:
         commodity_dict = VarNames.commodity_dict.value
         commodity_code = VarNames.commodity_code.value
         commodity_num_name = VarNames.commodity_num.value
-
+        print(self.sc_list[0])
+        print(self.sc_list[0])
+        print(self.sc_list[0])
         commodity_num = len(self.timba_data[self.sc_list[0]][timba_data_all][commodity_code].unique())
         self.add_data[commodity_dict] = {}
         self.add_data[commodity_dict][commodity_num_name] = commodity_num
