@@ -45,7 +45,7 @@ from c_module.parameters.defines import ParamNames
               default=user_input[ParamNames.fao_data_update.value], show_default=True, required=False, type=bool,
               help="Flag to update FAO data.")
 @click.option('-FP', '--folder_path', 'folder_path', default=user_input[ParamNames.folderpath.value],
-              show_default=True, required=False, type=str)
+              show_default=True, required=False, type=str, help="Path to directory with Input/Output folder.")
 def cli(add_on_activated, sc_num, start_year, end_year, calc_c_forest_agb, calc_c_forest_bgb, calc_c_forest_soil,
         calc_c_forest_dwl, calc_c_hwp, c_hwp_accounting_approach, read_in_pkl, show_carbon_dashboard, fao_data_update,
         folder_path):
