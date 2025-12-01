@@ -14,20 +14,21 @@ def extract_scenarios(input_folder, output_folder, sc_num):
     :param sc_num: Number of scenarios to extract.
     :return: List of merged scenario names.
     """
-    scenarios = []
+
+    folder_path = Path(output_folder)
+    files = list(folder_path.glob("*.pkl"))
+    files.sort(key=lambda f: f.stat().st_mtime)
     if sc_num is None:
         folder_path = Path(input_folder)
-        for file in folder_path.glob("*.xlsx"):
-            scenario_name = f"DataContainer_Sc_{file.stem}.pkl"
-            scenario_path = Path(output_folder) / Path(scenario_name)
-            scenarios.append(scenario_path)
-
+        try:
+            sc_num = len(list(folder_path.glob("*.xlsx")))
+        except FileNotFoundError:
+            sc_num = 1
+        files = files[-sc_num:]
     else:
-        folder_path = Path(output_folder)
-        files = list(folder_path.glob("*.pkl"))
-        files.sort(key=lambda f: f.stat().st_mtime)
         files = files[-user_input[ParamNames.sc_num.value]:]
-        scenarios = files
+
+    scenarios = files
 
     return scenarios
 
@@ -58,10 +59,18 @@ def cmodule_is_standalone():
 
 
 PACKAGEDIR = Path(__file__).parent.parent.absolute()
-TIMBADIR = Path(__file__).parent.parent.parent.parent.parent.parent.absolute()
-TIMBADIR_INPUT = TIMBADIR / Path("TiMBA") / Path("data") / Path("input") / Path("01_Input_Files")
-TIMBADIR_OUTPUT = TIMBADIR / Path("TiMBA") / Path("data") / Path("output")
 INPUT_FOLDER = PACKAGEDIR / Path("data") / Path("input")
+if user_input[ParamNames.folderpath.value] is None:
+    # If user-defined path does not exists, use default path
+    TIMBADIR = Path(__file__).parent.parent.parent.parent.parent.parent.absolute()
+    TIMBADIR_INPUT = TIMBADIR / Path("TiMBA") / Path("data") / Path("input") / Path("01_Input_Files")
+    TIMBADIR_OUTPUT = TIMBADIR / Path("TiMBA") / Path("data") / Path("output") / Path("data")
+
+else:
+    # If user-defined path exist
+    USER_PATH = Path(user_input[ParamNames.folderpath.value]).absolute()
+    TIMBADIR_INPUT = USER_PATH / Path("TiMBA") / Path("data") / Path("input") / Path("01_Input_Files")
+    TIMBADIR_OUTPUT = USER_PATH / Path("TiMBA") / Path("data") / Path("output") / Path("data")
 
 if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone():
     # output paths for add-on c-module
@@ -69,7 +78,10 @@ if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone():
 
 else:
     # output paths for standalone c-module
-    OUTPUT_FOLDER = PACKAGEDIR / Path("data") / Path("output")
+    if user_input[ParamNames.folderpath.value] is None:
+        OUTPUT_FOLDER = PACKAGEDIR / Path("data") / Path("output")
+    else:
+        OUTPUT_FOLDER = USER_PATH / Path("data") / Path("output")
 
 
 # Official statistics from the Food and Agriculture Organization
