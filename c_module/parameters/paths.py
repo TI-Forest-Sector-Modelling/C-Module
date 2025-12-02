@@ -14,7 +14,6 @@ def extract_scenarios(input_folder, output_folder, sc_num):
     :param sc_num: Number of scenarios to extract.
     :return: List of merged scenario names.
     """
-
     folder_path = Path(output_folder)
     files = list(folder_path.glob("*.pkl"))
     files.sort(key=lambda f: f.stat().st_mtime)
@@ -33,28 +32,86 @@ def extract_scenarios(input_folder, output_folder, sc_num):
     return scenarios
 
 
-def cmodule_is_standalone():
+def cmodule_is_standalone(debug: bool = False) -> bool:
     """
     Check if cmodule is standalone or not, covering if the code is run as the main program, covering CLI, script, IDE,
      and entry point runs.
+    :param debug: Flag to enable debug mode.
     :return: Bool if cmodule is standalone or not.
     """
-    import __main__
     import sys
+    import inspect
+    import __main__
 
-    if getattr(__main__, "__file__", None):
-        main_file = Path(__main__.__file__).resolve()
-        package_root = Path(__file__).resolve().parents[1]
+    reasons = []
 
-        if package_root in main_file.parents:
+    # Running under a typical test runner => treat as imported
+    if "pytest" in sys.modules:
+        reasons.append("pytest detected in sys.modules")
+        if debug:
+            print("DEBUG: pytest present -> treated as imported")
+        return False
+    if any("unittest" in mod for mod in sys.modules):
+        reasons.append("unittest detected in sys.modules")
+        if debug:
+            print("DEBUG: unittest present -> treated as imported")
+        return False
+
+    # Simple and reliable check for most cases
+    if __name__ == "__main__":
+        reasons.append("__name__ == '__main__'")
+        if debug:
+            print("DEBUG: __name__ == '__main__' -> standalone")
+        return True
+
+    # Inspect stack: some IDEs or runners execute a wrapper that sets __name__ == '__main__'
+    # in a different frame. If any frame was executed as __main__, assume standalone entry.
+    for frame_info in inspect.stack():
+        g = frame_info.frame.f_globals
+        frame_name = g.get("__name__")
+        frame_file = g.get("__file__", None)
+        if frame_name == "__main__":
+            reasons.append(f"found frame with __name__ == '__main__' (file={frame_file})")
+            if debug:
+                print("DEBUG: stack frame with __name__ == '__main__' -> standalone")
+                print(f"DEBUG: frame file: {frame_file}")
             return True
 
-        if "pytest" in sys.modules and Path.cwd().resolve() == package_root.parent:
-            return True
+    # Compare the top-level script path with this package path:
+    # if the top-level entry script is outside this package, it likely invoked/imported the package.
+    main_file = getattr(__main__, "__file__", None)
+    if main_file:
+        try:
+            main_path = Path(main_file).resolve()
+            package_root = Path(__file__).resolve().parents[1]
+            # If the top-level script is the module file itself -> standalone
+            if main_path == Path(__file__).resolve():
+                reasons.append("main_file equals this module file")
+                if debug:
+                    print("DEBUG: main_file equals this module file -> standalone")
+                return True
+            # If the top-level script is *inside* the package: often still a standalone run (python -m)
+            if package_root in main_path.parents:
+                reasons.append("main_file is located inside package root (likely -m or IDE module run)")
+                if debug:
+                    print("DEBUG: main_file inside package root -> standalone")
+                    print(f"DEBUG: main_file={main_path}, package_root={package_root}")
+                return True
+            # Otherwise treat as imported
+            reasons.append("main_file exists but is outside package -> treated as imported")
+            if debug:
+                print("DEBUG: main_file outside package -> treated as imported")
+                print(f"DEBUG: main_file={main_path}, package_root={package_root}")
+            return False
+        except Exception as e:
+            # fallback
+            if debug:
+                print("DEBUG: error resolving main_file or package_root:", e)
+            pass
 
-        if any("unittest" in mod for mod in sys.modules):
-            return True
-
+    # If none of the above matched, assume imported
+    if debug:
+        print("DEBUG: no indication of standalone execution; reasons:", reasons)
     return False
 
 

@@ -18,7 +18,7 @@ class DataManager:
 
     @staticmethod
     def set_sc_paths(self):
-        if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone():
+        if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone(debug=False):
             # input paths for add-on c-module
             scenarios = extract_scenarios(input_folder=TIMBADIR_INPUT,
                                           output_folder=TIMBADIR_OUTPUT,
