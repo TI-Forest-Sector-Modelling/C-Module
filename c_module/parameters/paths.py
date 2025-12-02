@@ -116,29 +116,35 @@ def cmodule_is_standalone(debug: bool = False) -> bool:
 
 
 PACKAGEDIR = Path(__file__).parent.parent.absolute()
-INPUT_FOLDER = PACKAGEDIR / Path("data") / Path("input")
-if user_input[ParamNames.folderpath.value] is None:
-    # If user-defined path does not exists, use default path
-    TIMBADIR = Path(__file__).parent.parent.parent.parent.parent.parent.absolute()
-    TIMBADIR_INPUT = TIMBADIR / Path("TiMBA") / Path("data") / Path("input") / Path("01_Input_Files")
-    TIMBADIR_OUTPUT = TIMBADIR / Path("TiMBA") / Path("data") / Path("output") / Path("data")
 
-else:
-    # If user-defined path exist
-    USER_PATH = Path(user_input[ParamNames.folderpath.value]).absolute()
-    TIMBADIR_INPUT = USER_PATH / Path("TiMBA") / Path("data") / Path("input") / Path("01_Input_Files")
-    TIMBADIR_OUTPUT = USER_PATH / Path("TiMBA") / Path("data") / Path("output") / Path("data")
+if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone(debug=False):
+    # input and output paths for add-on c-module
+    if user_input[ParamNames.folderpath.value] is None:
+        # If user-defined path does not exists, use default path
+        # For compatibility with other modules, paths must be adapted
+        TIMBADIR = Path(__file__).parent.parent.parent.parent.parent.parent.absolute()
+        TIMBADIR_INPUT = TIMBADIR / Path("TiMBA") / Path("data") / Path("input") / Path("01_Input_Files")
+        TIMBADIR_OUTPUT = TIMBADIR / Path("TiMBA") / Path("data") / Path("output") / Path("data")
+    else:
+        # If user-defined path exist
+        USER_PATH = Path(user_input[ParamNames.folderpath.value]).absolute()
+        TIMBADIR_INPUT = USER_PATH / Path("TiMBA") / Path("data") / Path("input") / Path("01_Input_Files")
+        TIMBADIR_OUTPUT = USER_PATH / Path("TiMBA") / Path("data") / Path("output") / Path("data")
 
-if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone():
-    # output paths for add-on c-module
     OUTPUT_FOLDER = TIMBADIR_OUTPUT
 
 else:
-    # output paths for standalone c-module
+    # input and output paths for standalone c-module
     if user_input[ParamNames.folderpath.value] is None:
+        INPUT_FOLDER = PACKAGEDIR / Path("data") / Path("input")
         OUTPUT_FOLDER = PACKAGEDIR / Path("data") / Path("output")
     else:
+        USER_PATH = Path(user_input[ParamNames.folderpath.value]).absolute()
+        INPUT_FOLDER = USER_PATH / Path("data") / Path("input")
         OUTPUT_FOLDER = USER_PATH / Path("data") / Path("output")
+
+    TIMBADIR_INPUT = None
+    TIMBADIR_OUTPUT = None
 
 
 # Official statistics from the Food and Agriculture Organization
