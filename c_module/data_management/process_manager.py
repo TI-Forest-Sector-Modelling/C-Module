@@ -8,6 +8,7 @@ from c_module.logic.visualisation import Carbon_DashboardPlotter
 class ProcessManager:
     @staticmethod
     def run_readin_process(self):
+        DataManager.check_input_data(self)
         DataManager.set_sc_paths(self)
         ProcessManager.readin_add_data_process(self)
         ProcessManager.readin_timba_process(self)

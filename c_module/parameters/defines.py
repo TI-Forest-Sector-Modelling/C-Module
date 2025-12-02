@@ -138,6 +138,14 @@ class VarNames(Enum):
     faostat_export_value = "Export value"
 
 
+class FolderNames(Enum):
+    # Folder names
+    additional_info = "additional_information"
+    projection_data = "projection_data"
+    historical_data = "historical_data"
+
+
+
 
 
 

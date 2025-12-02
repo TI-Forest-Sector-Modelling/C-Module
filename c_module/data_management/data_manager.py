@@ -1,8 +1,8 @@
 from c_module.parameters.paths import (INPUT_FOLDER, TIMBADIR_INPUT, ADD_INFO_CARBON_PATH, ADD_INFO_COUNTRY,
                                        FAOSTAT_DATA, FRA_DATA, OUTPUT_FOLDER, TIMBADIR_OUTPUT, FAOSTAT_URL, FAO_DIR,
-                                       FRA_URL)
+                                       FRA_URL, DEFAULT_PROJECTION_URL, ADD_INFO_URL)
 from c_module.parameters.paths import cmodule_is_standalone, extract_scenarios
-from c_module.parameters.defines import (VarNames, ParamNames, CountryConstants)
+from c_module.parameters.defines import (VarNames, ParamNames, CountryConstants, FolderNames)
 from c_module.user_io.default_parameters import user_input
 import pandas as pd
 from tqdm import tqdm
@@ -33,6 +33,82 @@ class DataManager:
             PKL_RESULTS_INPUT = scenarios
 
         self.sc_path = PKL_RESULTS_INPUT
+
+    @staticmethod
+    def check_input_data(self):
+        self.logger.info(f"C-Module - Check input data for carbon module")
+        DataManager.check_input_data_structure(self)
+        DataManager.check_input_data_content(self)
+
+    @staticmethod
+    def check_input_data_structure(self):
+        INPUT_FOLDER.mkdir(parents=True, exist_ok=True)
+
+        if cmodule_is_standalone(debug=False):
+            required = {FolderNames.additional_info.value, FolderNames.projection_data.value}
+        else:
+            required = {FolderNames.additional_info.value}
+        existing = {p.name for p in Path(INPUT_FOLDER).iterdir() if p.is_dir()}
+        missing = list(required - existing)
+        if len(missing) > 0:
+            for missing_folder in missing:
+                NEW_FOLDER = INPUT_FOLDER / Path(missing_folder)
+                NEW_FOLDER.mkdir(parents=True, exist_ok=True)
+
+    @staticmethod
+    def check_input_data_content(self):
+        subfolders = [p.name for p in INPUT_FOLDER.iterdir() if p.is_dir()]
+        for folder in subfolders:
+            if (folder == FolderNames.additional_info.value) or (folder == FolderNames.projection_data.value):
+                if folder == FolderNames.additional_info.value:
+                    # download additional info data
+                    GIT_DATA_URL = ADD_INFO_URL
+
+                if folder == FolderNames.projection_data.value:
+                    # download projection data
+                    GIT_DATA_URL = DEFAULT_PROJECTION_URL
+
+                folder_path = INPUT_FOLDER / Path(folder)
+                missing_files = DataManager.compare_local_and_remote(local_folder_path=folder_path,
+                                                                     remote_folder_url=GIT_DATA_URL)
+
+                for missing_file in list(missing_files):
+                    DataManager.download_carbon_data_from_github(self=self,
+                                                                 data_url=GIT_DATA_URL,
+                                                                 folder_path=folder_path,
+                                                                 missing_file=missing_file)
+
+    @staticmethod
+    def compare_local_and_remote(local_folder_path, remote_folder_url):
+        response = requests.get(remote_folder_url, timeout=30)
+        response.raise_for_status()
+        repo_files = response.json()
+
+        github_filenames = {f["name"] for f in repo_files if f["type"] == "file"}
+
+        local_filenames = {p.name for p in local_folder_path.iterdir() if p.is_file()}
+
+        missing_local = github_filenames - local_filenames
+
+        return missing_local
+
+    @staticmethod
+    def download_carbon_data_from_github(self, data_url, folder_path, missing_file):
+        response = requests.get(data_url, timeout=30)
+        response.raise_for_status()
+
+        files = response.json()
+        for file in files:
+            if file["name"] == missing_file:
+                self.logger.info(f"C-Module - Download {file['name']} from GitHub")
+                if file["type"] == "file":
+                    r = requests.get(file["download_url"], timeout=30)
+                    r.raise_for_status()
+                    out_file = folder_path / file["name"]
+
+                    with open(out_file, "wb") as f:
+                        f.write(r.content)
+
 
     @staticmethod
     def load_data(filepath, table_name, input_source):
