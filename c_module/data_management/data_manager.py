@@ -20,6 +20,10 @@ class DataManager:
     def set_sc_paths(self):
         if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone():
             # input paths for add-on c-module
+            print("\n")
+            print(f"carbon module is standalone: {cmodule_is_standalone()}")
+            print(f"user input add-on: {user_input[ParamNames.add_on_activated.value]}")
+            print("\n")
             print(TIMBADIR_INPUT)
             print(TIMBADIR_INPUT)
             print(TIMBADIR_INPUT)
