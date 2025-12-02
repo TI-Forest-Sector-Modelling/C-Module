@@ -117,6 +117,15 @@ def cmodule_is_standalone(debug: bool = False) -> bool:
 
 PACKAGEDIR = Path(__file__).parent.parent.absolute()
 
+if cmodule_is_standalone(debug=False):
+    if user_input[ParamNames.add_on_activated.value]:
+        import sys
+        print("Inconsistent settings:")
+        print(f"C-Module is executed as standalone: {cmodule_is_standalone(debug=False)}")
+        print(f"But parameter add_on_activated: {user_input[ParamNames.add_on_activated.value]}")
+        print(f"Harmonize settings to proceed")
+        sys.exit("Stopping execution.")
+
 if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone(debug=False):
     # input and output paths for add-on c-module
     if user_input[ParamNames.folderpath.value] is None:
