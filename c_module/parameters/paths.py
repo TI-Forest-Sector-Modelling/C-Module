@@ -167,12 +167,13 @@ FRA_URL = "https://fra-data.fao.org/api/file/bulk-download?assessmentName=fra&cy
 FRA_DATA = INPUT_FOLDER / Path("historical_data") / Path(f"FRA_Years_All_Data")
 
 # additional information
-ADD_INFO_URL = "https://api.github.com/repos/TI-Forest-Sector-Modelling/C-Module/contents/c_module/data/input/additional_information"
+CMODULE_ZIP_URL = "https://github.com/TI-Forest-Sector-Modelling/C-Module/archive/refs/heads/main.zip"
+ADD_INFO_DIR = "C-Module-main/c_module/data/input/additional_information"
 ADD_INFO_FOLDER = PACKAGEDIR / INPUT_FOLDER / Path("additional_information")
 ADD_INFO_CARBON_PATH = ADD_INFO_FOLDER / Path("carbon_additional_information")
 PKL_ADD_INFO_CARBON_PATH = ADD_INFO_FOLDER / Path("carbon_additional_information")
 ADD_INFO_COUNTRY = ADD_INFO_FOLDER / Path("country_data")
 PKL_ADD_INFO_START_YEAR = ADD_INFO_FOLDER / Path("hist_hwp_carbon_start_year")
-DEFAULT_PROJECTION_URL = "https://api.github.com/repos/TI-Forest-Sector-Modelling/C-Module/contents/c_module/data/input/projection_data"
+DEFAULT_PROJECTION_DIR = "C-Module-main/c_module/data/input/projection_data"
 
 LOGGING_OUTPUT_FOLDER = OUTPUT_FOLDER

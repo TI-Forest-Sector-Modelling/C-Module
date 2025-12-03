@@ -1,6 +1,6 @@
 from c_module.parameters.paths import (INPUT_FOLDER, TIMBADIR_INPUT, ADD_INFO_CARBON_PATH, ADD_INFO_COUNTRY,
                                        FAOSTAT_DATA, FRA_DATA, OUTPUT_FOLDER, TIMBADIR_OUTPUT, FAOSTAT_URL, FAO_DIR,
-                                       FRA_URL, DEFAULT_PROJECTION_URL, ADD_INFO_URL)
+                                       FRA_URL, DEFAULT_PROJECTION_DIR, ADD_INFO_DIR, CMODULE_ZIP_URL)
 from c_module.parameters.paths import cmodule_is_standalone, extract_scenarios
 from c_module.parameters.defines import (VarNames, ParamNames, CountryConstants, FolderNames)
 from c_module.user_io.default_parameters import user_input
@@ -8,6 +8,7 @@ import pandas as pd
 from tqdm import tqdm
 from pathlib import Path
 import requests
+from io import BytesIO
 import zipfile
 import io
 import time
@@ -36,12 +37,19 @@ class DataManager:
 
     @staticmethod
     def check_input_data(self):
+        """
+        Checks input data for the C-Module in two steps. First, the input data structure is checked. After, the content
+        of each input data folder is checked.
+        """
         self.logger.info(f"C-Module - Check input data for carbon module")
         DataManager.check_input_data_structure(self)
         DataManager.check_input_data_content(self)
 
     @staticmethod
     def check_input_data_structure(self):
+        """
+        Checks the input data structure. If input data folder are missing, the missing folder is generated.
+        """
         INPUT_FOLDER.mkdir(parents=True, exist_ok=True)
 
         if cmodule_is_standalone(debug=False):
@@ -57,58 +65,99 @@ class DataManager:
 
     @staticmethod
     def check_input_data_content(self):
+        """
+        Checks if input data folder content corresponds to folder content from the C-Module main branch on GitHub.
+        Missing input data is downloaded automatically.
+        :param self: C-Module object
+        """
         subfolders = [p.name for p in INPUT_FOLDER.iterdir() if p.is_dir()]
         for folder in subfolders:
             if (folder == FolderNames.additional_info.value) or (folder == FolderNames.projection_data.value):
                 if folder == FolderNames.additional_info.value:
                     # download additional info data
-                    GIT_DATA_URL = ADD_INFO_URL
+                    GIT_DATA_DIR = ADD_INFO_DIR
 
                 if folder == FolderNames.projection_data.value:
                     # download projection data
-                    GIT_DATA_URL = DEFAULT_PROJECTION_URL
+                    GIT_DATA_DIR = DEFAULT_PROJECTION_DIR
 
                 folder_path = INPUT_FOLDER / Path(folder)
                 missing_files = DataManager.compare_local_and_remote(local_folder_path=folder_path,
-                                                                     remote_folder_url=GIT_DATA_URL)
+                                                                     repo_zip_url=CMODULE_ZIP_URL,
+                                                                     target_subdir=GIT_DATA_DIR)
 
                 for missing_file in list(missing_files):
                     DataManager.download_carbon_data_from_github(self=self,
-                                                                 data_url=GIT_DATA_URL,
+                                                                 repo_zip_url=CMODULE_ZIP_URL,
+                                                                 target_subdir=GIT_DATA_DIR,
                                                                  folder_path=folder_path,
                                                                  missing_file=missing_file)
 
     @staticmethod
-    def compare_local_and_remote(local_folder_path, remote_folder_url):
-        response = requests.get(remote_folder_url, timeout=30)
+    def compare_local_and_remote(local_folder_path: Path, repo_zip_url: str, target_subdir: str):
+        """
+        Compares local and remote input data folder and returns missing files.
+        :param local_folder_path: Local input data folder
+        :param repo_zip_url: Remote input data zip url
+        :param target_subdir: Target subdirectory of remote input data folder
+        :return: Missing files in local folder
+        """
+        response = requests.get(repo_zip_url, timeout=60)
         response.raise_for_status()
-        repo_files = response.json()
 
-        github_filenames = {f["name"] for f in repo_files if f["type"] == "file"}
+        with zipfile.ZipFile(BytesIO(response.content)) as zip_file:
+            zip_files = zip_file.namelist()
 
-        local_filenames = {p.name for p in local_folder_path.iterdir() if p.is_file()}
+        # GitHub files
+        github_filenames = {
+            Path(f).name
+            for f in zip_files
+            if f.startswith(target_subdir) and not f.endswith("/")
+        }
+
+        # Local files
+        local_filenames = {
+            p.name for p in local_folder_path.iterdir() if p.is_file()
+        }
 
         missing_local = github_filenames - local_filenames
 
         return missing_local
 
     @staticmethod
-    def download_carbon_data_from_github(self, data_url, folder_path, missing_file):
-        response = requests.get(data_url, timeout=30)
+    def download_carbon_data_from_github(self, repo_zip_url: str, target_subdir: str, folder_path: Path,
+                                         missing_file: str):
+        """
+        Downloads missing input data from GitHub.
+        :param self: C-Module object
+        :param repo_zip_url: Remote input data zip url
+        :param target_subdir: Target subdirectory of remote input data folder
+        :param folder_path: Local input data folder
+        :param missing_file: Input data files missing in local folder
+        """
+        response = requests.get(repo_zip_url, timeout=60)
         response.raise_for_status()
 
-        files = response.json()
-        for file in files:
-            if file["name"] == missing_file:
-                self.logger.info(f"C-Module - Download {file['name']} from GitHub")
-                if file["type"] == "file":
-                    r = requests.get(file["download_url"], timeout=30)
-                    r.raise_for_status()
-                    out_file = folder_path / file["name"]
+        with zipfile.ZipFile(BytesIO(response.content)) as zip_file:
+            zip_files = zip_file.namelist()
 
-                    with open(out_file, "wb") as f:
-                        f.write(r.content)
+            target_path = None
+            for f in zip_files:
+                if f.startswith(target_subdir) and f.endswith(missing_file):
+                    target_path = f
+                    break
 
+            if not target_path:
+                raise FileNotFoundError(
+                    f"{missing_file} not found in GitHub folder {target_subdir}"
+                )
+
+            self.logger.info(f"C-Module - Download {missing_file} from GitHub")
+
+            with zip_file.open(target_path) as zf:
+                out_file = folder_path / missing_file
+                with open(out_file, "wb") as f:
+                    f.write(zf.read())
 
     @staticmethod
     def load_data(filepath, table_name, input_source):
