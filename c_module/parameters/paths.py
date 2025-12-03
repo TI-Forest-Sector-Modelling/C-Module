@@ -151,7 +151,7 @@ else:
     else:
         USER_PATH = Path(user_input[ParamNames.folderpath.value]).absolute()
         TARGETDIR = USER_PATH
-
+    print(f"USER PATH used: {USER_PATH}")
     TIMBADIR_INPUT = None
     TIMBADIR_OUTPUT = None
 
