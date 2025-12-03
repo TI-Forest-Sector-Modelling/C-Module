@@ -1,13 +1,11 @@
-from c_module.parameters.paths import (INPUT_FOLDER, TIMBADIR_INPUT, ADD_INFO_CARBON_PATH, ADD_INFO_COUNTRY,
-                                       FAOSTAT_DATA, FRA_DATA, OUTPUT_FOLDER, TIMBADIR_OUTPUT, FAOSTAT_URL, FAO_DIR,
-                                       FRA_URL)
 from c_module.parameters.paths import cmodule_is_standalone, extract_scenarios
-from c_module.parameters.defines import (VarNames, ParamNames, CountryConstants)
+from c_module.parameters.defines import (VarNames, ParamNames, CountryConstants, FolderNames, PathNames)
 from c_module.user_io.default_parameters import user_input
 import pandas as pd
 from tqdm import tqdm
 from pathlib import Path
 import requests
+from io import BytesIO
 import zipfile
 import io
 import time
@@ -18,9 +16,12 @@ class DataManager:
 
     @staticmethod
     def set_sc_paths(self):
-        if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone():
-            # input paths for add-on c-module
+        TIMBADIR_INPUT = self.paths[PathNames.TIMBADIR_INPUT.value]
+        TIMBADIR_OUTPUT = self.paths[PathNames.TIMBADIR_OUTPUT.value]
+        INPUT_FOLDER = self.paths[PathNames.INPUT_FOLDER.value]
 
+        if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone(debug=False):
+            # input paths for add-on c-module
             scenarios = extract_scenarios(input_folder=TIMBADIR_INPUT,
                                           output_folder=TIMBADIR_OUTPUT,
                                           sc_num=user_input[ParamNames.sc_num.value])
@@ -34,6 +35,136 @@ class DataManager:
             PKL_RESULTS_INPUT = scenarios
 
         self.sc_path = PKL_RESULTS_INPUT
+
+    @staticmethod
+    def check_input_data(self):
+        """
+        Checks input data for the C-Module in two steps. First, the input data structure is checked. After, the content
+        of each input data folder is checked.
+        """
+        self.logger.info(f"C-Module - Check input data for carbon module")
+        DataManager.check_input_data_structure(self)
+        DataManager.check_input_data_content(self)
+
+    @staticmethod
+    def check_input_data_structure(self):
+        """
+        Checks the input data structure. If input data folder are missing, the missing folder is generated.
+        """
+        INPUT_FOLDER = self.paths[PathNames.INPUT_FOLDER.value]
+        INPUT_FOLDER.mkdir(parents=True, exist_ok=True)
+
+        if cmodule_is_standalone(debug=False):
+            required = {FolderNames.additional_info.value, FolderNames.projection_data.value}
+        else:
+            required = {FolderNames.additional_info.value}
+        existing = {p.name for p in Path(INPUT_FOLDER).iterdir() if p.is_dir()}
+        missing = list(required - existing)
+        if len(missing) > 0:
+            for missing_folder in missing:
+                NEW_FOLDER = INPUT_FOLDER / Path(missing_folder)
+                NEW_FOLDER.mkdir(parents=True, exist_ok=True)
+
+    @staticmethod
+    def check_input_data_content(self):
+        """
+        Checks if input data folder content corresponds to folder content from the C-Module main branch on GitHub.
+        Missing input data is downloaded automatically.
+        :param self: C-Module object
+        """
+        INPUT_FOLDER = self.paths[PathNames.INPUT_FOLDER.value]
+        CMODULE_ZIP_URL = self.paths[PathNames.CMODULE_ZIP_URL.value]
+        ADD_INFO_DIR = self.paths[PathNames.ADD_INFO_DIR.value]
+        DEFAULT_PROJECTION_DIR = self.paths[PathNames.DEFAULT_PROJECTION_DIR.value]
+
+        subfolders = [p.name for p in INPUT_FOLDER.iterdir() if p.is_dir()]
+        for folder in subfolders:
+            if (folder == FolderNames.additional_info.value) or (folder == FolderNames.projection_data.value):
+                if folder == FolderNames.additional_info.value:
+                    # download additional info data
+                    GIT_DATA_DIR = ADD_INFO_DIR
+
+                if folder == FolderNames.projection_data.value:
+                    # download projection data
+                    GIT_DATA_DIR = DEFAULT_PROJECTION_DIR
+
+                folder_path = INPUT_FOLDER / Path(folder)
+                missing_files = DataManager.compare_local_and_remote(local_folder_path=folder_path,
+                                                                     repo_zip_url=CMODULE_ZIP_URL,
+                                                                     target_subdir=GIT_DATA_DIR)
+
+                for missing_file in list(missing_files):
+                    DataManager.download_carbon_data_from_github(self=self,
+                                                                 repo_zip_url=CMODULE_ZIP_URL,
+                                                                 target_subdir=GIT_DATA_DIR,
+                                                                 folder_path=folder_path,
+                                                                 missing_file=missing_file)
+
+    @staticmethod
+    def compare_local_and_remote(local_folder_path: Path, repo_zip_url: str, target_subdir: str):
+        """
+        Compares local and remote input data folder and returns missing files.
+        :param local_folder_path: Local input data folder
+        :param repo_zip_url: Remote input data zip url
+        :param target_subdir: Target subdirectory of remote input data folder
+        :return: Missing files in local folder
+        """
+        response = requests.get(repo_zip_url, timeout=60)
+        response.raise_for_status()
+
+        with zipfile.ZipFile(BytesIO(response.content)) as zip_file:
+            zip_files = zip_file.namelist()
+
+        # GitHub files
+        github_filenames = {
+            Path(f).name
+            for f in zip_files
+            if f.startswith(target_subdir) and not f.endswith("/")
+        }
+
+        # Local files
+        local_filenames = {
+            p.name for p in local_folder_path.iterdir() if p.is_file()
+        }
+
+        missing_local = github_filenames - local_filenames
+
+        return missing_local
+
+    @staticmethod
+    def download_carbon_data_from_github(self, repo_zip_url: str, target_subdir: str, folder_path: Path,
+                                         missing_file: str):
+        """
+        Downloads missing input data from GitHub.
+        :param self: C-Module object
+        :param repo_zip_url: Remote input data zip url
+        :param target_subdir: Target subdirectory of remote input data folder
+        :param folder_path: Local input data folder
+        :param missing_file: Input data files missing in local folder
+        """
+        response = requests.get(repo_zip_url, timeout=60)
+        response.raise_for_status()
+
+        with zipfile.ZipFile(BytesIO(response.content)) as zip_file:
+            zip_files = zip_file.namelist()
+
+            target_path = None
+            for f in zip_files:
+                if f.startswith(target_subdir) and f.endswith(missing_file):
+                    target_path = f
+                    break
+
+            if not target_path:
+                raise FileNotFoundError(
+                    f"{missing_file} not found in GitHub folder {target_subdir}"
+                )
+
+            self.logger.info(f"C-Module - Download {missing_file} from GitHub")
+
+            with zip_file.open(target_path) as zf:
+                out_file = folder_path / missing_file
+                with open(out_file, "wb") as f:
+                    f.write(zf.read())
 
     @staticmethod
     def load_data(filepath, table_name, input_source):
@@ -101,6 +232,7 @@ class DataManager:
 
     @staticmethod
     def save_data(self):
+        OUTPUT_FOLDER = self.paths[PathNames.OUTPUT_FOLDER.value]
         for sc in self.sc_list:
             carbon_data_ext = DataManager.flattening_data(data=self.carbon_data[sc])
             carbon_data_ext = DataManager.add_additional_info(self, data=carbon_data_ext, sc=sc)
@@ -109,12 +241,11 @@ class DataManager:
             if not self.UserInput[ParamNames.add_on_activated.value]:
                 DataManager.serialize_to_pickle(self.timba_data[sc], OUTPUT_FOLDER / Path(f"{sc}.pkl"))
             else:
-                DataManager.serialize_to_pickle(
-                    self.carbon_data[sc], OUTPUT_FOLDER / Path(f"{self.time_stamp}_{sc}.pkl"))
+                DataManager.serialize_to_pickle(self.carbon_data[sc], OUTPUT_FOLDER / Path(f"{sc}.pkl"))
 
             for df_key in self.carbon_data[sc].keys():
                 carbon_data = self.carbon_data[sc][df_key]
-                carbon_data_path = OUTPUT_FOLDER / Path(f"{df_key}_D{self.time_stamp}_{sc}")
+                carbon_data_path = OUTPUT_FOLDER / Path(f"{df_key}_{sc}")
                 carbon_data.to_csv(f"{carbon_data_path}.csv", index=False)
 
     @staticmethod
@@ -129,6 +260,7 @@ class DataManager:
 
     @staticmethod
     def load_additional_data(self):
+        ADD_INFO_COUNTRY = self.paths[PathNames.ADD_INFO_COUNTRY.value]
         self.add_data["country_data"] = DataManager.load_data(
             f"{ADD_INFO_COUNTRY}.csv", ADD_INFO_COUNTRY, "csv")
 
@@ -139,7 +271,6 @@ class DataManager:
         commodity_dict = VarNames.commodity_dict.value
         commodity_code = VarNames.commodity_code.value
         commodity_num_name = VarNames.commodity_num.value
-
         commodity_num = len(self.timba_data[self.sc_list[0]][timba_data_all][commodity_code].unique())
         self.add_data[commodity_dict] = {}
         self.add_data[commodity_dict][commodity_num_name] = commodity_num
@@ -162,6 +293,8 @@ class DataManager:
         Additional information for projections of carbon removals and emissions are readin
         :param self: object of class C-Module
         """
+        ADD_INFO_CARBON_PATH = self.paths[PathNames.ADD_INFO_CARBON_PATH.value]
+
         commodity_code = VarNames.commodity_code.value
         for sheet_name in pd.ExcelFile(f"{ADD_INFO_CARBON_PATH}.xlsx").sheet_names:
             if "CarbonHWP_" in sheet_name:
@@ -186,6 +319,8 @@ class DataManager:
         :param self: object of class C-Module
         :param update_data: Flag to update FAOSTAT data even if max cache age is not reached
         """
+        FAOSTAT_DATA = self.paths[PathNames.FAOSTAT_DATA.value]
+        FAO_DIR = self.paths[PathNames.FAO_DIR.value]
         CSV_FILE = Path(f"{FAOSTAT_DATA}.csv")
 
         CACHE_MAX_AGE = 2 * 30 * 24 * 60 * 60  # 2 months
@@ -216,6 +351,11 @@ class DataManager:
         :param database: Database name
         :return: FAOSTAT data as DataFrame
         """
+        FRA_URL = self.paths[PathNames.FRA_URL.value]
+        FAOSTAT_URL = self.paths[PathNames.FAOSTAT_URL.value]
+        FAOSTAT_DATA = self.paths[PathNames.FAOSTAT_DATA.value]
+        FRA_DATA = self.paths[PathNames.FRA_DATA.value]
+
         self.logger.info(f"C-Module - Download {database} data from API")
         if database == "FRA":
             database_url = FRA_URL
@@ -387,6 +527,8 @@ class DataManager:
         :param update_data: Flag to update FAOSTAT data even if max cache age is not reached
         """
         # Paths
+        FRA_DATA = self.paths[PathNames.FRA_DATA.value]
+        FAO_DIR = self.paths[PathNames.FAO_DIR.value]
         CSV_FILE = Path(f"{FRA_DATA}.csv")
 
         CACHE_MAX_AGE = 2 * 30 * 24 * 60 * 60  # 2 months

@@ -28,6 +28,7 @@ class ParamNames(Enum):
     start_year = "start_year"
     end_year = "end_year"
     read_in_pkl = "read_in_pkl"
+    folderpath = "folderpath"
     save_data_as = "save_data_as"
     calc_c_forest_agb = "calc_c_forest_agb"
     calc_c_forest_bgb = "calc_c_forest_bgb"
@@ -135,6 +136,36 @@ class VarNames(Enum):
     faostat_export = "Export quantity"
     faostat_import_value = "Import value"
     faostat_export_value = "Export value"
+
+
+class FolderNames(Enum):
+    # Folder names
+    additional_info = "additional_information"
+    projection_data = "projection_data"
+    historical_data = "historical_data"
+
+
+class PathNames(Enum):
+    INPUT_FOLDER = "INPUT_FOLDER"
+    OUTPUT_FOLDER = "OUTPUT_FOLDER"
+    TIMBADIR_INPUT = "TIMBADIR_INPUT"
+    TIMBADIR_OUTPUT = "TIMBADIR_OUTPUT"
+    FAO_DIR = "FAO_DIR"
+    FAOSTAT_URL = "FAOSTAT_URL"
+    FAOSTAT_DATA = "FAOSTAT_DATA"
+    FRA_URL = "FRA_URL"
+    FRA_DATA = "FRA_DATA"
+    CMODULE_ZIP_URL = "CMODULE_ZIP_URL"
+    ADD_INFO_DIR = "ADD_INFO_DIR"
+    ADD_INFO_FOLDER = "ADD_INFO_FOLDER"
+    ADD_INFO_CARBON_PATH = "ADD_INFO_CARBON_PATH"
+    PKL_ADD_INFO_CARBON_PATH = "PKL_ADD_INFO_CARBON_PATH"
+    ADD_INFO_COUNTRY = "ADD_INFO_COUNTRY"
+    PKL_ADD_INFO_START_YEAR = "PKL_ADD_INFO_START_YEAR"
+    DEFAULT_PROJECTION_DIR = "DEFAULT_PROJECTION_DIR"
+    LOGGING_OUTPUT_FOLDER = "LOGGING_OUTPUT_FOLDER"
+
+
 
 
 

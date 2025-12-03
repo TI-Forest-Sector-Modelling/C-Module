@@ -1,6 +1,5 @@
 from c_module.data_management.data_manager import DataManager
-from c_module.parameters.paths import (FAOSTAT_DATA, FRA_DATA)
-from c_module.parameters.defines import (VarNames, ParamNames)
+from c_module.parameters.defines import (VarNames, ParamNames, PathNames)
 from pathlib import Path
 from c_module.logic.visualisation import Carbon_DashboardPlotter
 
@@ -8,6 +7,7 @@ from c_module.logic.visualisation import Carbon_DashboardPlotter
 class ProcessManager:
     @staticmethod
     def run_readin_process(self):
+        DataManager.check_input_data(self)
         DataManager.set_sc_paths(self)
         ProcessManager.readin_add_data_process(self)
         ProcessManager.readin_timba_process(self)
@@ -37,6 +37,7 @@ class ProcessManager:
     @staticmethod
     def readin_faostat_process(self):
         self.logger.info("C-Module - Reading in FAOSTAT data")
+        FAOSTAT_DATA = self.paths[PathNames.FAOSTAT_DATA.value]
         DataManager.load_faostat_data(self, update_data=self.UserInput[ParamNames.fao_data_update.value])
         if not Path(f"{FAOSTAT_DATA}_processed.pkl").is_file():
             DataManager.prep_faostat_data(self)
@@ -48,6 +49,7 @@ class ProcessManager:
     @staticmethod
     def readin_fra_process(self):
         self.logger.info("C-Module - Reading in FRA data")
+        FRA_DATA = self.paths[PathNames.FRA_DATA.value]
         # TODO implement fra processing steps
         DataManager.load_fra_data(self, update_data=self.UserInput[ParamNames.fao_data_update.value])
         if not Path(f"{FRA_DATA}_processed.pkl").is_file():
