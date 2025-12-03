@@ -158,6 +158,12 @@ else:
     INPUT_FOLDER = TARGETDIR / Path("data") / Path("input")
     OUTPUT_FOLDER = TARGETDIR / Path("data") / Path("output")
 
+print("Input path used")
+print(INPUT_FOLDER)
+print("\n")
+print("Output path used")
+print(OUTPUT_FOLDER)
+
 
 # Official statistics from the Food and Agriculture Organization
 FAO_DIR = INPUT_FOLDER / Path("historical_data")
