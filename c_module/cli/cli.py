@@ -44,11 +44,11 @@ from c_module.parameters.defines import ParamNames
 @click.option('-UD', '--fao_data_update', 'fao_data_update',
               default=user_input[ParamNames.fao_data_update.value], show_default=True, required=False, type=bool,
               help="Flag to update FAO data.")
-@click.option('-FP', '--folder_path', 'folder_path', default=user_input[ParamNames.folderpath.value],
+@click.option('-FP', '--folderpath', 'folderpath', default=user_input[ParamNames.folderpath.value],
               show_default=True, required=False, type=str, help="Path to directory with Input/Output folder.")
 def cli(add_on_activated, sc_num, start_year, end_year, calc_c_forest_agb, calc_c_forest_bgb, calc_c_forest_soil,
         calc_c_forest_dwl, calc_c_hwp, c_hwp_accounting_approach, read_in_pkl, show_carbon_dashboard, fao_data_update,
-        folder_path):
+        folderpath):
 
     user_input_cli = {
         ParamNames.add_on_activated.value: add_on_activated,
@@ -64,7 +64,7 @@ def cli(add_on_activated, sc_num, start_year, end_year, calc_c_forest_agb, calc_
         ParamNames.c_hwp_accounting_approach.value: c_hwp_accounting_approach,
         ParamNames.show_carbon_dashboard.value: show_carbon_dashboard,
         ParamNames.fao_data_update.value: fao_data_update,
-        ParamNames.folderpath.value: folder_path,
+        ParamNames.folderpath.value: folderpath,
         # Adavanced settings not available via CLI
         ParamNames.historical_c_hwp.value: user_input[ParamNames.historical_c_hwp.value],
         ParamNames.hist_hwp_start_year.value: user_input[ParamNames.hist_hwp_start_year.value],
