@@ -50,12 +50,12 @@ def cmodule_is_standalone(debug: bool = False) -> bool:
         reasons.append("pytest detected in sys.modules")
         if debug:
             print("DEBUG: pytest present -> treated as imported")
-        return False
+        return True
     if any("unittest" in mod for mod in sys.modules):
         reasons.append("unittest detected in sys.modules")
         if debug:
             print("DEBUG: unittest present -> treated as imported")
-        return False
+        return True
 
     # Simple and reliable check for most cases
     if __name__ == "__main__":
