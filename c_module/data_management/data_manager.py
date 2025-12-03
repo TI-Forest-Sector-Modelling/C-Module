@@ -1,8 +1,5 @@
-from c_module.parameters.paths import (INPUT_FOLDER, TIMBADIR_INPUT, ADD_INFO_CARBON_PATH, ADD_INFO_COUNTRY,
-                                       FAOSTAT_DATA, FRA_DATA, OUTPUT_FOLDER, TIMBADIR_OUTPUT, FAOSTAT_URL, FAO_DIR,
-                                       FRA_URL, DEFAULT_PROJECTION_DIR, ADD_INFO_DIR, CMODULE_ZIP_URL)
 from c_module.parameters.paths import cmodule_is_standalone, extract_scenarios
-from c_module.parameters.defines import (VarNames, ParamNames, CountryConstants, FolderNames)
+from c_module.parameters.defines import (VarNames, ParamNames, CountryConstants, FolderNames, PathNames)
 from c_module.user_io.default_parameters import user_input
 import pandas as pd
 from tqdm import tqdm
@@ -19,6 +16,10 @@ class DataManager:
 
     @staticmethod
     def set_sc_paths(self):
+        TIMBADIR_INPUT = self.paths[PathNames.TIMBADIR_INPUT.value]
+        TIMBADIR_OUTPUT = self.paths[PathNames.TIMBADIR_OUTPUT.value]
+        INPUT_FOLDER = self.paths[PathNames.INPUT_FOLDER.value]
+
         if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone(debug=False):
             # input paths for add-on c-module
             scenarios = extract_scenarios(input_folder=TIMBADIR_INPUT,
@@ -50,6 +51,7 @@ class DataManager:
         """
         Checks the input data structure. If input data folder are missing, the missing folder is generated.
         """
+        INPUT_FOLDER = self.paths[PathNames.INPUT_FOLDER.value]
         INPUT_FOLDER.mkdir(parents=True, exist_ok=True)
 
         if cmodule_is_standalone(debug=False):
@@ -70,6 +72,11 @@ class DataManager:
         Missing input data is downloaded automatically.
         :param self: C-Module object
         """
+        INPUT_FOLDER = self.paths[PathNames.INPUT_FOLDER.value]
+        CMODULE_ZIP_URL = self.paths[PathNames.CMODULE_ZIP_URL.value]
+        ADD_INFO_DIR = self.paths[PathNames.ADD_INFO_DIR.value]
+        DEFAULT_PROJECTION_DIR = self.paths[PathNames.DEFAULT_PROJECTION_DIR.value]
+
         subfolders = [p.name for p in INPUT_FOLDER.iterdir() if p.is_dir()]
         for folder in subfolders:
             if (folder == FolderNames.additional_info.value) or (folder == FolderNames.projection_data.value):
@@ -225,6 +232,7 @@ class DataManager:
 
     @staticmethod
     def save_data(self):
+        OUTPUT_FOLDER = self.paths[PathNames.OUTPUT_FOLDER.value]
         for sc in self.sc_list:
             carbon_data_ext = DataManager.flattening_data(data=self.carbon_data[sc])
             carbon_data_ext = DataManager.add_additional_info(self, data=carbon_data_ext, sc=sc)
@@ -252,6 +260,7 @@ class DataManager:
 
     @staticmethod
     def load_additional_data(self):
+        ADD_INFO_COUNTRY = self.paths[PathNames.ADD_INFO_COUNTRY.value]
         self.add_data["country_data"] = DataManager.load_data(
             f"{ADD_INFO_COUNTRY}.csv", ADD_INFO_COUNTRY, "csv")
 
@@ -284,6 +293,8 @@ class DataManager:
         Additional information for projections of carbon removals and emissions are readin
         :param self: object of class C-Module
         """
+        ADD_INFO_CARBON_PATH = self.paths[PathNames.ADD_INFO_CARBON_PATH.value]
+
         commodity_code = VarNames.commodity_code.value
         for sheet_name in pd.ExcelFile(f"{ADD_INFO_CARBON_PATH}.xlsx").sheet_names:
             if "CarbonHWP_" in sheet_name:
@@ -308,6 +319,8 @@ class DataManager:
         :param self: object of class C-Module
         :param update_data: Flag to update FAOSTAT data even if max cache age is not reached
         """
+        FAOSTAT_DATA = self.paths[PathNames.FAOSTAT_DATA.value]
+        FAO_DIR = self.paths[PathNames.FAO_DIR.value]
         CSV_FILE = Path(f"{FAOSTAT_DATA}.csv")
 
         CACHE_MAX_AGE = 2 * 30 * 24 * 60 * 60  # 2 months
@@ -338,6 +351,11 @@ class DataManager:
         :param database: Database name
         :return: FAOSTAT data as DataFrame
         """
+        FRA_URL = self.paths[PathNames.FRA_URL.value]
+        FAOSTAT_URL = self.paths[PathNames.FAOSTAT_URL.value]
+        FAOSTAT_DATA = self.paths[PathNames.FAOSTAT_DATA.value]
+        FRA_DATA = self.paths[PathNames.FRA_DATA.value]
+
         self.logger.info(f"C-Module - Download {database} data from API")
         if database == "FRA":
             database_url = FRA_URL
@@ -509,6 +527,8 @@ class DataManager:
         :param update_data: Flag to update FAOSTAT data even if max cache age is not reached
         """
         # Paths
+        FRA_DATA = self.paths[PathNames.FRA_DATA.value]
+        FAO_DIR = self.paths[PathNames.FAO_DIR.value]
         CSV_FILE = Path(f"{FRA_DATA}.csv")
 
         CACHE_MAX_AGE = 2 * 30 * 24 * 60 * 60  # 2 months

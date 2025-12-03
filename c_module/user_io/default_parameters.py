@@ -9,7 +9,7 @@ start_year = 2020  # Not activated
 end_year = 2050  # Not activated
 
 read_in_pkl = True  # Caution False option is not implemented yet
-folderpath = "C:/Users/honkomp/test_test_test"
+folderpath = None
 
 # Forest carbon related parameters
 calc_c_forest_agb = True

@@ -1,5 +1,4 @@
-from c_module.parameters.defines import (VarNames, ParamNames, CarbonConstants)
-from c_module.parameters.paths import (PKL_ADD_INFO_START_YEAR)
+from c_module.parameters.defines import (VarNames, ParamNames, CarbonConstants, PathNames)
 from c_module.data_management.data_manager import DataManager
 
 import pandas as pd
@@ -164,6 +163,7 @@ class CarbonCalculator:
             for period in timba_data[period_var].unique():
                 if period == 0:
                     carbon_data = CarbonCalculator.calc_historic_carbon_hwp(
+                        self=self,
                         timba_data=timba_data,
                         faostat_data=faostat_data,
                         add_carbon_data=add_carbon_data,
@@ -198,7 +198,7 @@ class CarbonCalculator:
             self.carbon_data[sc][VarNames.carbon_hwp.value] = carbon_data
 
     @staticmethod
-    def calc_historic_carbon_hwp(timba_data: pd.DataFrame, faostat_data: pd.DataFrame, add_data: pd.DataFrame,
+    def calc_historic_carbon_hwp(self, timba_data: pd.DataFrame, faostat_data: pd.DataFrame, add_data: pd.DataFrame,
                                  add_carbon_data: pd.DataFrame, user_input: dict):
         """
         Calculates the historical carbon stock in semi-finished HWP based on the production or stock-change approach as
@@ -212,6 +212,7 @@ class CarbonCalculator:
         :param user_input: Input from user
         :return: Historical carbon stocks in semi-finished HWP for all countries represented in TiMBA
         """
+        PKL_ADD_INFO_START_YEAR = self.paths[PathNames.PKL_ADD_INFO_START_YEAR.value]
         carbon_factor = VarNames.carbon_factor.value
         half_life = VarNames.half_life.value
         faostat_country_code = VarNames.fao_country_code.value
@@ -264,7 +265,8 @@ class CarbonCalculator:
             country_spec_start_year = DataManager.restore_from_pickle(f"{PKL_ADD_INFO_START_YEAR}.pkl")
         else:
             country_spec_start_year = (CarbonCalculator.determine_start_year
-                                       (user_input=user_input,
+                                       (self=self,
+                                        user_input=user_input,
                                         faostat_data=faostat_data,
                                         add_carbon_data=add_carbon_data))
 
@@ -272,7 +274,8 @@ class CarbonCalculator:
         if ((len(country_spec_start_year[start_year].unique()) > 1) &
                 (user_input[ParamNames.hist_hwp_start_year.value] != "country-specific")):
             country_spec_start_year = (CarbonCalculator.determine_start_year
-                                       (user_input=user_input,
+                                       (self=self,
+                                        user_input=user_input,
                                         faostat_data=faostat_data,
                                         add_carbon_data=add_carbon_data))
         else:
@@ -700,7 +703,7 @@ class CarbonCalculator:
         return share_domestic_feedstock
 
     @staticmethod
-    def determine_start_year(faostat_data: pd.DataFrame, add_carbon_data: pd.DataFrame, user_input: dict):
+    def determine_start_year(self, faostat_data: pd.DataFrame, add_carbon_data: pd.DataFrame, user_input: dict):
         """
         Determines dynamically the start year for the historic HWP carbon pool calculation based on the data
         availability of FAOSTAT. The start year is determined for each country and product. The start year is determined
@@ -711,6 +714,7 @@ class CarbonCalculator:
         :param user_input: Input from user
         :return: DataFrame with start years
         """
+        PKL_ADD_INFO_START_YEAR = self.paths[PathNames.PKL_ADD_INFO_START_YEAR.value]
         faostat_country_code = VarNames.fao_country_code.value
         faostat_commodity_code = VarNames.faostat_item_code.value
         year_var = VarNames.year_name.value

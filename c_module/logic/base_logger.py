@@ -3,10 +3,9 @@ import os
 from pathlib import Path
 import datetime as dt
 import logging
-from c_module.parameters.paths import LOGGING_OUTPUT_FOLDER
 
 
-def get_logger(user_path: Union[str, Path, None], add_on_activated: bool):
+def get_logger(user_path: Union[str, Path, None], add_on_activated: bool, logging_folder):
     current_dt = dt.datetime.now().strftime("%Y%m%d")
     if add_on_activated:
         filename = f"{current_dt}_TiMBA.log"
@@ -14,7 +13,7 @@ def get_logger(user_path: Union[str, Path, None], add_on_activated: bool):
         filename = rf"{current_dt}_C_Module.log"
 
     if user_path is None:
-        filepath = os.path.join(LOGGING_OUTPUT_FOLDER, filename)
+        filepath = os.path.join(logging_folder, filename)
     else:
         filepath = os.path.join(user_path, "output", filename)
     if not os.path.exists(filepath):

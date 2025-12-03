@@ -1,7 +1,7 @@
 import datetime as dt
 from pathlib import Path
 from c_module.user_io.default_parameters import user_input
-from c_module.parameters.defines import ParamNames
+from c_module.parameters.defines import ParamNames, PathNames
 
 current_dt = dt.datetime.now().strftime("%Y%m%dT%H-%M-%S")
 
@@ -115,71 +115,87 @@ def cmodule_is_standalone(debug: bool = False) -> bool:
     return False
 
 
-PACKAGEDIR = Path(__file__).parent.parent.absolute()
+def set_paths(user_input: dict) -> dict:
+    PACKAGEDIR = Path(__file__).parent.parent.absolute()
 
-if cmodule_is_standalone(debug=False):
-    if user_input[ParamNames.add_on_activated.value]:
-        import sys
-        print("Inconsistent settings:")
-        print(f"C-Module is executed as standalone: {cmodule_is_standalone(debug=False)}")
-        print(f"But parameter add_on_activated: {user_input[ParamNames.add_on_activated.value]}")
-        print(f"Harmonize settings to proceed")
-        sys.exit("Stopping execution.")
+    if cmodule_is_standalone(debug=False):
+        if user_input[ParamNames.add_on_activated.value]:
+            import sys
+            print("Inconsistent settings:")
+            print(f"C-Module is executed as standalone: {cmodule_is_standalone(debug=False)}")
+            print(f"But parameter add_on_activated: {user_input[ParamNames.add_on_activated.value]}")
+            print(f"Harmonize settings to proceed")
+            sys.exit("Stopping execution.")
 
-if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone(debug=True):
-    # input and output paths for add-on c-module
-    if user_input[ParamNames.folderpath.value] is None:
-        # If user-defined path does not exists, use default path
-        # For compatibility with other modules, paths must be adapted
-        TIMBADIR = Path(__file__).parent.parent.parent.parent.parent.parent.absolute()
-        TARGETDIR = TIMBADIR
+    if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone(debug=False):
+        # input and output paths for add-on c-module
+        if user_input[ParamNames.folderpath.value] is None:
+            # If user-defined path does not exists, use default path
+            # For compatibility with other modules, paths must be adapted
+            TIMBADIR = Path(__file__).parent.parent.parent.parent.parent.parent.absolute()
+            TARGETDIR = TIMBADIR
+        else:
+            # If user-defined path exist
+            USER_PATH = Path(user_input[ParamNames.folderpath.value]).absolute()
+            TARGETDIR = USER_PATH
+
+        TIMBADIR_INPUT = TARGETDIR / Path("TiMBA") / Path("data") / Path("input") / Path("01_Input_Files")
+        TIMBADIR_OUTPUT = TARGETDIR / Path("TiMBA") / Path("data") / Path("output") / Path("data")
+
+        INPUT_FOLDER = PACKAGEDIR / Path("data") / Path("input")
+        OUTPUT_FOLDER = TIMBADIR_OUTPUT
+
     else:
-        # If user-defined path exist
-        USER_PATH = Path(user_input[ParamNames.folderpath.value]).absolute()
-        TARGETDIR = USER_PATH
+        # input and output paths for standalone c-module
+        if user_input[ParamNames.folderpath.value] is None:
+            TARGETDIR = PACKAGEDIR
+        else:
+            USER_PATH = Path(user_input[ParamNames.folderpath.value]).absolute()
+            TARGETDIR = USER_PATH
 
-    TIMBADIR_INPUT = TARGETDIR / Path("TiMBA") / Path("data") / Path("input") / Path("01_Input_Files")
-    TIMBADIR_OUTPUT = TARGETDIR / Path("TiMBA") / Path("data") / Path("output") / Path("data")
+        TIMBADIR_INPUT = None
+        TIMBADIR_OUTPUT = None
 
-    INPUT_FOLDER = PACKAGEDIR / Path("data") / Path("input")
-    OUTPUT_FOLDER = TIMBADIR_OUTPUT
+        INPUT_FOLDER = TARGETDIR / Path("data") / Path("input")
+        OUTPUT_FOLDER = TARGETDIR / Path("data") / Path("output")
 
-else:
-    # input and output paths for standalone c-module
-    if user_input[ParamNames.folderpath.value] is None:
-        TARGETDIR = PACKAGEDIR
-    else:
-        USER_PATH = Path(user_input[ParamNames.folderpath.value]).absolute()
-        TARGETDIR = USER_PATH
-    print(f"USER PATH used: {USER_PATH}")
-    TIMBADIR_INPUT = None
-    TIMBADIR_OUTPUT = None
+    # Official statistics from the Food and Agriculture Organization
+    FAO_DIR = INPUT_FOLDER / Path("historical_data")
+    FAOSTAT_URL = "https://bulks-faostat.fao.org/production/Forestry_E_All_Data.zip"
+    FAOSTAT_DATA = INPUT_FOLDER / Path("historical_data") / Path("Forestry_E_All_Data_NOFLAG")
+    FRA_URL = "https://fra-data.fao.org/api/file/bulk-download?assessmentName=fra&cycleName=2020&countryIso=WO"
+    FRA_DATA = INPUT_FOLDER / Path("historical_data") / Path(f"FRA_Years_All_Data")
 
-    INPUT_FOLDER = TARGETDIR / Path("data") / Path("input")
-    OUTPUT_FOLDER = TARGETDIR / Path("data") / Path("output")
+    # additional information
+    CMODULE_ZIP_URL = "https://github.com/TI-Forest-Sector-Modelling/C-Module/archive/refs/heads/main.zip"
+    ADD_INFO_DIR = "C-Module-main/c_module/data/input/additional_information"
+    ADD_INFO_FOLDER = PACKAGEDIR / INPUT_FOLDER / Path("additional_information")
+    ADD_INFO_CARBON_PATH = ADD_INFO_FOLDER / Path("carbon_additional_information")
+    PKL_ADD_INFO_CARBON_PATH = ADD_INFO_FOLDER / Path("carbon_additional_information")
+    ADD_INFO_COUNTRY = ADD_INFO_FOLDER / Path("country_data")
+    PKL_ADD_INFO_START_YEAR = ADD_INFO_FOLDER / Path("hist_hwp_carbon_start_year")
+    DEFAULT_PROJECTION_DIR = "C-Module-main/c_module/data/input/projection_data"
 
-print("Input path used")
-print(INPUT_FOLDER)
-print("\n")
-print("Output path used")
-print(OUTPUT_FOLDER)
+    LOGGING_OUTPUT_FOLDER = OUTPUT_FOLDER
 
-
-# Official statistics from the Food and Agriculture Organization
-FAO_DIR = INPUT_FOLDER / Path("historical_data")
-FAOSTAT_URL = "https://bulks-faostat.fao.org/production/Forestry_E_All_Data.zip"
-FAOSTAT_DATA = INPUT_FOLDER / Path("historical_data") / Path("Forestry_E_All_Data_NOFLAG")
-FRA_URL = "https://fra-data.fao.org/api/file/bulk-download?assessmentName=fra&cycleName=2020&countryIso=WO"
-FRA_DATA = INPUT_FOLDER / Path("historical_data") / Path(f"FRA_Years_All_Data")
-
-# additional information
-CMODULE_ZIP_URL = "https://github.com/TI-Forest-Sector-Modelling/C-Module/archive/refs/heads/main.zip"
-ADD_INFO_DIR = "C-Module-main/c_module/data/input/additional_information"
-ADD_INFO_FOLDER = PACKAGEDIR / INPUT_FOLDER / Path("additional_information")
-ADD_INFO_CARBON_PATH = ADD_INFO_FOLDER / Path("carbon_additional_information")
-PKL_ADD_INFO_CARBON_PATH = ADD_INFO_FOLDER / Path("carbon_additional_information")
-ADD_INFO_COUNTRY = ADD_INFO_FOLDER / Path("country_data")
-PKL_ADD_INFO_START_YEAR = ADD_INFO_FOLDER / Path("hist_hwp_carbon_start_year")
-DEFAULT_PROJECTION_DIR = "C-Module-main/c_module/data/input/projection_data"
-
-LOGGING_OUTPUT_FOLDER = OUTPUT_FOLDER
+    path_dict = {
+        PathNames.INPUT_FOLDER.value: INPUT_FOLDER,
+        PathNames.OUTPUT_FOLDER.value: OUTPUT_FOLDER,
+        PathNames.TIMBADIR_INPUT.value: TIMBADIR_INPUT,
+        PathNames.TIMBADIR_OUTPUT.value: TIMBADIR_OUTPUT,
+        PathNames.FAO_DIR.value: FAO_DIR,
+        PathNames.FAOSTAT_URL.value: FAOSTAT_URL,
+        PathNames.FAOSTAT_DATA.value: FAOSTAT_DATA,
+        PathNames.FRA_URL.value: FRA_URL,
+        PathNames.FRA_DATA.value: FRA_DATA,
+        PathNames.CMODULE_ZIP_URL.value: CMODULE_ZIP_URL,
+        PathNames.ADD_INFO_DIR.value: ADD_INFO_DIR,
+        PathNames.ADD_INFO_FOLDER.value: ADD_INFO_FOLDER,
+        PathNames.ADD_INFO_CARBON_PATH.value: ADD_INFO_CARBON_PATH,
+        PathNames.PKL_ADD_INFO_CARBON_PATH.value: PKL_ADD_INFO_CARBON_PATH,
+        PathNames.ADD_INFO_COUNTRY.value: ADD_INFO_COUNTRY,
+        PathNames.PKL_ADD_INFO_START_YEAR.value: PKL_ADD_INFO_START_YEAR,
+        PathNames.DEFAULT_PROJECTION_DIR.value: DEFAULT_PROJECTION_DIR,
+        PathNames.LOGGING_OUTPUT_FOLDER.value: LOGGING_OUTPUT_FOLDER
+    }
+    return path_dict
