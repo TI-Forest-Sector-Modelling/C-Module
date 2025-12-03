@@ -126,7 +126,7 @@ if cmodule_is_standalone(debug=False):
         print(f"Harmonize settings to proceed")
         sys.exit("Stopping execution.")
 
-if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone(debug=False):
+if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone(debug=True):
     # input and output paths for add-on c-module
     if user_input[ParamNames.folderpath.value] is None:
         # If user-defined path does not exists, use default path
