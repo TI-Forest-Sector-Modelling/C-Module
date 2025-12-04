@@ -127,7 +127,7 @@ def set_paths(user_input: dict) -> dict:
             print(f"Harmonize settings to proceed")
             sys.exit("Stopping execution.")
 
-    if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone(debug=True):
+    if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone(debug=False):
         # input and output paths for add-on c-module
         if user_input[ParamNames.folderpath.value] is None:
             # If user-defined path does not exists, use default path
@@ -158,12 +158,6 @@ def set_paths(user_input: dict) -> dict:
 
         INPUT_FOLDER = TARGETDIR / Path("data") / Path("input")
         OUTPUT_FOLDER = TARGETDIR / Path("data") / Path("output")
-
-    print("\n")
-    print(f"Input path used: {INPUT_FOLDER}")
-    print("\n")
-    print(f"Output path used: {OUTPUT_FOLDER}")
-    print("\n")
 
     # Official statistics from the Food and Agriculture Organization
     FAO_DIR = INPUT_FOLDER / Path("historical_data")
