@@ -73,7 +73,7 @@ To install the newest version of the C-Module via PyPI, use following command in
 ### Installation via GitHub
 1. Clone the repository   
 Begin by cloning the repository to your local machine using the following command: 
-    >git clone https://github.com/TI-Forest-Sector-Modelling/C-Module
+    >git clone https://github.com/TI-Forest-Sector-Modelling/C-Module.git
    > 
 2. Switch to the C-Module directory  
 Navigate into the C-Module project folder on your local machine.
@@ -135,6 +135,16 @@ Test if the C-Module is running by executing the module only for a selection of 
 By running the provided example, the C-Module will calculate carbon stocks and stock changes in forest aboveground biomass (-CF_AGB),
 in forest belowground biomass (-CF_BGB), and in HWP (-C_HWP). Carbon stocks and stock changes in forest soil (-CF_S) and dead wood and
 litter (-CF_DWL) will not be calculated.
+
+The target folder for input and output data of the C-Module can be changed from the default settings (\C-Module\c_module\data)
+by specifying -FP when executing the package from the CLI. 
+  >run_cmodule -SC 1 -FP "\your_folderpath" 
+
+If executed from an IDE, a target folder can be specified in `default_parametres.py` using 
+`folderpath = "\your_folderpath"`.
+
+When specifying a target folder, necessary input data from the GitHub repository will be automatically downloaded to ensure
+the functionlity of the package. The provided path should match OS-specific requirements.
 
 ### Test suite and coverage report
 The C-Module comes with a test suite to ensure its functionality and allow for continuous and safe development. The 
@@ -245,6 +255,7 @@ Basic module settings include:
 | `hist_hwp_start_year_default` | Setting to control the reference year for the historical HWP pool. <br/>Used in combination with `hist_hwp_start_year`="default" |                                                                                                  int                                                                                                  | 2020 (start year) |
 |    `show_carbon_dashboard`    |                        Setting to control if the dashboard for explorative result exploration is launched                        |                                                                                                 Bool                                                                                                  |       True        |
 |       `fao_data_update`       |                                Setting to control if FAO data (FRA and FAOSTAT) is updated or not                                |                                                                                                 Bool                                                                                                  |       False       |
+|         `folderpath`          |                                  Setting to control the target folder for input and output data                                  |                                                                                              None or str                                                                                              |       None        |
 
 If the C-Module is used as an add-on to TiMBA, the start and end year parameters are automatically adjusted to match TiMBA's start and end years.
 The C-Module is delivered with a set of default settings, which were tested and validated. The default settings can be changed when executing the
