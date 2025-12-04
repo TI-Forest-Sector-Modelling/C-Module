@@ -1,5 +1,14 @@
 # Changelog
 
+## [v1.1.2] - 2025-12-04
+
+### Added
+
+- Dynamic path setting allowing a flexible usage of the C-Module in combination with other packages (such as TiMBA).
+- Safeguards to prevent errors related to missing input data. In the case of missing input data, missing files are
+automatically downloaded from GitHub.
+- CLI refinement to integrate dynamic path setting.
+
 ## [v1.1.1] - 2025-09-16
 
 ### Added
