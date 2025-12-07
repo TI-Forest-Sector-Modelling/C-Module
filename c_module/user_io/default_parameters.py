@@ -9,7 +9,8 @@ start_year = 2020  # Not activated
 end_year = 2050  # Not activated
 
 read_in_pkl = True  # Caution False option is not implemented yet
-folderpath = None
+input_folder_path = None
+output_folder_path = None
 
 # Forest carbon related parameters
 calc_c_forest_agb = True
@@ -36,7 +37,8 @@ user_input = {
     ParamNames.start_year.value: start_year,
     ParamNames.end_year.value: end_year,
     ParamNames.read_in_pkl.value: read_in_pkl,
-    ParamNames.folderpath.value: folderpath,
+    ParamNames.input_folder_path.value: input_folder_path,
+    ParamNames.output_folder_path.value: output_folder_path,
     ParamNames.calc_c_forest_agb.value: calc_c_forest_agb,
     ParamNames.calc_c_forest_bgb.value: calc_c_forest_bgb,
     ParamNames.calc_c_forest_soil.value: calc_c_forest_soil,
