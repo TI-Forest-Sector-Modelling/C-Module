@@ -1,4 +1,4 @@
-from c_module.parameters.paths import cmodule_is_standalone, extract_scenarios
+from c_module.parameters.paths import extract_scenarios
 from c_module.parameters.defines import (VarNames, ParamNames, CountryConstants, FolderNames, PathNames)
 from c_module.user_io.default_parameters import user_input
 import pandas as pd
@@ -16,16 +16,15 @@ class DataManager:
 
     @staticmethod
     def set_sc_paths(self):
-        TIMBADIR_INPUT = self.paths[PathNames.TIMBADIR_INPUT.value]
-        TIMBADIR_OUTPUT = self.paths[PathNames.TIMBADIR_OUTPUT.value]
         INPUT_FOLDER = self.paths[PathNames.INPUT_FOLDER.value]
+        OUTPUT_FOLDER = self.paths[PathNames.OUTPUT_FOLDER.value]
 
-        if user_input[ParamNames.add_on_activated.value] or not cmodule_is_standalone(debug=False):
+        if user_input[ParamNames.add_on_activated.value]:
             # input paths for add-on c-module
-            scenarios = extract_scenarios(input_folder=TIMBADIR_INPUT,
-                                          output_folder=TIMBADIR_OUTPUT,
+            scenarios = extract_scenarios(output_folder=OUTPUT_FOLDER,
                                           sc_num=user_input[ParamNames.sc_num.value])
             PKL_RESULTS_INPUT = scenarios
+            input_folder = INPUT_FOLDER
         else:
             # input paths for standalone c-module
             scenarios = list((INPUT_FOLDER / Path("projection_data")).glob(r"*.pkl"))
@@ -33,6 +32,10 @@ class DataManager:
                 scenarios.sort(key=lambda f: f.stat().st_mtime)
                 scenarios = scenarios[-user_input[ParamNames.sc_num.value]:]
             PKL_RESULTS_INPUT = scenarios
+            input_folder = INPUT_FOLDER / Path("projection_data")
+
+        if len(PKL_RESULTS_INPUT) == 0:
+            self.logger.info(f"No scenarios found in {input_folder}")
 
         self.sc_path = PKL_RESULTS_INPUT
 
@@ -54,10 +57,10 @@ class DataManager:
         INPUT_FOLDER = self.paths[PathNames.INPUT_FOLDER.value]
         INPUT_FOLDER.mkdir(parents=True, exist_ok=True)
 
-        if cmodule_is_standalone(debug=False):
-            required = {FolderNames.additional_info.value, FolderNames.projection_data.value}
-        else:
+        if self.UserInput[ParamNames.add_on_activated.value]:
             required = {FolderNames.additional_info.value}
+        else:
+            required = {FolderNames.additional_info.value, FolderNames.projection_data.value}
         existing = {p.name for p in Path(INPUT_FOLDER).iterdir() if p.is_dir()}
         missing = list(required - existing)
         if len(missing) > 0:
@@ -238,10 +241,7 @@ class DataManager:
             carbon_data_ext = DataManager.add_additional_info(self, data=carbon_data_ext, sc=sc)
             self.timba_data[sc][VarNames.timba_data_carbon.value] = self.carbon_data[sc][VarNames.carbon_total.value]
             self.timba_data[sc][VarNames.timba_data_carbon_flat.value] = carbon_data_ext
-            if not self.UserInput[ParamNames.add_on_activated.value]:
-                DataManager.serialize_to_pickle(self.timba_data[sc], OUTPUT_FOLDER / Path(f"{sc}.pkl"))
-            else:
-                DataManager.serialize_to_pickle(self.carbon_data[sc], OUTPUT_FOLDER / Path(f"{sc}.pkl"))
+            DataManager.serialize_to_pickle(self.timba_data[sc], OUTPUT_FOLDER / Path(f"{sc}.pkl"))
 
             for df_key in self.carbon_data[sc].keys():
                 carbon_data = self.carbon_data[sc][df_key]

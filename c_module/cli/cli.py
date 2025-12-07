@@ -9,8 +9,12 @@ from c_module.parameters.defines import ParamNames
               default=user_input[ParamNames.add_on_activated.value], show_default=True, required=True, is_flag=True,
               help="Flag to use the carbon module as a standalone module or as a TiMBA add-on.")
 @click.option('-SC', '--sc_num', "sc_num",
-              default=user_input[ParamNames.sc_num.value], show_default=True, required=True, type=int,
+              default=user_input[ParamNames.sc_num.value], show_default=True, required=False, type=int,
               help="Flag to control the number of processed scenarios.")
+@click.option('-IFP', '--input_folder_path', 'input_folder_path', default=user_input[ParamNames.input_folder_path.value],
+              show_default=True, required=False, type=str, help="Path to input folder.")
+@click.option('-OFP', '--input_folder_path', 'output_folder_path', default=user_input[ParamNames.output_folder_path.value],
+              show_default=True, required=False, type=str, help="Path to output folder.")
 @click.option('-SY', '--start_year', 'start_year', default=user_input[ParamNames.start_year.value],
               show_default=True, required=True, type=int,
               help="Start year of carbon calculations.")
@@ -44,12 +48,9 @@ from c_module.parameters.defines import ParamNames
 @click.option('-UD', '--fao_data_update', 'fao_data_update',
               default=user_input[ParamNames.fao_data_update.value], show_default=True, required=False, is_flag=True,
               help="Flag to update FAO data.")
-@click.option('-FP', '--folderpath', 'folderpath', default=user_input[ParamNames.folderpath.value],
-              show_default=True, required=False, type=str, help="Path to directory with Input/Output folder.")
-
 def cli(add_on_activated, sc_num, start_year, end_year, calc_c_forest_agb, calc_c_forest_bgb, calc_c_forest_soil,
         calc_c_forest_dwl, calc_c_hwp, c_hwp_accounting_approach, read_in_pkl, show_carbon_dashboard, fao_data_update,
-        folderpath):
+        input_folder_path, output_folder_path):
 
     user_input_cli = {
         ParamNames.add_on_activated.value: add_on_activated,
@@ -65,7 +66,8 @@ def cli(add_on_activated, sc_num, start_year, end_year, calc_c_forest_agb, calc_
         ParamNames.c_hwp_accounting_approach.value: c_hwp_accounting_approach,
         ParamNames.show_carbon_dashboard.value: show_carbon_dashboard,
         ParamNames.fao_data_update.value: fao_data_update,
-        ParamNames.folderpath.value: folderpath,
+        ParamNames.input_folder_path.value: input_folder_path,
+        ParamNames.output_folder_path.value: output_folder_path,
         # Adavanced settings not available via CLI
         ParamNames.historical_c_hwp.value: user_input[ParamNames.historical_c_hwp.value],
         ParamNames.hist_hwp_start_year.value: user_input[ParamNames.hist_hwp_start_year.value],
