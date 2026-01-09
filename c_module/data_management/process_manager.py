@@ -50,7 +50,6 @@ class ProcessManager:
     def readin_fra_process(self):
         self.logger.info("C-Module - Reading in FRA data")
         FRA_DATA = self.paths[PathNames.FRA_DATA.value]
-        # TODO implement fra processing steps
         DataManager.load_fra_data(self, update_data=self.UserInput[ParamNames.fao_data_update.value])
         if not Path(f"{FRA_DATA}_processed.pkl").is_file():
             DataManager.prep_fra_data(self)
