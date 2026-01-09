@@ -553,7 +553,223 @@ class DataManager:
 
     @staticmethod
     def prep_fra_data(self):
+        """
+        Prepares country data from FRA for further carbon calculations including a data gap filling approach.
+        :param self: object of class C-Module
+        """
         self.fra_data["data_aligned"] = pd.DataFrame()
+        fra_data = self.fra_data["data"].copy()
+        country_data = self.add_data["country_data"][[VarNames.ISO3.value, VarNames.carbon_region.value,
+                                                      VarNames.continent.value]]
+
+        fra_forest_data = fra_data[[VarNames.fra_iso3.value,
+                                    VarNames.fra_forest_area.value,
+                                    VarNames.fra_forest_stock_agb.value,
+                                    VarNames.fra_forest_stock_bgb.value]]
+
+        fra_carbon_data = fra_data[[VarNames.fra_iso3.value,
+                                    VarNames.year_name.value,
+                                    VarNames.fra_carbon_agb.value,
+                                    VarNames.fra_carbon_bgb.value,
+                                    VarNames.fra_carbon_dw.value,
+                                    VarNames.fra_carbon_litter.value,
+                                    VarNames.fra_carbon_soil.value]]
+
+        fra_forest_data = fra_forest_data.merge(country_data,
+                                                left_on=VarNames.fra_iso3.value,
+                                                right_on=VarNames.ISO3.value,
+                                                how='left')
+        fra_forest_data = fra_forest_data.dropna(subset=[VarNames.carbon_region.value]).reset_index(drop=True)
+        fra_carbon_data = fra_carbon_data.merge(country_data,
+                                                left_on=VarNames.fra_iso3.value,
+                                                right_on=VarNames.ISO3.value,
+                                                how='left')
+        fra_carbon_data = fra_carbon_data.dropna(subset=[VarNames.carbon_region.value]).reset_index(drop=True)
+
+        # Calculate carbon density for aboveground biomass
+        fra_carbon_data[VarNames.fra_carbon_density_agb.value] = DataManager.calc_carbon_density(
+            carbon_data=fra_carbon_data,
+            forest_data=fra_forest_data,
+            carbon_pool_col=VarNames.fra_carbon_agb.value,
+            forest_stock_col=VarNames.fra_forest_stock_agb.value
+        )
+        # Calculate carbon density for belowground biomass
+        fra_carbon_data[VarNames.fra_carbon_density_bgb.value] = DataManager.calc_carbon_density(
+            carbon_data=fra_carbon_data,
+            forest_data=fra_forest_data,
+            carbon_pool_col=VarNames.fra_carbon_bgb.value,
+            forest_stock_col=VarNames.fra_forest_stock_bgb.value
+        )
+
+        region_carbon_data, region_carbon_data_avg = DataManager.calc_geo_avg_data(
+            data=fra_carbon_data,
+            geo_aggregation=VarNames.carbon_region.value,
+            var_names=[
+                VarNames.fra_carbon_density_agb.value,
+                VarNames.fra_carbon_density_bgb.value,
+                VarNames.fra_carbon_dw.value,
+                VarNames.fra_carbon_litter.value,
+                VarNames.fra_carbon_soil.value
+            ]
+        )
+
+        continent_carbon_data, continent_carbon_data_avg = DataManager.calc_geo_avg_data(
+            data=fra_carbon_data,
+            geo_aggregation=VarNames.continent.value,
+            var_names=[
+                VarNames.fra_carbon_density_agb.value,
+                VarNames.fra_carbon_density_bgb.value,
+                VarNames.fra_carbon_dw.value,
+                VarNames.fra_carbon_litter.value,
+                VarNames.fra_carbon_soil.value
+            ]
+        )
+        # Merge regional and continental aggregates in a separate function
+        region_carbon_data = DataManager.combine_regional_continental_fra_carbon_data(
+            region_carbon_data=region_carbon_data,
+            continent_carbon_data=continent_carbon_data,
+            geo_data=self.add_data[VarNames.country_data.value])
+        self.fra_data["data_carbon"] = fra_carbon_data
+        self.fra_data["data_carbon_region"] = region_carbon_data
+
+        # Gap-filling approach
+        fra_carbon_data = DataManager.gap_filling_fra_data(fra_data=fra_carbon_data,
+                                                           region_data=region_carbon_data,
+                                                           col_with_gaps=[
+                                                               VarNames.fra_carbon_density_agb.value,
+                                                               VarNames.fra_carbon_density_bgb.value,
+                                                               VarNames.fra_carbon_dw.value,
+                                                               VarNames.fra_carbon_litter.value,
+                                                               VarNames.fra_carbon_soil.value]
+                                                           )
+
+        fra_carbon_data, fra_carbon_data_avg = DataManager.calc_geo_avg_data(
+            data=fra_carbon_data,
+            geo_aggregation=VarNames.fra_iso3.value,
+            var_names=[
+                VarNames.fra_carbon_density_agb.value,
+                VarNames.fra_carbon_density_bgb.value,
+                VarNames.fra_carbon_dw.value,
+                VarNames.fra_carbon_litter.value,
+                VarNames.fra_carbon_soil.value
+            ]
+        )
+        self.fra_data["data_carbon"] = fra_carbon_data
+        self.fra_data["data_carbon_avg"] = fra_carbon_data_avg
+
+    @staticmethod
+    def calc_carbon_density(carbon_data, forest_data, carbon_pool_col, forest_stock_col):
+        """
+        Calculates carbon density for selected carbon pool in tonnes/m³ based on carbon and forest data from FRA.
+        :param carbon_data: Carbon data extracted from FRA.
+        :param forest_data: Forest data extracted from FRA.
+        :param carbon_pool_col: Selected carbon pool for carbon density calculation
+        :param forest_stock_col: Selected forest stock for carbon density calculation. Must match selected carbon pool.
+        :return: Carbon density as a pandas Serie
+        """
+        # Conversion carbon density (tonnes / ha in tonnes / m³)
+        forest_area = forest_data[VarNames.fra_forest_area.value] * 1000  # Conversion forest area (Tsd ha to ha)
+        forest_stock = forest_data[forest_stock_col] * forest_area  # Conversion forest stock (m³ / ha to m³)
+        carbon_density = (carbon_data[carbon_pool_col] * forest_area) / forest_stock
+
+        return carbon_density
+
+    @staticmethod
+    def calc_geo_avg_data(data: pd.DataFrame, geo_aggregation: str, var_names: list):
+        """
+        Calculates the yearly and overall average values for selected variables for a selected geographical aggregation.
+        :param data: Data containing selected variables.
+        :param geo_aggregation: Geographical aggregation to calculate average values for.
+        :param var_names: Selected variables to calculate average values for.
+        :return: Averaged data for all years (region_data) and for the average over all years (region_data_avg)
+        """
+
+        region_data = data.copy()
+        region_data = region_data.groupby([geo_aggregation, VarNames.year_name.value])[var_names].mean().reset_index()
+        region_data_avg = region_data.groupby([geo_aggregation])[var_names].mean().reset_index()
+        region_data_avg[VarNames.year_name.value] = "average"
+        region_data = pd.concat([region_data, region_data_avg], axis=0)
+        region_data = region_data.sort_values(by=[geo_aggregation, VarNames.year_name.value],
+                                              ascending=[True, True]).reset_index(drop=True)
+        return region_data, region_data_avg
+
+    @staticmethod
+    def combine_regional_continental_fra_carbon_data(region_carbon_data, continent_carbon_data, geo_data):
+        """
+        Combines regional and continental data for carbon densities to fill data gaps in regional data according to the
+        following approach: Gaps in regional data are filled with average data on continal level.
+        :param region_carbon_data: Average carbon data on regional level.
+        :param continent_carbon_data: Average carbon data on continental level.
+        :param geo_data: geographical concordance between regions and continents.
+        :return: Compelemented regional carbon data
+        """
+        region_continent_concordance = geo_data[[VarNames.continent.value,
+                                                 VarNames.carbon_region.value]].drop_duplicates().reset_index(drop=True)
+
+        region_carbon_data = region_carbon_data.merge(region_continent_concordance,
+                                                      left_on=VarNames.carbon_region.value,
+                                                      right_on=VarNames.carbon_region.value,
+                                                      how="left")
+
+        carbon_pools = [VarNames.fra_carbon_density_agb.value, VarNames.fra_carbon_density_bgb.value,
+                        VarNames.fra_carbon_dw.value, VarNames.fra_carbon_litter.value, VarNames.fra_carbon_soil.value]
+
+        for c_pool in carbon_pools:
+            continent_carbon_data_tmp = continent_carbon_data[[VarNames.continent.value, VarNames.year_name.value,
+                                                               c_pool]].copy()
+            continent_carbon_data_tmp = continent_carbon_data_tmp.rename(columns={c_pool: f"{c_pool}_cont"})
+            region_carbon_data = region_carbon_data.merge(continent_carbon_data_tmp,
+                                                          left_on=[VarNames.continent.value, VarNames.year_name.value],
+                                                          right_on=[VarNames.continent.value, VarNames.year_name.value],
+                                                          how="left")
+
+            index_with_data = list(region_carbon_data.dropna(subset=[c_pool]).index)
+            carbon_without_data = region_carbon_data.drop(index_with_data)
+            carbon_with_data = region_carbon_data.dropna(subset=[c_pool])
+            carbon_without_data[c_pool] = carbon_without_data[f"{c_pool}_cont"]
+            region_carbon_data = pd.concat([carbon_with_data, carbon_without_data], axis=0).sort_index()
+            region_carbon_data = region_carbon_data.drop(f"{c_pool}_cont", axis=1)
+
+        return region_carbon_data
+
+    @staticmethod
+    def gap_filling_fra_data(fra_data, region_data, col_with_gaps):
+        """
+        Fills data gaps in country data from FRA with regional averaged data for the selected columns.
+        :param fra_data: Data from FRA to be complemented.
+        :param region_data: Regional data used for complementing country data.
+        :param col_with_gaps: Selected columns to fill gaps.
+        :return: Complemented country data from FRA
+        """
+
+        for col in col_with_gaps:
+            region_data_tmp = region_data[[VarNames.carbon_region.value, VarNames.year_name.value, col]].copy()
+            region_data_tmp = region_data_tmp.rename(columns={col: f"{col}_reg"})
+            region_data_tmp = region_data_tmp[
+                region_data_tmp[VarNames.year_name.value] == "average"].reset_index(drop=True)
+            region_data_tmp = region_data_tmp[[VarNames.carbon_region.value, f"{col}_reg"]]
+
+            fra_data = fra_data.merge(region_data_tmp,
+                                      left_on=VarNames.carbon_region.value,
+                                      right_on=VarNames.carbon_region.value,
+                                      how="left")
+
+            fra_data[col] = fra_data[col].fillna(fra_data[f"{col}_reg"])
+
+        fra_data = fra_data.drop(columns=[f"{col}_reg" for col in col_with_gaps])
+
+        return fra_data
+
+    @staticmethod
+    def extract_fra_carbon_data(self):
+        fra_carbon_data = self.fra_data["data"].copy()
+        fra_carbon_data = fra_carbon_data[[VarNames.fra_iso3.value,
+                                           VarNames.year_name.value,
+                                           VarNames.fra_carbon_agb.value,
+                                           VarNames.fra_carbon_bgb.value,
+                                           VarNames.fra_carbon_dw.value,
+                                           VarNames.fra_carbon_litter.value,
+                                           VarNames.fra_carbon_soil.value]]
 
     @staticmethod
     def align_carbon_data(self):

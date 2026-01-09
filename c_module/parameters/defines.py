@@ -42,6 +42,7 @@ class ParamNames(Enum):
     hist_hwp_start_year_default = "hist_hwp_start_year_default"
     show_carbon_dashboard = "show_carbon_dashboard"
     fao_data_update = "fao_data_update"
+    data_validation = "data_validation"
 
 
 class VarNames(Enum):
@@ -137,6 +138,20 @@ class VarNames(Enum):
     faostat_export = "Export quantity"
     faostat_import_value = "Import value"
     faostat_export_value = "Export value"
+
+    # FRA data
+    fra_iso3 = "iso3"
+    fra_forest_area = "1a_forestArea"
+    fra_forest_stock_agb = "2c_agb"
+    fra_forest_stock_bgb = "2c_bgb"
+    fra_carbon_agb = "2d_carbon_agb"
+    fra_carbon_bgb = "2d_carbon_bgb"
+    fra_carbon_dw = "2d_carbon_dw"
+    fra_carbon_litter = "2d_carbon_litter"
+    fra_carbon_soil = "2d_carbon_soil"
+    fra_carbon_density_agb = "2d_carbon_density_agb"
+    fra_carbon_density_bgb = "2d_carbon_density_bgb"
+
 
 
 class FolderNames(Enum):

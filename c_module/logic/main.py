@@ -1,6 +1,7 @@
 import datetime as dt
 from c_module.data_management.process_manager import ProcessManager
 from c_module.logic.carbon_calc import CarbonCalculator
+from c_module.logic.carbon_val import CarbonValidation
 from c_module.logic.base_logger import get_logger
 from c_module.parameters.defines import ParamNames, PathNames
 from c_module.parameters.paths import set_paths
@@ -27,6 +28,8 @@ class C_Module(object):
         ProcessManager.start_header(self)
         ProcessManager.run_readin_process(self)
         CarbonCalculator.run_carbon_calc(self)
+        if self.UserInput[ParamNames.data_validation.value]:
+            CarbonValidation.run_carbon_validation(self)
         ProcessManager.save_carbon_data(self)
         if self.UserInput[ParamNames.show_carbon_dashboard.value]:
             ProcessManager.call_carbon_dashboard(self)
