@@ -62,6 +62,7 @@ class VarNames(Enum):
     dummy_region = "zy"
     year_name = "year"
     period_var = "Period"
+    period_structure = "period_structure"
     data_aligned = "data_aligned"
     data = "data"
     supply_var = "Supply"
@@ -84,6 +85,7 @@ class VarNames(Enum):
     commodity_dict = "commodity"
     commodity_data = "commodity_data"
     commodity_num = "commodity_num"
+    history = "history"
 
     # Additional carbon data
     carbon_forest_biomass = "CarbonForestBiomass"

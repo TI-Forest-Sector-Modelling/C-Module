@@ -25,6 +25,7 @@ class ProcessManager:
         self.logger.info("C-Module - Reading in input data")
         DataManager.load_timba_data(self)
         DataManager.retrieve_commodity_num(self)
+        DataManager.retrieve_period_structure(self)
 
     @staticmethod
     def readin_carbon_process(self):
@@ -54,6 +55,10 @@ class ProcessManager:
         if not Path(f"{FRA_DATA}_processed.pkl").is_file():
             DataManager.prep_fra_data(self)
             DataManager.serialize_to_pickle(self.fra_data["data_aligned"], f"{FRA_DATA}_processed.pkl")
+        else:
+            self.fra_data["data_aligned"] = DataManager.restore_from_pickle(f"{FRA_DATA}_processed.pkl")
+        DataManager.update_add_carbon_data_with_fra_data(self)
+        DataManager.update_period_structure(self)
 
     @staticmethod
     def save_carbon_data(self):

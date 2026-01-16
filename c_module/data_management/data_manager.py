@@ -237,10 +237,27 @@ class DataManager:
     @staticmethod
     def save_data(self):
         OUTPUT_FOLDER = self.paths[PathNames.OUTPUT_FOLDER.value]
+        carbon_data_ext_hist = DataManager.flattening_data(data=self.carbon_data[VarNames.history.value],
+                                                           change_var_list=[
+                                                               VarNames.carbon_forest_biomass_chg.value,
+                                                               VarNames.carbon_dwl_chg.value,
+                                                               VarNames.carbon_soil_chg.value
+                                                           ])
+        carbon_data_ext_hist = DataManager.add_additional_info(self, data=carbon_data_ext_hist, sc="history")
+
         for sc in self.sc_list:
-            carbon_data_ext = DataManager.flattening_data(data=self.carbon_data[sc])
+            carbon_data_ext = DataManager.flattening_data(data=self.carbon_data[sc],
+                                                          change_var_list=[
+                                                              VarNames.carbon_forest_biomass_chg.value,
+                                                              VarNames.carbon_dwl_chg.value,
+                                                              VarNames.carbon_soil_chg.value,
+                                                              VarNames.carbon_hwp_chg.value,
+                                                              VarNames.total_substitution_chg.value,
+                                                              VarNames.carbon_total_chg.value
+                                                          ])
             carbon_data_ext = DataManager.add_additional_info(self, data=carbon_data_ext, sc=sc)
             self.timba_data[sc][VarNames.timba_data_carbon.value] = self.carbon_data[sc][VarNames.carbon_total.value]
+            carbon_data_ext = pd.concat([carbon_data_ext_hist, carbon_data_ext], axis=0).reset_index(drop=True)
             self.timba_data[sc][VarNames.timba_data_carbon_flat.value] = carbon_data_ext
             DataManager.serialize_to_pickle(self.timba_data[sc], OUTPUT_FOLDER / Path(f"{sc}.pkl"))
 
@@ -278,6 +295,8 @@ class DataManager:
 
     @staticmethod
     def retrieve_commodity_data(self):
+        # TODO: At the moment, the Carbon Module assumes that all scenarios have the same commodity structure. Adapat the
+        #  following function with a loop over scenarios
         carbon_hwp_name = VarNames.carbon_hwp.value
         commodity_dict_name = VarNames.commodity_dict.value
         commodity_data_name = VarNames.commodity_data.value
@@ -287,6 +306,35 @@ class DataManager:
 
         commodity_data = self.add_carbon_data[carbon_hwp_name][[commodity_name, commodity_code, fao_item_code]].copy()
         self.add_data[commodity_dict_name][commodity_data_name] = commodity_data
+
+    @staticmethod
+    def retrieve_period_structure(self):
+        # TODO: At the moment, the Carbon Module assumes that all scenarios have the same period structure. Adapat the
+        #  following function with a loop over scenarios
+        timba_data_all = VarNames.timba_data_all.value
+        period_col = VarNames.period_var.value
+        year_col = VarNames.year_name.value
+        period_name = VarNames.period_structure.value
+        period_structure = self.timba_data[
+            self.sc_list[0]][timba_data_all][[period_col, year_col]].drop_duplicates().reset_index(drop=True)
+        self.add_data[period_name] = period_structure
+
+    @staticmethod
+    def update_period_structure(self):
+        period_name = VarNames.period_structure.value
+        period_hist = self.fra_data[VarNames.data.value][VarNames.year_name.value].unique().copy()
+        period_structure = self.add_data[period_name].copy()
+        period_hist = sorted(period_hist, reverse=True)
+        period_runner = -1
+        for period in period_hist:
+            if period < self.add_data[period_name][VarNames.year_name.value].min():
+                period_tmp = pd.DataFrame([[period_runner, period]]).rename(
+                    columns={0: VarNames.period_var.value, 1: VarNames.year_name.value})
+                period_structure = pd.concat([period_structure, period_tmp]).reset_index(drop=True)
+                period_runner -= 1
+
+        period_structure = period_structure.sort_values(by=VarNames.period_var.value, ascending=True)
+        self.add_data[period_name] = period_structure
 
     @staticmethod
     def load_additional_data_carbon(self):
@@ -708,6 +756,7 @@ class DataManager:
             data=fra_forest_data,
             geo_aggregation=VarNames.fra_iso3.value,
             var_names=[
+                VarNames.fra_forest_area.value,
                 VarNames.fra_forest_stock_agb.value,
                 VarNames.fra_forest_stock_bgb.value
             ]
@@ -835,6 +884,78 @@ class DataManager:
                                            VarNames.fra_carbon_soil.value]]
 
     @staticmethod
+    def update_add_carbon_data_with_fra_data(self):
+        geo_data = self.add_data[VarNames.country_data.value].copy()
+        geo_data = geo_data[[VarNames.ISO3.value, VarNames.region_code.value, VarNames.carbon_region.value,
+                             VarNames.continent.value]]
+        fra_carbon_data = self.fra_data[VarNames.data_aligned.value]["data_carbon"].copy()
+        commodity_len = self.add_data["commodity"]["commodity_num"]
+        # CarbonAboveGround
+        self.add_carbon_data[VarNames.carbon_agb.value] = DataManager.align_fra_carbon_data(
+            fra_data=fra_carbon_data,
+            geo_data=geo_data,
+            carbon_pool=VarNames.fra_carbon_density_agb.value,
+            description_text="Aboveground carbon (tonnes/m³)",
+            commodity_len=commodity_len
+        )
+        # CarbonBelowGround
+        self.add_carbon_data[VarNames.carbon_bgb.value] = DataManager.align_fra_carbon_data(
+            fra_data=fra_carbon_data,
+            geo_data=geo_data,
+            carbon_pool=VarNames.fra_carbon_density_bgb.value,
+            description_text="Belowground carbon (tonnes/m³)",
+            commodity_len=commodity_len
+        )
+        # CarbonDeadWood
+        self.add_carbon_data[VarNames.carbon_dw.value] = DataManager.align_fra_carbon_data(
+            fra_data=fra_carbon_data,
+            geo_data=geo_data,
+            carbon_pool=VarNames.fra_carbon_dw.value,
+            description_text="Deadwood carbon (tonnes/ha)",
+            commodity_len=commodity_len
+        )
+
+        # CarbonLitter
+        self.add_carbon_data[VarNames.carbon_litter.value] = DataManager.align_fra_carbon_data(
+            fra_data=fra_carbon_data,
+            geo_data=geo_data,
+            carbon_pool=VarNames.fra_carbon_litter.value,
+            description_text="Litter carbon (tonnes/ha)",
+            commodity_len=commodity_len
+        )
+        # CarbonSoil
+        self.add_carbon_data[VarNames.carbon_soil.value] = DataManager.align_fra_carbon_data(
+            fra_data=fra_carbon_data,
+            geo_data=geo_data,
+            carbon_pool=VarNames.fra_carbon_soil.value,
+            description_text="Soil carbon (tonnes/ha)",
+            commodity_len=commodity_len
+        )
+
+    @staticmethod
+    def align_fra_carbon_data(fra_data, geo_data, carbon_pool, description_text, commodity_len):
+        """
+        Alignes carbon data from FRA for further processing
+        :param fra_data: FRA carbon data.
+        :param geo_data: Data containing geographical information
+        :param carbon_pool: Carbon pool which is aligned
+        :param description_text:
+        :param commodity_len:
+        :return:
+        """
+        fra_carbon_data = fra_data[[VarNames.fra_iso3.value, VarNames.year_name.value, carbon_pool]].copy()
+        fra_carbon_data["data description"] = description_text
+        fra_carbon_data = geo_data.merge(fra_carbon_data, left_on=VarNames.ISO3.value, right_on=VarNames.fra_iso3.value,
+                                         how="left")
+        fra_carbon_data = fra_carbon_data.dropna()
+        fra_carbon_data = pd.concat([fra_carbon_data] * commodity_len).sort_values(by=[VarNames.region_code.value,
+                                                                                       VarNames.year_name.value]
+                                                                                   ).reset_index(drop=True)
+        fra_carbon_data = fra_carbon_data.rename(columns={carbon_pool: "data"})
+
+        return fra_carbon_data
+
+    @staticmethod
     def align_carbon_data(self):
         """
         Data related to the quantification of carbon removals and emissions from forest biomass, forest soil, dead wood,
@@ -907,6 +1028,15 @@ class DataManager:
         carbon_substitution_name = VarNames.carbon_substitution.value
         carbon_total_name = VarNames.carbon_total.value
 
+        self.carbon_data[VarNames.history.value] = {}
+        self.carbon_data[VarNames.history.value][carbon_forest_biomass_name] = pd.DataFrame(
+                    [0], columns=[carbon_forest_biomass_name])
+        self.carbon_data[VarNames.history.value][carbon_dwl_name] = pd.DataFrame(
+            [0], columns=[carbon_dwl_name])
+        self.carbon_data[VarNames.history.value][carbon_soil_name] = pd.DataFrame(
+            [0], columns=[carbon_soil_name])
+        self.carbon_data[VarNames.history.value][carbon_total_name] = pd.DataFrame([0], columns=[carbon_total_name])
+
         for sc in self.sc_list:
             self.carbon_data[sc] = {}
             if self.UserInput[ParamNames.calc_c_forest_agb.value] or self.UserInput[ParamNames.calc_c_forest_bgb.value]:
@@ -922,18 +1052,16 @@ class DataManager:
             self.carbon_data[sc][carbon_total_name] = pd.DataFrame([0], columns=[carbon_total_name])
 
     @staticmethod
-    def flattening_data(data):
+    def flattening_data(data, change_var_list):
         """
         Flattens dictionary data into 2D dataframe.
         :param data: dictionary data
+        :param change_var_list: list of variables with carbon pool changes
         :return: flattened dataframe
         """
         flat_data = pd.DataFrame()
-        change_var_list = [VarNames.carbon_forest_biomass_chg.value, VarNames.carbon_dwl_chg.value,
-                           VarNames.carbon_soil_chg.value, VarNames.carbon_hwp_chg.value,
-                           VarNames.total_substitution_chg.value, VarNames.carbon_total_chg.value]
         for key, key_change in zip(data.keys(), change_var_list):
-            data_tmp = data[key].copy()
+            data_tmp = data[key].copy().drop_duplicates().reset_index(drop=True)
             if key == VarNames.carbon_hwp.value:
                 data_tmp[VarNames.output_variable.value] = "Carbon" + "_" + data_tmp[VarNames.hwp_category.value]
             else:
@@ -954,12 +1082,13 @@ class DataManager:
             flat_data = pd.concat([flat_data, data_tmp], axis=0).reset_index(drop=True)
 
         data_hwp = flat_data[flat_data[VarNames.output_variable.value].str.contains("Carbon_", na=False)]
-        data_hwp = data_hwp.groupby([VarNames.region_code.value,
-                                     VarNames.ISO3.value, VarNames.period_var.value],
-                                    as_index=False).agg({VarNames.carbon_stock.value: "sum",
-                                                         VarNames.carbon_stock_chg.value: "sum"})
-        data_hwp[VarNames.output_variable.value] = VarNames.carbon_hwp.value
-        flat_data = pd.concat([flat_data, data_hwp], axis=0).reset_index(drop=True)
+        if len(data_hwp) > 0:
+            data_hwp = data_hwp.groupby([VarNames.region_code.value,
+                                         VarNames.ISO3.value, VarNames.period_var.value],
+                                        as_index=False).agg({VarNames.carbon_stock.value: "sum",
+                                                             VarNames.carbon_stock_chg.value: "sum"})
+            data_hwp[VarNames.output_variable.value] = VarNames.carbon_hwp.value
+            flat_data = pd.concat([flat_data, data_hwp], axis=0).reset_index(drop=True)
         flat_data = flat_data[flat_data[VarNames.ISO3.value] != "WRL"].reset_index(drop=True)
         return flat_data
 
@@ -974,13 +1103,10 @@ class DataManager:
         """
         geo_data = self.add_data[VarNames.country_data.value]
         geo_data = geo_data[[VarNames.ISO3.value, VarNames.continent.value, VarNames.carbon_region.value]]
-        year_data = self.timba_data[sc][VarNames.timba_data_all.value]
-        year_data = year_data[[VarNames.period_var.value,
-                               VarNames.year_name.value]].drop_duplicates().reset_index(drop=True)
-
+        year_data = self.add_data[VarNames.period_structure.value]
         data = data.merge(geo_data, left_on=VarNames.ISO3.value, right_on=VarNames.ISO3.value, how='left')
         data = data.merge(year_data, left_on=VarNames.period_var.value, right_on=VarNames.period_var.value, how='left')
-
+        data[VarNames.scenario.value] = sc
         return data
 
     @staticmethod

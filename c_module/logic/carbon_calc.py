@@ -12,38 +12,84 @@ class CarbonCalculator:
     def calc_carbon_forest_biomass(self):
         self.logger.info(
             f"C-Module - Calculating carbon stocks and fluxes for forest biomass (aboveground and belowground)")
+
+        self.carbon_data[VarNames.history.value][VarNames.carbon_forest_biomass.value] = (
+            CarbonCalculator.calc_carbon_forest(
+                carbon_data=self.carbon_data[VarNames.history.value][VarNames.carbon_forest_biomass.value],
+                add_carbon_data=self.add_carbon_data,
+                add_data=self.add_data[VarNames.country_data.value],
+                forest_data=self.fra_data[VarNames.data_aligned.value]["data_forest"],
+                timespan="history",
+                monte_carlo=[],
+                period_structure=self.add_data[VarNames.period_structure.value]
+            )
+        )
+
         for sc in self.sc_list:
             self.carbon_data[sc][VarNames.carbon_forest_biomass.value] = CarbonCalculator.calc_carbon_forest(
                 carbon_data=self.carbon_data[sc][VarNames.carbon_forest_biomass.value],
                 add_carbon_data=self.add_carbon_data,
                 add_data=self.add_data[VarNames.country_data.value],
                 forest_data=self.timba_data[sc][VarNames.timba_data_forest.value],
-                monte_carlo=[VarNames.carbon_agb.value, VarNames.carbon_bgb.value])
+                timespan="projection",
+                monte_carlo=[],
+                period_structure=self.add_data[VarNames.period_structure.value]
+            )
 
     @staticmethod
     def calc_carbon_forest_soil(self):
         self.logger.info(f"C-Module - Calculating carbon stocks and fluxes for forest soil")
+
+        self.carbon_data[VarNames.history.value][VarNames.carbon_soil.value] = (
+            CarbonCalculator.calc_carbon_forest(
+                carbon_data=self.carbon_data[VarNames.history.value][VarNames.carbon_soil.value],
+                add_carbon_data=self.add_carbon_data,
+                add_data=self.add_data[VarNames.country_data.value],
+                forest_data=self.fra_data[VarNames.data_aligned.value]["data_forest"],
+                timespan="history",
+                monte_carlo=[],
+                period_structure=self.add_data[VarNames.period_structure.value]
+            )
+        )
+
         for sc in self.sc_list:
             self.carbon_data[sc][VarNames.carbon_soil.value] = CarbonCalculator.calc_carbon_forest(
                 carbon_data=self.carbon_data[sc][VarNames.carbon_soil.value],
                 add_carbon_data=self.add_carbon_data,
                 add_data=self.add_data[VarNames.country_data.value],
                 forest_data=self.timba_data[sc][VarNames.timba_data_forest.value],
-                monte_carlo=[VarNames.carbon_agb.value, VarNames.carbon_bgb.value])
+                timespan="projection",
+                monte_carlo=[],
+                period_structure=self.add_data[VarNames.period_structure.value]
+            )
 
     @staticmethod
     def calc_carbon_forest_dwl(self):
         self.logger.info(f"C-Module - Calculating carbon stocks and fluxes for dead wood and litter")
+        self.carbon_data[VarNames.history.value][VarNames.carbon_dwl.value] = (
+            CarbonCalculator.calc_carbon_forest(
+                carbon_data=self.carbon_data[VarNames.history.value][VarNames.carbon_dwl.value],
+                add_carbon_data=self.add_carbon_data,
+                add_data=self.add_data[VarNames.country_data.value],
+                forest_data=self.fra_data[VarNames.data_aligned.value]["data_forest"],
+                timespan="history",
+                monte_carlo=[],
+                period_structure=self.add_data[VarNames.period_structure.value]
+            )
+        )
         for sc in self.sc_list:
             self.carbon_data[sc][VarNames.carbon_dwl.value] = CarbonCalculator.calc_carbon_forest(
                 carbon_data=self.carbon_data[sc][VarNames.carbon_dwl.value],
                 add_carbon_data=self.add_carbon_data,
                 add_data=self.add_data[VarNames.country_data.value],
                 forest_data=self.timba_data[sc][VarNames.timba_data_forest.value],
-                monte_carlo=[VarNames.carbon_agb.value, VarNames.carbon_bgb.value])
+                timespan="projection",
+                monte_carlo=[],
+                period_structure=self.add_data[VarNames.period_structure.value]
+            )
 
     @staticmethod
-    def calc_carbon_forest(carbon_data, add_carbon_data, add_data, forest_data, monte_carlo):
+    def calc_carbon_forest(carbon_data, add_carbon_data, add_data, forest_data, timespan, monte_carlo, period_structure):
         """
         Carbon stock calculation for forest biomass (aboveground and belowground), forest soil, and dead wood and litter.
         Calculations for carbon in forest biomass are based on forest stock and calculations for carbon in forest soil,
@@ -58,15 +104,21 @@ class CarbonCalculator:
         CarbonLitter, CarbonDeadWood)
         :param add_data: Additional data with country and commodity information
         :param add_carbon_data: DataContainer with carbon data
+        :param timespan: Span of time considered (options: history or projection)
         :param monte_carlo: List storing names of carbon pools quantified with randomized emission factor
+        :param period_structure: Period structure of historical and projection data
         :return: Updated dataframe of selected carbon pool
         """
-        c_dens_avg = VarNames.carbon_density_avg.value
+        c_dens_avg = VarNames.data.value
         c_dens_avg_rnd = VarNames.carbon_density_avg_rand.value
 
         if VarNames.carbon_forest_biomass.value in carbon_data.columns:
             unit_conversion_param = CarbonConstants.CARBON_MIO_FACTOR.value
-            forest_data_col = VarNames.forest_stock_var.value
+            if timespan == "projection":
+                forest_data_col = VarNames.forest_stock_var.value
+            else:
+                forest_agb_col = f"{VarNames.data.value}_agb"
+                forest_bgb_col = f"{VarNames.data.value}_bgb"
 
             if VarNames.carbon_agb.value in monte_carlo:
                 carbon_above_ground_col = c_dens_avg_rnd
@@ -77,13 +129,37 @@ class CarbonCalculator:
             else:
                 carbon_below_ground_col = c_dens_avg
 
-            emission_factor = ((add_carbon_data[VarNames.carbon_agb.value][carbon_above_ground_col] +
-                                add_carbon_data[VarNames.carbon_bgb.value][carbon_below_ground_col]) *
-                               CarbonConstants.CO2_FACTOR.value)
+            add_carbon_agb = add_carbon_data[VarNames.carbon_agb.value]
+            add_carbon_bgb = add_carbon_data[VarNames.carbon_bgb.value]
+
+            if timespan == "projection":
+                add_carbon_agb = add_carbon_agb[
+                    add_carbon_agb[VarNames.year_name.value] == "average"].reset_index(drop=True)
+                add_carbon_bgb = add_carbon_bgb[
+                    add_carbon_bgb[VarNames.year_name.value] == "average"].reset_index(drop=True)
+                emission_factor = ((add_carbon_agb[carbon_above_ground_col] + add_carbon_bgb[carbon_below_ground_col]) *
+                                   CarbonConstants.CO2_FACTOR.value)
+            else:
+                add_carbon_agb = add_carbon_agb[
+                    add_carbon_agb[VarNames.year_name.value] != "average"].reset_index(drop=True)
+                add_carbon_bgb = add_carbon_bgb[
+                    add_carbon_bgb[VarNames.year_name.value] != "average"].reset_index(drop=True)
+                emission_factor = add_carbon_agb[[VarNames.ISO3.value, VarNames.region_code.value,
+                                                  VarNames.year_name.value]].copy()
+                emission_factor[forest_agb_col] = (
+                        add_carbon_agb[VarNames.data.value] * CarbonConstants.CO2_FACTOR.value
+                )
+                emission_factor[forest_bgb_col] = (
+                        add_carbon_bgb[VarNames.data.value] * CarbonConstants.CO2_FACTOR.value
+                )
+
             col_name, col_name_change = VarNames.carbon_forest_biomass.value, VarNames.carbon_forest_biomass_chg.value
         else:
             unit_conversion_param = CarbonConstants.CARBON_TSD_FACTOR.value
-            forest_data_col = VarNames.forest_area_var.value
+            if timespan == "projection":
+                forest_data_col = VarNames.forest_area_var.value
+            else:
+                forest_data_col = VarNames.fra_forest_area.value
             if VarNames.carbon_soil.value in carbon_data.columns:
 
                 if VarNames.carbon_soil.value in monte_carlo:
@@ -91,12 +167,22 @@ class CarbonCalculator:
                 else:
                     carbon_soil_col = c_dens_avg
 
-                emission_factor = (add_carbon_data[VarNames.carbon_soil.value][carbon_soil_col] *
-                                   CarbonConstants.CO2_FACTOR.value)
+                add_carbon_soil = add_carbon_data[VarNames.carbon_soil.value]
+
+                if timespan == "projection":
+                    add_carbon_soil = add_carbon_soil[
+                        add_carbon_soil[VarNames.year_name.value] == "average"].reset_index(drop=True)
+                    emission_factor = (add_carbon_soil[carbon_soil_col] * CarbonConstants.CO2_FACTOR.value)
+                else:
+                    add_carbon_soil = add_carbon_soil[
+                        add_carbon_soil[VarNames.year_name.value] != "average"].reset_index(drop=True)
+                    emission_factor = add_carbon_soil[[VarNames.ISO3.value, VarNames.region_code.value,
+                                                      VarNames.year_name.value]].copy()
+                    emission_factor[VarNames.data.value] = (add_carbon_soil[VarNames.data.value] *
+                                                            CarbonConstants.CO2_FACTOR.value)
 
                 col_name, col_name_change = VarNames.carbon_soil.value, VarNames.carbon_soil_chg.value
             else:
-
                 if VarNames.carbon_litter.value in monte_carlo:
                     carbon_litter_col = c_dens_avg_rnd
                 else:
@@ -106,49 +192,127 @@ class CarbonCalculator:
                 else:
                     carbon_dead_wood_col = c_dens_avg
 
-                emission_factor = ((add_carbon_data[VarNames.carbon_litter.value][carbon_litter_col] +
-                                    add_carbon_data[VarNames.carbon_dw.value][carbon_dead_wood_col]) *
-                                   CarbonConstants.CO2_FACTOR.value)
+                add_carbon_litter = add_carbon_data[VarNames.carbon_litter.value]
+                add_carbon_dw = add_carbon_data[VarNames.carbon_dw.value]
+
+                if timespan == "projection":
+                    add_carbon_litter = add_carbon_litter[
+                        add_carbon_litter[VarNames.year_name.value] == "average"].reset_index(drop=True)
+                    add_carbon_dw = add_carbon_dw[
+                        add_carbon_dw[VarNames.year_name.value] == "average"].reset_index(drop=True)
+                    emission_factor = ((add_carbon_litter[carbon_litter_col] + add_carbon_dw[carbon_dead_wood_col]) *
+                                       CarbonConstants.CO2_FACTOR.value)
+                else:
+                    add_carbon_litter = add_carbon_litter[
+                        add_carbon_litter[VarNames.year_name.value] != "average"].reset_index(drop=True)
+                    add_carbon_dw = add_carbon_dw[
+                        add_carbon_dw[VarNames.year_name.value] != "average"].reset_index(drop=True)
+                    emission_factor = add_carbon_litter[[VarNames.ISO3.value, VarNames.region_code.value,
+                                                         VarNames.year_name.value]].copy()
+                    emission_factor[VarNames.data.value] = ((add_carbon_litter[VarNames.data.value] +
+                                                             add_carbon_dw[VarNames.data.value]) *
+                                                            CarbonConstants.CO2_FACTOR.value)
+
                 col_name, col_name_change = VarNames.carbon_dwl.value, VarNames.carbon_dwl_chg.value
 
+        carbon_data_input = carbon_data.copy()
         carbon_data = pd.DataFrame()
-        for period in forest_data[VarNames.period_var.value].unique():
-            forest_data_period = forest_data[forest_data[VarNames.period_var.value] == period].copy().reset_index(drop=True)
-            forest_data_period = forest_data_period.merge(add_data[[VarNames.region_code.value, VarNames.ISO3.value]],
-                                                          left_on=VarNames.region_code.value,
-                                                          right_on=VarNames.region_code.value,
-                                                          how="left")
-            if period == 0:
-                forest_variable_prev = pd.DataFrame(np.zeros(len(forest_data_period)))[0]
-                carbonstock_prev = pd.DataFrame(np.zeros(len(forest_data_period)))[0]
+        if timespan == "projection":
+            for period in forest_data[VarNames.period_var.value].unique():
+                forest_data_period = forest_data[forest_data[VarNames.period_var.value] == period].copy().reset_index(drop=True)
+                forest_data_period = forest_data_period.merge(add_data[[VarNames.region_code.value, VarNames.ISO3.value]],
+                                                              left_on=VarNames.region_code.value,
+                                                              right_on=VarNames.region_code.value,
+                                                              how="left")
+                if period == 0:
+                    forest_variable_prev = pd.DataFrame(np.zeros(len(forest_data_period)))[0]
+                    carbonstock_prev = pd.DataFrame(np.zeros(len(forest_data_period)))[0]
+                else:
+                    forest_variable_prev = (
+                        forest_data[forest_data[VarNames.period_var.value] == period - 1][forest_data_col]).copy().reset_index(drop=True)
+                    carbonstock_prev = (
+                        carbon_data[carbon_data[VarNames.period_var.value] == period - 1][col_name]).copy().reset_index(drop=True)
+
+                forest_variable_new = forest_data_period[forest_data_col].copy().reset_index(drop=True)
+                carbonstock_change = (
+                        emission_factor * (forest_variable_new - forest_variable_prev) * unit_conversion_param)
+                carbonstock_new = carbonstock_change + carbonstock_prev
+
+                if period == 0:
+                    carbonstock_change = pd.DataFrame(
+                        np.zeros(len(carbonstock_change))).rename(columns={0: col_name_change})
+                else:
+                    pass
+
+                carbonstock_forest = pd.concat([
+                    forest_data_period[[VarNames.region_code.value, VarNames.ISO3.value, VarNames.period_var.value,
+                                        forest_data_col]],
+                    pd.DataFrame(data=carbonstock_new, columns=[col_name]),
+                    pd.DataFrame(data=carbonstock_change, columns=[col_name_change])
+                ], axis=1)
+                carbon_data = pd.concat([carbon_data, carbonstock_forest.copy()], axis=0).reset_index(drop=True)
+
+            carbon_data = carbon_data.drop_duplicates().reset_index(drop=True)
+            carbon_data[col_name] = carbon_data[col_name] / CarbonConstants.CARBON_MIO_FACTOR.value
+            carbon_data[col_name_change] = carbon_data[col_name_change] / CarbonConstants.CARBON_MIO_FACTOR.value
+
+        else:
+            carbon_data_tmp = emission_factor.merge(forest_data,
+                                                    left_on=[VarNames.ISO3.value, VarNames.year_name.value],
+                                                    right_on=[VarNames.fra_iso3.value, VarNames.year_name.value],
+                                                    how="left")
+            carbon_data_tmp = carbon_data_tmp.sort_values(by=[VarNames.year_name.value,
+                                                              VarNames.region_code.value]).reset_index(drop=True)
+
+            if VarNames.carbon_forest_biomass.value in carbon_data_input.columns:
+                agb_stock = (carbon_data_tmp[VarNames.fra_forest_stock_agb.value] *
+                             (carbon_data_tmp[VarNames.fra_forest_area.value] *
+                              CarbonConstants.CARBON_TSD_FACTOR.value))
+                bgb_stock = (carbon_data_tmp[VarNames.fra_forest_stock_bgb.value] *
+                             (carbon_data_tmp[VarNames.fra_forest_area.value] *
+                              CarbonConstants.CARBON_TSD_FACTOR.value))
+
+                agb_carbon_stock = agb_stock * emission_factor[forest_agb_col]
+                bgb_carbon_stock = bgb_stock * emission_factor[forest_bgb_col]
+                carbon_stock = (agb_carbon_stock + bgb_carbon_stock) / CarbonConstants.CARBON_MIO_FACTOR.value
+                carbon_data_tmp[VarNames.forest_stock_var.value] = ((agb_stock + bgb_stock) /
+                                                                    CarbonConstants.CARBON_MIO_FACTOR.value)
+                carbon_data_tmp = carbon_data_tmp[[VarNames.ISO3.value, VarNames.region_code.value,
+                                                   VarNames.year_name.value, VarNames.forest_stock_var.value]].copy()
+                carbon_data_tmp[col_name] = carbon_stock
+                carbon_data_tmp[col_name_change] = pd.Series(np.zeros(len(carbon_data_tmp)))
             else:
-                forest_variable_prev = (
-                    forest_data[forest_data[VarNames.period_var.value] == period - 1][forest_data_col]).copy().reset_index(drop=True)
-                carbonstock_prev = (
-                    carbon_data[carbon_data[VarNames.period_var.value] == period - 1][col_name]).copy().reset_index(drop=True)
+                carbon_stock = (carbon_data_tmp[VarNames.data.value] *
+                                (carbon_data_tmp[VarNames.fra_forest_area.value] *
+                                 CarbonConstants.CARBON_TSD_FACTOR.value)) / CarbonConstants.CARBON_MIO_FACTOR.value
+                carbon_data_tmp = carbon_data_tmp.rename(
+                    columns={VarNames.fra_forest_area.value: VarNames.forest_area_var.value})
+                carbon_data_tmp = carbon_data_tmp[[VarNames.ISO3.value, VarNames.region_code.value,
+                                                   VarNames.year_name.value, VarNames.forest_area_var.value]].copy()
+                carbon_data_tmp[col_name] = carbon_stock
+                carbon_data_tmp[col_name_change] = pd.Series(np.zeros(len(carbon_data_tmp)))
 
-            forest_variable_new = forest_data_period[forest_data_col].copy().reset_index(drop=True)
-            carbonstock_change = (
-                    emission_factor * (forest_variable_new - forest_variable_prev) * unit_conversion_param)
-            carbonstock_new = carbonstock_change + carbonstock_prev
+            year_list = carbon_data_tmp[VarNames.year_name.value].unique()
+            year_prev = 0
+            for year in year_list:
+                carbon_data_year = carbon_data_tmp[carbon_data_tmp[VarNames.year_name.value] == year].copy()
+                year_index = carbon_data_year.index
+                if year_prev == 0:
+                    carbon_data_tmp.loc[year_index.min(): year_index.max(), col_name_change] = carbon_data_tmp[col_name]
+                else:
+                    carbon_data_year_prev = carbon_data_tmp[
+                        carbon_data_tmp[VarNames.year_name.value] == year_prev].copy()
+                    carbon_data_year_prev = carbon_data_year_prev.set_index(year_index, drop=True)
+                    carbon_chg = carbon_data_year[col_name] - carbon_data_year_prev[col_name]
+                    carbon_data_tmp.loc[year_index.min(): year_index.max(), col_name_change] = carbon_chg
+                year_prev = year
+            carbon_data_tmp = carbon_data_tmp.merge(period_structure, left_on=[VarNames.year_name.value],
+                                                    right_on=[VarNames.year_name.value], how='left')
 
-            if period == 0:
-                carbonstock_change = pd.DataFrame(
-                    np.zeros(len(carbonstock_change))).rename(columns={0: col_name_change})
-            else:
-                pass
+            carbon_data = carbon_data_tmp.copy()
+            # Drop historical data if projection data is available
+            carbon_data = carbon_data[carbon_data[VarNames.period_var.value] != 0].reset_index(drop=True)
 
-            carbonstock_forest = pd.concat([
-                forest_data_period[[VarNames.region_code.value, VarNames.ISO3.value, VarNames.period_var.value,
-                                    forest_data_col]],
-                pd.DataFrame(data=carbonstock_new, columns=[col_name]),
-                pd.DataFrame(data=carbonstock_change, columns=[col_name_change])
-            ], axis=1)
-            carbon_data = pd.concat([carbon_data, carbonstock_forest.copy()], axis=0).reset_index(drop=True)
-
-        carbon_data = carbon_data.drop_duplicates().reset_index(drop=True)
-        carbon_data[col_name] = carbon_data[col_name] / CarbonConstants.CARBON_MIO_FACTOR.value
-        carbon_data[col_name_change] = carbon_data[col_name_change] / CarbonConstants.CARBON_MIO_FACTOR.value
         return carbon_data
 
     @staticmethod
