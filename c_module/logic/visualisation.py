@@ -748,7 +748,13 @@ class Carbon_DashboardPlotter:
         country_pivot = country_data.pivot(index=VarNames.ISO3.value,
                                            columns=VarNames.output_variable.value,
                                            values=stock_type).reset_index()
-        country_pivot["Total_Selected"] = country_pivot[selected_vars].sum(axis=1)
+
+        if stock_type == VarNames.carbon_stock.value:
+            col_name = "Total Carbon Stocks"
+        else:
+            col_name = "Net Carbon Stock Changes"
+
+        country_pivot[f"{col_name}"] = country_pivot[selected_vars].sum(axis=1)
 
         if value_type == "shares":
             totals = country_pivot[selected_vars].sum(axis=1).replace(0, np.nan)
@@ -769,7 +775,7 @@ class Carbon_DashboardPlotter:
                     parts.append(f"{v}: {row[v]:.2f}%")
                 else:
                     parts.append(f"{v}: {row[v]:.2f} MtC")
-            parts.append(f"Total: {row['Total_Selected']:.2f} MtC")
+            parts.append(f"Total: {row[col_name]:.2f} MtC")
             hover_texts.append("<br>".join(parts))
 
         country_pivot["hover_text"] = hover_texts
@@ -778,8 +784,8 @@ class Carbon_DashboardPlotter:
         fig = px.choropleth(
             country_pivot,
             locations=VarNames.ISO3.value,
-            color='Total_Selected',
-            color_continuous_scale="Greens"
+            color=f'{col_name}',
+            color_continuous_scale="PuBuGn"  # "Greens"
         )
 
         fig.update_traces(
@@ -795,8 +801,11 @@ class Carbon_DashboardPlotter:
             else:
                 value_type_title = "Carbon Stock Changes"
 
+        start_year = year_range[0]
+        end_year = year_range[1]
+
         fig.update_layout(
-            title=f"<br><br>Average {value_type_title} by Pool – {active_level}: {active_label}",
+            title=f"<br>Average {value_type_title} by Pool – {active_level}: {active_label} <br>Period: {start_year} - {end_year}",
             geo=dict(
                 showcoastlines=True,
                 coastlinecolor="LightGray",
@@ -808,7 +817,11 @@ class Carbon_DashboardPlotter:
                 projection=dict(scale=0.8)
             ),
             margin=dict(l=1, r=1, t=1, b=1),
-            coloraxis_showscale=True,
+            coloraxis=dict(
+                showscale=True,
+                colorbar=dict(
+                    title=f"{value_type_title} [MtC]")
+            ),
             template='plotly_white'
         )
         return fig
