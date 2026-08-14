@@ -263,6 +263,12 @@ class DataManager:
 
             for df_key in self.carbon_data[sc].keys():
                 carbon_data = self.carbon_data[sc][df_key]
+                if df_key == VarNames.carbon_total.value:
+                    carbon_data = carbon_data.merge(self.add_data["country_data"], left_on="ISO3 Code",
+                                                    right_on="ISO3 Code", how="left")
+                    carbon_data_biomass = carbon_data.groupby(["Carbon Region", "Period"])[["CarbonForestBiomass"]].sum().reset_index()
+                    carbon_data_hwp = carbon_data.groupby(["Carbon Region", "Period"])[["CarbonHWP"]].sum().reset_index()
+                    carbon_data = pd.concat([carbon_data_biomass, carbon_data_hwp["CarbonHWP"]], axis=1)
                 carbon_data_path = OUTPUT_FOLDER / Path(f"{df_key}_{sc}")
                 carbon_data.to_csv(f"{carbon_data_path}.csv", index=False)
 
