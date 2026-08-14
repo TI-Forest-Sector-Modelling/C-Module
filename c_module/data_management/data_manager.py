@@ -95,7 +95,8 @@ class DataManager:
                 folder_path = INPUT_FOLDER / Path(folder)
                 missing_files = DataManager.compare_local_and_remote(local_folder_path=folder_path,
                                                                      repo_zip_url=CMODULE_ZIP_URL,
-                                                                     target_subdir=GIT_DATA_DIR)
+                                                                     target_subdir=GIT_DATA_DIR,
+                                                                     folder=folder)
 
                 for missing_file in list(missing_files):
                     DataManager.download_carbon_data_from_github(self=self,
@@ -105,12 +106,13 @@ class DataManager:
                                                                  missing_file=missing_file)
 
     @staticmethod
-    def compare_local_and_remote(local_folder_path: Path, repo_zip_url: str, target_subdir: str):
+    def compare_local_and_remote(local_folder_path: Path, repo_zip_url: str, target_subdir: str, folder: str):
         """
         Compares local and remote input data folder and returns missing files.
         :param local_folder_path: Local input data folder
         :param repo_zip_url: Remote input data zip url
         :param target_subdir: Target subdirectory of remote input data folder
+        :param folder: Name of the local input data folder
         :return: Missing files in local folder
         """
         response = requests.get(repo_zip_url, timeout=60)
@@ -131,7 +133,11 @@ class DataManager:
             p.name for p in local_folder_path.iterdir() if p.is_file()
         }
 
-        missing_local = github_filenames - local_filenames
+        if (folder == FolderNames.projection_data.value) and len(local_filenames) > 0:
+            if (list(local_filenames)[0].endswith(".pkl")):
+                missing_local = []
+        else:
+            missing_local = github_filenames - local_filenames
 
         return missing_local
 
